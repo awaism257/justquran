@@ -1,0 +1,29 @@
+# Dependencies & build output
+node_modules
+dist
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Local env / editor files
+.env
+.env.*
+*.local
+.vscode
+.idea
+
+# ============================================================
+# NEVER COMMIT SIGNING MATERIAL — HARD RULE
+# The Android release keystore and its passwords must never
+# enter this repository, in any form. Keep them offline only.
+# ============================================================
+*.keystore
+*.jks
+*.ks
+*.p12
+*.pem
+*.key
+keystore.properties
+signing.properties
+**/secrets/

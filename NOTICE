@@ -1,0 +1,49 @@
+JustQuran — Third-Party Notices
+================================
+
+The JustQuran source code is licensed under the MIT License (see LICENSE),
+copyright (c) 2026 Awais Mahmood. The bundled texts and fonts below remain
+under their own licences, reproduced here with permission / under their terms.
+
+Quran text (Arabic, IndoPak script)
+-----------------------------------
+Digital Khatt Indopak Script (Ayah by Ayah) — QUL resource 566
+https://qul.tarteel.ai/resources/quran-script/566
+Distributed under the MIT License of the TarteelAI/quranic-universal-library
+project — Copyright (c) 2024-present Tarteel, Inc.
+Ayah-end ornament clusters are removed (the app renders its own verse badges);
+the text is otherwise reproduced verbatim, including the IndoPak waqf marks.
+
+English translation
+-------------------
+The Clear Quran — Dr. Talal Itani, ClearQuran.com
+Licence: Creative Commons Attribution-NoDerivatives 4.0 International
+(CC BY-ND 4.0) — https://creativecommons.org/licenses/by-nd/4.0/
+Bundled unmodified, as the licence requires.
+
+Urdu translation
+----------------
+Tarjumat-e-Quran by Maulana Fateh Muhammad Jalandhari (d. 1941).
+Public domain. Digitised by the JustQuran project from the Qudrat Ullah
+Company edition (public-domain scan, archive.org) and proofread against
+the scan — not copied from any other digital source.
+
+Transliteration
+---------------
+English Transliteration — Tanzil Project (https://tanzil.net)
+Used with attribution as required by the Tanzil licence.
+
+Fonts — SIL Open Font License 1.1 (full text: public/fonts/OFL.txt)
+-------------------------------------------------------------------
+- Digital Khatt IndoPak — Copyright (c) 2024-2025 Amine Anane,
+  Copyright (c) 2024-2025 Tarteel Inc
+- Amiri Quran — The Amiri Project (Khaled Hosny)
+- Noto Nastaliq Urdu — Google Inc.
+- Noto Naskh Arabic — Google Inc.
+
+Recitation audio
+----------------
+Sheikh Mahmoud Khalil Al-Hussary (Murattal), streamed per-verse from
+everyayah.com at playback time. Audio is not bundled in this repository;
+when a user downloads for offline listening, files are cached on their
+own device only.
