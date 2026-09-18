@@ -1,0 +1,873 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  @font-face {
+    font-family: 'DigitalKhatt IndoPak';
+    src: url('/fonts/digitalkhatt-indopak-v2.otf') format('opentype');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Amiri Quran';
+    src: url('../fonts/amiri-quran.ttf') format('truetype');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Noto Nastaliq Urdu';
+    src: url('/fonts/nastaliq.ttf') format('truetype');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'NotoNaskh';
+    src: url('../fonts/noto-naskh.ttf') format('truetype');
+    font-display: swap;
+  }
+
+  /* Compact calligraphy honorific ligatures (U+FD40, U+FD41, U+FDFA). */
+  .honorific {
+    font-family: 'NotoNaskh';
+    font-size: 0.9em;
+  }
+
+  :root {
+    --bg: rgb(16, 22, 19);
+    --cream: rgb(240, 235, 220);
+    --green: rgb(201, 166, 88);
+    --card: rgb(43, 44, 47);
+    --muted: rgba(240, 235, 220, 0.55);
+    --line: rgba(201, 166, 88, 0.2);
+    --paper: rgb(243, 236, 216);
+    --paper2: rgb(238, 229, 203);
+    --ink: rgb(38, 32, 22);
+    --frame: rgb(158, 124, 62);
+    --frame2: rgb(190, 152, 84);
+
+    /* derived theme tokens (dark = default) */
+    --chrome: var(--bg);
+    --text: var(--cream);
+    --card-bg: var(--card);
+    --card-shadow: none;
+    --divider: var(--green);
+    --vc-ar: var(--cream);
+    --vc-en: rgba(240, 235, 220, 0.85);
+    --vc-ur: rgb(228, 204, 148);
+    --vc-tr: rgba(240, 235, 220, 0.4);
+    --player-shadow: 0 -8px 30px rgba(0, 0, 0, 0.45);
+
+    /* ornamental mashq-tile background (menu/browse screens only) */
+    --tiles-img: url('/tiles-dark.png');
+
+    /* user font scales (percent, 70–160) */
+    --fs-ar: 1;
+    --fs-en: 1;
+    --fs-ur: 1;
+    --fs-tr: 1;
+  }
+
+  html.light {
+    --chrome: var(--paper2);
+    --tiles-img: url('../tiles-light.png');
+    --text: var(--ink);
+    --card-bg: rgb(255, 255, 255);
+    --card-shadow: 0 3px 12px rgba(38, 32, 22, 0.08);
+    --divider: rgb(158, 124, 62);
+    --muted: rgba(38, 32, 22, 0.55);
+    --line: rgba(158, 124, 62, 0.3);
+    --vc-ar: var(--ink);
+    --vc-en: rgba(38, 32, 22, 0.78);
+    --vc-ur: rgb(122, 94, 42);
+    --vc-tr: rgba(38, 32, 22, 0.45);
+    --player-shadow: 0 -8px 24px rgba(38, 32, 22, 0.18);
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* The fixed player covers the bottom ~175px during recitation. Reserving
+       that space here makes scrollIntoView({block:'center'}) centre the
+       playing verse within the VISIBLE reading area, not the raw viewport —
+       so the verse sits at the screen's optical centre, above the player. */
+    scroll-padding-bottom: calc(185px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body {
+    background: var(--chrome);
+    color: var(--text);
+    font-family: 'DejaVu Serif', Georgia, serif;
+    min-height: 100dvh;
+    /* iPhone home-indicator strip: keep last in-flow content above it.
+       0 on desktop/Android, so nothing changes there. */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@layer components {
+  /* ---- shared chrome ---- */
+  .mhead {
+    /* iPhone notch/status bar: push the header content below it (0 elsewhere) */
+    padding: calc(18px + env(safe-area-inset-top, 0px)) 16px 14px;
+    background: var(--chrome);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Mashq-tile ornament for menu/browse screens (kept off reading pages) */
+  .tiles {
+    background-image: var(--tiles-img);
+    background-repeat: repeat;
+    background-size: 202px 244px;
+  }
+  .mhead > div {
+    min-width: 0; /* let the title block shrink so ellipsis can engage */
+  }
+  .mhead-title {
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    /* system font enlargement must never push the title out of the banner */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mhead-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mhead-icons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0; /* icons keep their size; only the title truncates */
+  }
+  .icon-btn {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    border: 1px solid var(--line);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  /* Apple 44px minimum hit area: invisible ring grows the tappable region
+     to 44×44 without changing the 38px visual circle. */
+  .icon-btn::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+  }
+  .icon-btn:hover {
+    background: var(--line);
+  }
+
+  .greendiv {
+    height: 2px;
+    background: var(--divider);
+    width: 100%;
+  }
+
+  .backbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* iPhone notch/status bar: sticky bar background covers it, buttons sit below (0 elsewhere) */
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 12px;
+  }
+  .backbar-title {
+    font-size: 22px;
+    font-weight: 400;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .backbar-meta {
+    font-size: 11.5px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ---- big tappable card rows ---- */
+  .card {
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    border-radius: 20px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .card .chev {
+    margin-left: auto;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* ---- verse card ---- */
+  .vcard {
+    background: var(--card-bg);
+    border: 1px solid rgba(190, 152, 84, 0.5);
+    border-radius: 18px;
+    padding: 16px;
+    user-select: none;
+    scroll-margin-top: calc(150px + env(safe-area-inset-top, 0px));
+  }
+  /* First ayah of a juz: soft gold tint + hairline so the boundary stands
+     out. Declared before .reciting/.now-playing so those (transient, more
+     important) states override the tint while recitation passes through. */
+  .vcard.juz-start {
+    border-color: var(--frame2);
+    background: color-mix(in srgb, var(--frame2) 7%, var(--card-bg));
+  }
+  .vcard.reciting {
+    border-color: var(--green);
+    box-shadow: 0 0 0 2px var(--green);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  /* Cards are scrolled to programmatically (auto-advance / follow); never
+     show a browser focus outline on them — the playing state rings above
+     are the only intended card outlines. */
+  .vcard:focus,
+  .vcard:focus-visible {
+    outline: none;
+  }
+  /* Single-verse playback: subtle green tint on the whole card while it plays. */
+  .vcard.now-playing {
+    border-color: var(--green);
+    background: color-mix(in srgb, var(--green) 8%, var(--card-bg));
+    box-shadow: 0 0 0 1.5px var(--green);
+  }
+  /* Small "Auto" toggle chip shown on the playing card (card mode). */
+  .spk.auto-chip {
+    width: auto;
+    padding: 0 10px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  /* "Juz begins here" divider chip at the top of a juz-opening verse card. */
+  .juz-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: -2px 0 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    color: var(--frame2);
+    white-space: nowrap;
+  }
+  .juz-chip::before,
+  .juz-chip::after {
+    content: '';
+    height: 1px;
+    flex: 1;
+    background: var(--line);
+  }
+  .vcard-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .vnum {
+    width: 30px;
+    height: 30px;
+    border-radius: 9999px;
+    background: var(--frame);
+    color: var(--paper);
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .spk {
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    border: 2px solid var(--frame);
+    background: transparent;
+    color: var(--frame2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .spk.playing {
+    background: var(--frame2);
+    color: var(--paper);
+  }
+  /* Also used by the Khatm screen's dua Arabic (.khatm-ar) — same IndoPak mushaf font. */
+  .vc-ar,
+  .khatm-ar {
+    font-family: 'DigitalKhatt IndoPak', 'Amiri Quran', serif;
+    font-size: calc(25px * var(--fs-ar, 1));
+    line-height: 2.05;
+    text-align: center;
+    color: var(--vc-ar);
+    direction: rtl;
+  }
+  .vc-en {
+    font-size: calc(15px * var(--fs-en, 1));
+    line-height: 1.7;
+    text-align: center;
+    color: var(--vc-en);
+    margin-top: 10px;
+  }
+  .vc-ur {
+    font-family: 'Noto Nastaliq Urdu', serif;
+    font-size: calc(13px * var(--fs-ur, 1));
+    line-height: 2.3;
+    text-align: center;
+    direction: rtl;
+    color: var(--vc-ur);
+    margin-top: 8px;
+  }
+  .vc-tr {
+    font-style: italic;
+    font-size: calc(11.5px * var(--fs-tr, 1));
+    text-align: center;
+    color: var(--vc-tr);
+    margin-top: 10px;
+  }
+
+  /* ---- bismillah band ---- */
+  .bism {
+    border: 1px solid rgba(190, 152, 84, 0.6);
+    border-radius: 16px;
+    padding: 14px 16px;
+    text-align: center;
+    margin: 4px 0 14px;
+    background: var(--chrome); /* solid — keep tiles from showing through behind sacred text */
+  }
+  .bism.reciting {
+    border-color: var(--green);
+    box-shadow: 0 0 0 2px var(--green);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  /* Al-Fatiha — opening of the Qur'an: solid gold frame */
+  .bism.fatiha {
+    border: 2px solid var(--green);
+  }
+
+  /* Card-mode Bismillah: band styling folded into the first card of the list,
+     with the translation of 1:1 underneath (follows the translation toggles). */
+  .bismcard {
+    border: 1px solid rgba(190, 152, 84, 0.6);
+    border-radius: 16px;
+    padding: 14px 16px;
+    text-align: center;
+    background: var(--card-bg);
+  }
+  .bismcard.reciting {
+    border-color: var(--green);
+    box-shadow: 0 0 0 2px var(--green);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .bismcard-tr {
+    font-style: italic;
+    font-size: calc(11.5px * var(--fs-tr, 1));
+    color: var(--vc-tr);
+    margin-top: 6px;
+  }
+  .bismcard-en {
+    font-size: calc(15px * var(--fs-en, 1));
+    line-height: 1.7;
+    color: var(--vc-en);
+    margin-top: 8px;
+  }
+  .bismcard-ur {
+    font-family: 'Noto Nastaliq Urdu', serif;
+    font-size: calc(13px * var(--fs-ur, 1));
+    line-height: 2.3;
+    direction: rtl;
+    color: var(--vc-ur);
+    margin-top: 8px;
+  }
+  /* Al-Fatiha 1:1's card carries the band look: name on top, gold frame */
+  .vcard.band {
+    border: 2px solid var(--green);
+  }
+  .vcard-bandname {
+    text-align: center;
+    margin: -2px 0 8px;
+  }
+  .bism-name {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--frame2);
+  }
+  .bism-text {
+    font-family: 'DigitalKhatt IndoPak', 'Amiri Quran', serif;
+    font-size: 22px;
+    line-height: 2;
+    direction: rtl;
+  }
+
+  /* ---- chips ---- */
+  .chips {
+    display: flex;
+    gap: 8px;
+    padding: 10px 16px;
+    overflow-x: auto;
+    justify-content: center;
+    flex-wrap: wrap;
+    background: var(--chrome); /* solid — keep tiles from showing behind the toggles */
+  }
+  .chip {
+    border: 1px solid var(--line);
+    border-radius: 9999px;
+    padding: 5px 14px;
+    font-size: 12.5px;
+    color: var(--muted);
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .chip.on {
+    background: var(--green);
+    border-color: var(--green);
+    color: rgb(16, 22, 19);
+  }
+
+  /* ---- folio ---- */
+  .folio {
+    background: var(--paper);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    padding: 26px 20px;
+    position: relative;
+  }
+  .folio-inner {
+    border: 2px solid var(--frame);
+    outline: 1px solid var(--frame2);
+    outline-offset: 3px;
+    padding: 26px 18px;
+    min-height: 300px;
+  }
+  .folio .orn {
+    position: absolute;
+    color: var(--frame);
+    font-size: 14px;
+    z-index: 1;
+  }
+  .folio-ar {
+    font-family: 'DigitalKhatt IndoPak', 'Amiri Quran', serif;
+    font-size: calc(23px * var(--fs-ar, 1));
+    line-height: 2.5;
+    text-align: center;
+    color: var(--ink);
+    direction: rtl;
+    /* long-press opens the verse popup instead of selecting text */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .folio.night {
+    background: rgb(28, 34, 30);
+  }
+  .folio.night .folio-inner {
+    background: rgb(22, 28, 24);
+  }
+  .folio.night .folio-ar {
+    color: var(--cream);
+  }
+  /* Al-Fatiha — opening of the Qur'an: solid gold frame */
+  .folio.fatiha .folio-inner {
+    border: 3px solid var(--green);
+    outline: 2px solid var(--frame2);
+    outline-offset: 4px;
+  }
+
+  /* Al-Fatiha page backdrop: the shamsa medallion, centred behind the page,
+     dimmed so the text always stays clear. Dark and light themed. */
+  .tiles.fatiha-bg {
+    background-image: linear-gradient(rgba(16, 22, 19, 0.5), rgba(16, 22, 19, 0.72)), url('/bg/fatiha-dark.jpg');
+    background-size: cover;
+    background-position: center top;
+    background-attachment: fixed;
+  }
+  html.light .tiles.fatiha-bg {
+    background-image: linear-gradient(rgba(238, 229, 203, 0.45), rgba(238, 229, 203, 0.68)), url('../bg/fatiha-light.jpg');
+  }
+  .verse-run {
+    scroll-margin-top: calc(150px + env(safe-area-inset-top, 0px));
+  }
+  .wqwrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .wqmark {
+    position: absolute;
+    bottom: calc(100% + 3px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'DigitalKhatt IndoPak', 'Amiri Quran', serif;
+    font-size: 25px;
+    line-height: 1;
+    text-align: center;
+    min-width: 26px;
+    color: var(--frame);
+    pointer-events: none;
+    white-space: nowrap;
+    direction: rtl;
+  }
+  /* Waqaf glyphs are zero-width combining marks — without their own slots,
+     clusters like ۚۖ (jeem + salah) overlap into one blob. Each glyph gets an
+     inline-block slot so multi-mark clusters lay out side by side (RTL). */
+  .wqch {
+    display: inline-block;
+    min-width: 0.68em;
+    text-align: center;
+  }
+  .vmark {
+    /* long-press opens the verse popup; never show the iOS callout / text selection */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 19px;
+    height: 19px;
+    scroll-margin-top: calc(150px + env(safe-area-inset-top, 0px));
+    border: 1px solid var(--frame);
+    border-radius: 9999px;
+    color: var(--frame);
+    font-family: 'DejaVu Serif', Georgia, serif;
+    font-size: 10.5px;
+    line-height: 1;
+    margin: 0 4px;
+    vertical-align: middle;
+    cursor: pointer;
+    direction: ltr;
+    background: transparent;
+    padding: 0 2px;
+  }
+
+  /* ---- verse popup ---- */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 60;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .popup {
+    /* no accidental text selection inside the popup; use the Copy button instead */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    background: var(--card-bg);
+    border: 1px solid var(--green);
+    border-radius: 18px 18px 0 0;
+    width: 100%;
+    max-width: 560px;
+    /* bottom sheet: keep controls above the iPhone home-indicator strip (0 elsewhere) */
+    padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+    color: var(--text);
+    box-shadow: var(--player-shadow);
+  }
+  .popup-label {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--green);
+    text-transform: uppercase;
+  }
+  .popup-ur {
+    font-family: 'Noto Nastaliq Urdu', serif;
+    font-size: 13px;
+    line-height: 2.3;
+    text-align: center;
+    direction: rtl;
+    color: var(--vc-ur);
+    margin-top: 8px;
+  }
+  .popup-en {
+    font-size: 14px;
+    line-height: 1.7;
+    text-align: center;
+    color: var(--vc-en);
+    margin-top: 8px;
+  }
+  .popup-bar {
+    height: 4px;
+    border-radius: 9999px;
+    background: rgba(201, 166, 88, 0.2);
+    margin-top: 14px;
+    overflow: hidden;
+  }
+  .popup-bar > div {
+    height: 100%;
+    background: var(--green);
+    width: 0%;
+    transition: width 0.2s linear;
+  }
+  .popup-controls {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+    align-items: center;
+  }
+  /* Prev/play/next live in their own centred group so the AUTO toggle
+     (pinned to the far right) never pushes the transport off-centre. */
+  .popup-transport {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+  .popup-controls .popup-auto {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: auto;
+    height: auto;
+    min-width: 44px;
+    min-height: 44px;
+    border: none;
+  }
+  .popup-controls button {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .popup-controls .play {
+    width: 50px;
+    height: 50px;
+    border-color: var(--green);
+    color: var(--green);
+  }
+  /* 44px minimum hit area on transport buttons (visual size unchanged) */
+  .popup-controls button::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+  }
+
+  /* ---- audio load failure notice (Reading page, below the chips row) ---- */
+  .audio-error {
+    margin: 10px 16px 0;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ---- whole-surah player card (bottom, no overlay) ---- */
+  .surah-player {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: 100%;
+    max-width: 560px;
+    z-index: 60;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    background: var(--card-bg);
+    border: 1px solid var(--green);
+    border-bottom: none;
+    border-radius: 18px 18px 0 0;
+    /* fixed bottom player: controls stay above the iPhone home-indicator strip (0 elsewhere) */
+    padding: 14px 18px calc(16px + env(safe-area-inset-bottom, 0px));
+    color: var(--text);
+    box-shadow: var(--player-shadow);
+  }
+
+  /* ---- juz-opening ayah in the mushaf folio: ۞ ornament + faint wash ---- */
+  .folio .juz-orn {
+    color: var(--frame2);
+    font-size: 0.75em;
+    vertical-align: 0.18em;
+  }
+  .verse-run.juz-start {
+    background: rgba(190, 152, 84, 0.1);
+    border-radius: 6px;
+  }
+
+  /* ---- currently-reciting verse in the mushaf folio ---- */
+  .verse-run.reciting {
+    color: var(--green);
+    background: rgba(201, 166, 88, 0.14);
+    border-radius: 6px;
+    transition: color 0.3s ease, background 0.3s ease;
+  }
+
+  /* ---- pager ---- */
+  .pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 0 24px;
+  }
+  .pager a,
+  .pager-link {
+    border: 1px solid var(--line);
+    border-radius: 9999px;
+    padding: 7px 16px;
+    font-size: 13px;
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .pager .count {
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .pager .disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  /* hairline gold divider (only permitted gradient) */
+  .vdiv {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(190, 152, 84, 0.7), transparent);
+  }
+}
+
+  /* ---- install sheet (InstallPrompt) ---- */
+  .install-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 90;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .install-sheet {
+    position: relative;
+    width: min(430px, 100%);
+    background: var(--card-bg);
+    border: 1px solid var(--frame);
+    border-bottom: none;
+    border-radius: 18px 18px 0 0;
+    padding: 22px 22px calc(24px + env(safe-area-inset-bottom, 0px));
+    color: var(--text);
+    animation: install-up 0.25s ease;
+  }
+  @keyframes install-up {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  .install-x {
+    position: absolute;
+    top: 12px;
+    inset-inline-end: 12px;
+  }
+  .install-title {
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .install-sub {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    margin: 6px 0 16px;
+  }
+  .install-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px;
+    border-radius: 12px;
+    border: none;
+    background: var(--green);
+    color: rgb(16, 22, 19);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .install-steps {
+    margin: 0;
+    padding-left: 22px;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--text);
+  }
+  .install-steps b { color: var(--green); }
+  .install-later {
+    display: block;
+    margin: 14px auto 0;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 6px 12px;
+  }
+
+  /* bigger waqaf marks rise above the card edge — give marked card headers room */
+  .vcard-head:has(.wqmark) {
+    margin-top: 12px;
+  }
+
+  /* keep a verse's last word glued to its number badge (no orphaned badges) */
+  .vkeep {
+    white-space: nowrap;
+  }
+
+/* Help page: collapsible pause-signs card (gold heading, smooth open) */
+.pauses-details > summary::-webkit-details-marker {
+  display: none;
+}
+.pauses-details > summary h2 {
+  margin-bottom: 0;
+}
+.pauses-details[open] > summary h2 {
+  margin-bottom: 12px;
+}
+.pauses-details[open] > summary ~ * {
+  animation: pauses-fade 0.25s ease;
+}
+.pauses-details[open] .pauses-chevron { transform: rotate(180deg); }
+@keyframes pauses-fade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

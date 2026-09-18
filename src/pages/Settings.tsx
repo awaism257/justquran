@@ -1,0 +1,331 @@
+import { ChevronRight } from 'lucide-react';
+import { Link } from 'react-router';
+import BackBar from '@/components/BackBar';
+import { useSettings } from '@/lib/settings';
+import type { FontScales, ThemeChoice } from '@/lib/settings';
+import { isAndroidApp } from '@/lib/androidApp';
+
+const GREEN = 'rgb(201, 166, 88)';
+
+/* ---------- controls ---------- */
+
+function SliderRow({
+  label,
+  value,
+  onChange,
+  min = 70,
+  max = 160,
+}: {
+  label: string;
+  value: number;
+  onChange: (pct: number) => void;
+  min?: number;
+  max?: number;
+}) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return (
+    <div className="py-3">
+      <div className="flex items-baseline justify-between">
+        <span style={{ fontSize: 14 }}>{label}</span>
+        <span style={{ fontSize: 12, color: 'var(--muted)' }}>{value}%</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={1}
+        value={value}
+        aria-label={label}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="jq-slider mt-2 w-full appearance-none"
+        style={{
+          height: 4,
+          borderRadius: 9999,
+          outline: 'none',
+          cursor: 'pointer',
+          background: `linear-gradient(to right, ${GREEN} ${pct}%, var(--line) ${pct}%)`,
+          accentColor: GREEN,
+        }}
+      />
+      <style>{`
+        input[type='range'].jq-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 9999px;
+          background: ${GREEN};
+          border: none;
+          cursor: pointer;
+        }
+        input[type='range'].jq-slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 9999px;
+          background: ${GREEN};
+          border: none;
+          cursor: pointer;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function Toggle({
+  on,
+  onClick,
+  label,
+}: {
+  on: boolean;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={onClick}
+      className="relative shrink-0 cursor-pointer"
+      style={{
+        width: 46,
+        height: 26,
+        borderRadius: 9999,
+        border: 'none',
+        background: on ? GREEN : 'var(--line)',
+        transition: 'background 0.15s ease',
+        padding: 0,
+      }}
+    >
+      <span
+        style={{
+          position: 'absolute',
+          top: 3,
+          left: on ? 23 : 3,
+          width: 20,
+          height: 20,
+          borderRadius: 9999,
+          background: on ? 'rgb(16,22,19)' : 'var(--muted)',
+          transition: 'left 0.15s ease',
+        }}
+      />
+    </button>
+  );
+}
+
+function ToggleRow({
+  label,
+  on,
+  onToggle,
+}: {
+  label: string;
+  on: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between py-3">
+      <span style={{ fontSize: 14 }}>{label}</span>
+      <Toggle on={on} onClick={onToggle} label={label} />
+    </div>
+  );
+}
+
+function RadioRow({
+  label,
+  selected,
+  onSelect,
+}: {
+  label: string;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      onClick={onSelect}
+      className="flex w-full cursor-pointer items-center justify-between py-3"
+      style={{ background: 'transparent', border: 'none', color: 'inherit', font: 'inherit', padding: 0, paddingTop: 12, paddingBottom: 12 }}
+    >
+      <span style={{ fontSize: 14 }}>{label}</span>
+      <span
+        className="flex items-center justify-center"
+        style={{
+          width: 22,
+          height: 22,
+          borderRadius: 9999,
+          border: `2px solid ${GREEN}`,
+          flexShrink: 0,
+        }}
+      >
+        {selected ? (
+          <span style={{ width: 12, height: 12, borderRadius: 9999, background: GREEN }} />
+        ) : null}
+      </span>
+    </button>
+  );
+}
+
+/* ---------- layout pieces ---------- */
+
+function SectionCard({ children }: { children: React.ReactNode }) {
+  return (
+    <section
+      style={{
+        background: 'var(--card-bg)',
+        boxShadow: 'var(--card-shadow)',
+        borderRadius: 20,
+        padding: '6px 18px',
+      }}
+    >
+      {children}
+    </section>
+  );
+}
+
+function CardTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2
+      style={{
+        fontSize: 11,
+        letterSpacing: '0.18em',
+        textTransform: 'uppercase',
+        color: GREEN,
+        paddingTop: 12,
+        paddingBottom: 4,
+        fontWeight: 400,
+      }}
+    >
+      {children}
+    </h2>
+  );
+}
+
+function RowDivider() {
+  return <div style={{ height: 1, background: 'var(--line)' }} />;
+}
+
+/* ---------- page ---------- */
+
+const FONT_ROWS: { key: keyof FontScales; label: string }[] = [
+  { key: 'ar', label: 'Arabic font size' },
+  { key: 'en', label: 'English font size' },
+  { key: 'ur', label: 'Urdu font size' },
+  { key: 'tr', label: 'Transliteration font size' },
+];
+
+const THEME_ROWS: { value: ThemeChoice; label: string }[] = [
+  { value: 'system', label: 'System default' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
+
+export default function Settings() {
+  const { settings, setTheme, setFontScale, toggle } = useSettings();
+
+  return (
+    <div>
+      <BackBar title="Settings" />
+      <div className="mx-auto flex max-w-[560px] flex-col gap-4 px-4 py-4 pb-10">
+        {/* Display */}
+        <SectionCard>
+          <CardTitle>Display</CardTitle>
+          {FONT_ROWS.map((row, i) => (
+            <div key={row.key}>
+              {i > 0 && <RowDivider />}
+              <div className="jq-slider-wrap">
+                <SliderRow
+                  label={row.label}
+                  value={settings.fonts[row.key]}
+                  onChange={(pct) => setFontScale(row.key, pct)}
+                />
+              </div>
+            </div>
+          ))}
+          <RowDivider />
+          <ToggleRow label="Show English" on={settings.showEn} onToggle={() => toggle('showEn')} />
+          <RowDivider />
+          <ToggleRow label="Show Urdu" on={settings.showUr} onToggle={() => toggle('showUr')} />
+          <RowDivider />
+          <ToggleRow
+            label="Show transliteration"
+            on={settings.showTr}
+            onToggle={() => toggle('showTr')}
+          />
+          <RowDivider />
+          <ToggleRow
+            label="Verse-by-verse layout"
+            on={settings.verseByVerse}
+            onToggle={() => toggle('verseByVerse')}
+          />
+        </SectionCard>
+
+        {/* Recitation */}
+        <SectionCard>
+          <CardTitle>Recitation</CardTitle>
+          <ToggleRow
+            label="Continue to next verse automatically"
+            on={settings.audioAutoAdvance}
+            onToggle={() => toggle('audioAutoAdvance')}
+          />
+          <RowDivider />
+          <Link
+            to="/recitation"
+            className="flex items-center justify-between py-3"
+            style={{ color: 'inherit', textDecoration: 'none' }}
+          >
+            <span style={{ fontSize: 14 }}>Download audio for offline</span>
+            <ChevronRight size={18} className="chev" style={{ color: 'var(--muted)' }} />
+          </Link>
+        </SectionCard>
+
+        {/* Theme */}
+        <SectionCard>
+          <CardTitle>Theme</CardTitle>
+          <div role="radiogroup" aria-label="Theme">
+            {THEME_ROWS.map((row, i) => (
+              <div key={row.value}>
+                {i > 0 && <RowDivider />}
+                <RadioRow
+                  label={row.label}
+                  selected={settings.theme === row.value}
+                  onSelect={() => setTheme(row.value)}
+                />
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+
+        {/* How to use */}
+        <Link to="/help" className="card">
+          <span style={{ fontSize: 14 }}>How to use</span>
+          <ChevronRight size={18} className="chev" />
+        </Link>
+
+        {/* Install app — opens the install sheet (native prompt on Android, steps on iPhone).
+            Hidden inside the native Android app (already installed). */}
+        {!isAndroidApp && !(window.matchMedia?.('(display-mode: standalone)').matches ||
+           (navigator as unknown as { standalone?: boolean }).standalone === true) && (
+          <button
+            type="button"
+            className="card"
+            style={{ width: '100%', border: 'none', font: 'inherit', textAlign: 'left' }}
+            onClick={() => window.dispatchEvent(new Event('jq:show-install'))}
+          >
+            <span style={{ fontSize: 14 }}>Install app</span>
+            <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--muted)' }}>offline · home screen</span>
+            <ChevronRight size={18} className="chev" style={{ marginLeft: 0 }} />
+          </button>
+        )}
+
+        {/* About & credits */}
+        <Link to="/about" className="card">
+          <span style={{ fontSize: 14 }}>About &amp; credits</span>
+          <ChevronRight size={18} className="chev" />
+        </Link>
+      </div>
+    </div>
+  );
+}
