@@ -39,6 +39,13 @@ export default function Reading() {
   const [surahProgress, setSurahProgress] = useState(0); // % within current verse
   const surahGen = useRef(0);
   const surahHandle = useRef<PlayHandle | null>(null);
+  // AUTO chip tapped off mid-chain: let the current verse finish, then stop
+  // (checked in the verse-end callbacks before stepping to the next verse).
+  const chainCancelRef = useRef(false);
+  /** Stop the running chain after the current verse (audio keeps playing to its end). */
+  const cancelChainAfterVerse = useCallback(() => {
+    chainCancelRef.current = true;
+  }, []);
   // Auto-scroll follows the recitation verse-by-verse — but the user's own
   // scrolling always wins: any manual wheel/touch pauses the follow, and it
   // resumes when the user uses the player controls or taps the playing verse.
@@ -146,6 +153,7 @@ export default function Reading() {
     (from: number, skipBismillah = false) => {
       if (!surah) return;
       followRef.current = true; // (re)starting playback re-engages auto-follow
+      chainCancelRef.current = false; // (re)starting also re-arms continuation
       setAudioError(false);
       const gen = ++surahGen.current;
       /** Audio failed to load (offline, or the host is unreachable): stop the
@@ -185,6 +193,15 @@ export default function Reading() {
               failChain();
               return;
             }
+            // AUTO turned off mid-chain → finish this verse, then stop.
+            if (chainCancelRef.current) {
+              chainCancelRef.current = false;
+              surahHandle.current = null;
+              setSurahPlayV(null);
+              setSurahPlaying(false);
+              setSurahProgress(0);
+              return;
+            }
             step(v + 1);
           },
           (pct) => {
@@ -208,6 +225,14 @@ export default function Reading() {
             if (surahGen.current !== gen) return;
             if (reason === 'error') {
               failChain();
+              return;
+            }
+            if (chainCancelRef.current) {
+              chainCancelRef.current = false;
+              surahHandle.current = null;
+              setSurahPlayV(null);
+              setSurahPlaying(false);
+              setSurahProgress(0);
               return;
             }
             step(1);
@@ -640,8 +665,14 @@ export default function Reading() {
           progress={surahProgress}
           hasPrev={surahPlayV > 1}
           hasNext={surahPlayV < verses.length}
-          auto={settings.audioAutoAdvance}
-          onToggleAuto={() => toggle('audioAutoAdvance')}
+          auto={settings.audioAutoAdvance || surahPlayV !== null}
+          onToggleAuto={() => {
+            // Filled = "audio will continue automatically". Tapping it off
+            // stops ALL continuation: the setting AND the running chain
+            // (the current verse plays out, then playback stops).
+            if (settings.audioAutoAdvance) toggle('audioAutoAdvance');
+            cancelChainAfterVerse();
+          }}
           onTogglePlay={toggleSurahPause}
           onPrev={() => skipSurahVerse(-1)}
           onNext={() => skipSurahVerse(1)}

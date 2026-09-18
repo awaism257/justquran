@@ -127,20 +127,24 @@ export default function SurahPlayer({
         </div>
         <button
           className="popup-auto"
-          aria-label="Auto-play next surah"
+          aria-label="Auto-continue playback"
           aria-pressed={auto}
-          title="Continue to next surah automatically"
+          title="Audio continues automatically — tap to stop after this verse"
           onClick={onToggleAuto}
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: 1,
-            color: auto ? 'var(--green)' : 'var(--muted)',
+            padding: '4px 10px',
+            borderRadius: 999,
+            border: `1px solid ${auto ? 'var(--green)' : 'var(--hairline)'}`,
+            background: auto ? 'var(--green)' : 'transparent',
+            color: auto ? 'var(--bg)' : 'var(--muted)',
           }}
         >
           <ListMusic size={15} />
-          <span style={{ fontSize: 8, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Auto</span>
+          <span style={{ fontSize: 8, letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700 }}>Auto</span>
         </button>
       </div>
     </div>
