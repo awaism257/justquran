@@ -76,6 +76,8 @@ export const PAUSES_NOTE = {
     { sign: '\u08DD', name_en: 'Saktah', en: 'A brief silent pause without taking a breath.', ur: 'سکتہ — سانس لیے بغیر مختصر وقفہ۔' },
     { sign: '\u08DF', name_en: 'Waqfah', en: 'A longer pause, still without taking a breath.', ur: 'وقفہ — سانس لیے بغیر کچھ طویل وقفہ۔' },
     { sign: '\u08D6', name_en: 'Ruku mark', en: 'Not a pause rule — marks the end of a ruku (a thematic section of the Quran).', ur: 'رکوع کی علامت — یہاں ایک رکوع مکمل ہوتا ہے۔' },
+    { sign: '۞', name_en: 'Juz marker', en: 'Not a pause rule — marks the start of a juz (para), one of the 30 sections of the Quran. It appears before the verse where a new juz begins.', ur: 'جز کا نشان — وقف کی علامت نہیں؛ یہاں قرآن کے تیس پاروں میں سے نئے پارے کا آغاز ہوتا ہے۔' },
+    { sign: '●', name_en: 'Gold wash (juz start)', en: 'Not a mushaf mark — a soft gold wash behind a verse marks where a new juz (para) begins, shown together with the ۞ marker.', ur: 'سنہری سایہ — چھپائی کی علامت نہیں؛ جس آیت کے پیچھے ہلکا سنہری رنگ ہو وہاں نئے پارے کا آغاز ہوتا ہے، یہ ۞ نشان کے ساتھ دکھایا جاتا ہے۔' },
   ] as PauseSign[],
 };
 
