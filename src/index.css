@@ -531,18 +531,20 @@
     pointer-events: none;
     white-space: nowrap;
     direction: rtl;
-    /* Multi-mark clusters stack vertically, most important on top (the JSX
-       emits wqSortDisplay order); the bottom glyph sits 3px above the badge. */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    height: 25px; /* one line box tall — stacked children lift upward from it */
   }
-  /* Waqaf glyphs are zero-width combining marks — each gets its own stacked
-     slot so clusters (e.g. jeem + salah) never overlap into one blob, and its
-     own ink-centring nudge. */
+  /* Multi-mark clusters stack vertically, most important on top (JSX emits
+     wqSortDisplay order and lifts each mark by index × 14px). The font's own
+     line box is 56px tall at 25px, so flow stacking left ~16px of dead air
+     between marks; the 14px pitch leaves ~4px between inks — distinct but
+     close. Each glyph keeps its own ink-centring nudge. */
   .wqch {
-    display: block;
-    line-height: 1;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 26px;
+    height: 25px;
+    line-height: 25px;
     text-align: center;
   }
   .vmark {

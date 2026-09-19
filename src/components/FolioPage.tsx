@@ -140,11 +140,14 @@ export default function FolioPage({ verses, night, activeV = null, fatiha = fals
                     <span className="wqmark" aria-hidden="true">
                       {wqSortDisplay(wqDisplay(v.wq))
                         .split('')
-                        .map((c, ci) => (
+                        .map((c, ci, arr) => (
                           <span
                             key={ci}
                             className="wqch"
-                            style={{ transform: `translateX(${wqInkOffset(c)}px)` }}
+                            style={{
+                              bottom: `${(arr.length - 1 - ci) * 14}px`,
+                              transform: `translateX(calc(-50% + ${wqInkOffset(c)}px))`,
+                            }}
                           >
                             {c}
                           </span>

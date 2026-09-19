@@ -143,11 +143,14 @@ export default function VerseCard({ verse, showEn, showUr, showTr, onAnyPlay, ac
             <span className="wqmark" aria-hidden="true">
               {wqSortDisplay(wqDisplay(verse.wq))
                 .split('')
-                .map((c, ci) => (
+                .map((c, ci, arr) => (
                   <span
                     key={ci}
                     className="wqch"
-                    style={{ transform: `translateX(${wqInkOffset(c)}px)` }}
+                    style={{
+                      bottom: `${(arr.length - 1 - ci) * 14}px`,
+                      transform: `translateX(calc(-50% + ${wqInkOffset(c)}px))`,
+                    }}
                   >
                     {c}
                   </span>
