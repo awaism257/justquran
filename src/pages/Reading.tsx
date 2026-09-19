@@ -400,8 +400,9 @@ export default function Reading() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bundle, n, location.hash, searchParams]);
 
-  // Horizontal swipe navigation: swipe left → next surah (start);
-  // swipe right → previous surah at its LAST page (?end=1).
+  // Horizontal swipe navigation, mushaf convention (the page turn moves
+  // LEFT → RIGHT to go forward): drag right (dx > 0) → next surah (start);
+  // drag left (dx < 0) → previous surah at its LAST page (?end=1).
   const onTouchStartSwipe = useCallback((e: React.TouchEvent) => {
     const t = e.touches[0];
     touchStart.current = { x: t.clientX, y: t.clientY, t: Date.now() };
@@ -637,18 +638,18 @@ export default function Reading() {
               </Link>
             )}
 
-            {/* Bottom pager: prev surah | N verses | next surah */}
+            {/* Bottom pager (mushaf convention): ← next surah | N verses | prev surah → */}
             <nav className="pager">
-              {n > 1 ? (
-                <Link to={`/surah/${n - 1}`}>← {getSurahMeta(bundle, n - 1)?.name_en ?? `Surah ${n - 1}`}</Link>
+              {n < 114 ? (
+                <Link to={`/surah/${n + 1}`}>← {getSurahMeta(bundle, n + 1)?.name_en ?? `Surah ${n + 1}`}</Link>
               ) : (
-                <span className="pager-link disabled">← Previous</span>
+                <span className="pager-link disabled">← Next</span>
               )}
               <span className="count">{surah.ayahs} verses</span>
-              {n < 114 ? (
-                <Link to={`/surah/${n + 1}`}>{getSurahMeta(bundle, n + 1)?.name_en ?? `Surah ${n + 1}`} →</Link>
+              {n > 1 ? (
+                <Link to={`/surah/${n - 1}`}>{getSurahMeta(bundle, n - 1)?.name_en ?? `Surah ${n - 1}`} →</Link>
               ) : (
-                <span className="pager-link disabled">Next →</span>
+                <span className="pager-link disabled">Previous →</span>
               )}
             </nav>
           </>
