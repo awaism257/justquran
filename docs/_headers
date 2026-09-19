@@ -1,0 +1,9 @@
+# Update-critical files: never serve a stale copy.
+# sw.js is the version gatekeeper; index.html points at the hashed assets.
+# (Netlify reads this file; harmless on hosts that ignore it.)
+/sw.js
+  Cache-Control: no-cache, must-revalidate
+/index.html
+  Cache-Control: no-cache, must-revalidate
+/manifest.webmanifest
+  Cache-Control: no-cache, must-revalidate

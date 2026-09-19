@@ -5,7 +5,7 @@ import App from './App.tsx';
 import { SettingsProvider } from '@/lib/settings';
 
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
+  <BrowserRouter basename={import.meta.env.BASE_URL}>
     <SettingsProvider>
       <App />
     </SettingsProvider>
