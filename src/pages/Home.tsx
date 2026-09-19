@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
-import { BookMarked, BookOpen, CircleHelp, HandHeart, History, Rows3, Search, Settings } from 'lucide-react';
+import { BookMarked, BookOpen, ChevronRight, CircleHelp, HandHeart, History, Rows3, Search, Settings } from 'lucide-react';
 import { getLastRead } from '@/lib/bookmarks';
 import type { LastRead } from '@/lib/bookmarks';
 import { loadBundle } from '@/lib/data';
@@ -20,14 +20,15 @@ function BigCard({
   sub: string;
 }) {
   return (
-    <Link to={to} className="card card-c">
+    <Link to={to} className="card">
       <span style={{ color: 'var(--green)', flexShrink: 0 }}>{icon}</span>
-      <span className="card-c-txt">
+      <span>
         <span className="block" style={{ fontSize: 17 }}>{title}</span>
         <span className="block" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
           {sub}
         </span>
       </span>
+      <ChevronRight size={18} className="chev" />
     </Link>
   );
 }
@@ -66,11 +67,11 @@ export default function Home() {
 
       <main className="px-4 pt-4 pb-8 flex-1 flex flex-col gap-3 justify-center">
         {last && (
-          <Link to={`/surah/${last.s}#v${last.v}`} className="card card-c">
+          <Link to={`/surah/${last.s}#v${last.v}`} className="card">
             <span style={{ color: 'var(--green)', flexShrink: 0 }}>
               <History size={20} />
             </span>
-            <span className="card-c-txt">
+            <span>
               <span className="block" style={{ fontSize: 17 }}>Continue reading</span>
               <span className="block" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
                 {lastSurah
@@ -78,6 +79,7 @@ export default function Home() {
                   : `Surah ${last.s} · verse ${last.v}`}
               </span>
             </span>
+            <ChevronRight size={18} className="chev" />
           </Link>
         )}
         <BigCard to="/surahs" icon={<BookOpen size={20} />} title="Surahs" sub="All 114 surahs" />

@@ -215,14 +215,6 @@
     color: var(--muted);
     flex-shrink: 0;
   }
-  /* Centred variant (home page buttons): content group centred, no chevron. */
-  .card.card-c {
-    justify-content: center;
-  }
-  .card.card-c .card-c-txt {
-    text-align: center;
-  }
-
   /* ---- verse card ---- */
   .vcard {
     background: var(--card-bg);
