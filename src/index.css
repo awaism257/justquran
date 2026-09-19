@@ -531,13 +531,18 @@
     pointer-events: none;
     white-space: nowrap;
     direction: rtl;
+    /* Multi-mark clusters stack vertically, most important on top (the JSX
+       emits wqSortDisplay order); the bottom glyph sits 3px above the badge. */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
-  /* Waqaf glyphs are zero-width combining marks — without their own slots,
-     clusters like ۚۖ (jeem + salah) overlap into one blob. Each glyph gets an
-     inline-block slot so multi-mark clusters lay out side by side (RTL). */
+  /* Waqaf glyphs are zero-width combining marks — each gets its own stacked
+     slot so clusters (e.g. jeem + salah) never overlap into one blob, and its
+     own ink-centring nudge. */
   .wqch {
-    display: inline-block;
-    min-width: 0.68em;
+    display: block;
+    line-height: 1;
     text-align: center;
   }
   .vmark {

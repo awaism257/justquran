@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState, type MouseEvent, type TouchEvent } from 'react';
-import { wqDisplay, wqInkOffset, loadBundle, getSurahVerses, juzStartAt } from '@/lib/data';
+import { wqDisplay, wqInkOffset, wqSortDisplay, loadBundle, getSurahVerses, juzStartAt } from '@/lib/data';
 import type { Verse } from '@/lib/data';
 import VersePopup from '@/components/VersePopup';
 import { AUTO_ADVANCE_EVENT } from '@/components/VerseCard';
@@ -137,15 +137,15 @@ export default function FolioPage({ verses, night, activeV = null, fatiha = fals
                     {v.v}
                   </button>
                   {v.wq && (
-                    <span
-                      className="wqmark"
-                      aria-hidden="true"
-                      style={{ transform: `translateX(calc(-50% + ${wqInkOffset(wqDisplay(v.wq))}px))` }}
-                    >
-                      {wqDisplay(v.wq)
+                    <span className="wqmark" aria-hidden="true">
+                      {wqSortDisplay(wqDisplay(v.wq))
                         .split('')
                         .map((c, ci) => (
-                          <span key={ci} className="wqch">
+                          <span
+                            key={ci}
+                            className="wqch"
+                            style={{ transform: `translateX(${wqInkOffset(c)}px)` }}
+                          >
                             {c}
                           </span>
                         ))}

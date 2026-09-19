@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Bookmark, Check, Copy, Volume2 } from 'lucide-react';
-import { wqDisplay, wqInkOffset, loadBundle, getSurahMeta, JUZ_NAMES } from '@/lib/data';
+import { wqDisplay, wqInkOffset, wqSortDisplay, loadBundle, getSurahMeta, JUZ_NAMES } from '@/lib/data';
 import type { Verse } from '@/lib/data';
 import { playVerse, stopAudio } from '@/lib/audio';
 import { isBookmarked, toggleBookmark } from '@/lib/bookmarks';
@@ -140,15 +140,15 @@ export default function VerseCard({ verse, showEn, showUr, showTr, onAnyPlay, ac
         <span className="wqwrap">
           <span className="vnum">{verse.v}</span>
           {verse.wq && (
-            <span
-              className="wqmark"
-              aria-hidden="true"
-              style={{ transform: `translateX(calc(-50% + ${wqInkOffset(wqDisplay(verse.wq))}px))` }}
-            >
-              {wqDisplay(verse.wq)
+            <span className="wqmark" aria-hidden="true">
+              {wqSortDisplay(wqDisplay(verse.wq))
                 .split('')
                 .map((c, ci) => (
-                  <span key={ci} className="wqch">
+                  <span
+                    key={ci}
+                    className="wqch"
+                    style={{ transform: `translateX(${wqInkOffset(c)}px)` }}
+                  >
                     {c}
                   </span>
                 ))}

@@ -29,6 +29,26 @@ export function wqDisplay(wq: string): string {
   return wq.replace(/\u08db/g, '\u06e9');
 }
 
+/** Waqaf mark priority, most important first (Android wqSortDisplay parity).
+ * Multi-mark clusters stack vertically with the most important mark on top:
+ * compulsory/no-stop directives first, then the stop family, then the
+ * continue family, brief pauses, and finally structural marks (sajdah, ruku). */
+const WQ_PRIORITY =
+  '\u06D8\u06D9\u0614\u0615\u08DE\u06DA\u08D7\u06D6\u08D5\u0617\u06DB\u08DD\u08DF\u06E9\u08D6';
+
+/** Sort a DISPLAY-form cluster for vertical stacking: most important first
+ * (top of the stack). Unknown marks sink to the bottom. */
+export function wqSortDisplay(displayWq: string): string {
+  return displayWq
+    .split('')
+    .sort((a, b) => {
+      const ia = WQ_PRIORITY.indexOf(a);
+      const ib = WQ_PRIORITY.indexOf(b);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    })
+    .join('');
+}
+
 /** Ink-center correction (CSS px at 17px) per waqaf cluster, measured from real
  *  renders: zero-width mark glyphs hang right of their anchor, so we shift them
  *  left to sit centered above the verse badge. */
