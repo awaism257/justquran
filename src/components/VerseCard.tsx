@@ -143,18 +143,29 @@ export default function VerseCard({ verse, showEn, showUr, showTr, onAnyPlay, ac
             <span className="wqmark" aria-hidden="true">
               {wqSortDisplay(wqDisplay(verse.wq))
                 .split('')
-                .map((c, ci, arr) => (
-                  <span
-                    key={ci}
-                    className="wqch"
-                    style={{
-                      bottom: `${(arr.length - 1 - ci) * 14}px`,
-                      transform: `translateX(calc(-50% + ${wqInkOffset(c)}px))`,
-                    }}
-                  >
-                    {c}
-                  </span>
-                ))}
+                .map((c, ci, arr) => {
+                  // 3-mark clusters: highest priority alone on top; the other
+                  // two side by side below (RTL: #2 right, #3 left).
+                  const n = arr.length;
+                  let bottom = (n - 1 - ci) * 14;
+                  let dx = 0;
+                  if (n === 3) {
+                    if (ci === 0) bottom = 14;
+                    else { bottom = 0; dx = ci === 1 ? 8 : -8; }
+                  }
+                  return (
+                    <span
+                      key={ci}
+                      className="wqch"
+                      style={{
+                        bottom: `${bottom}px`,
+                        transform: `translateX(calc(-50% + ${wqInkOffset(c) + dx}px))`,
+                      }}
+                    >
+                      {c}
+                    </span>
+                  );
+                })}
             </span>
           )}
         </span>
