@@ -14,10 +14,24 @@
     --green: rgb(167, 201, 137);
     --card: rgb(43, 44, 47);
     --muted: rgba(240, 235, 220, 0.55);
+    --accent: var(--gold);       /* readable accent; darker gold in light mode */
+    --tiles: url('tiles-dark.png');
+    --card-shadow: none;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: rgb(238, 229, 203);  /* app light theme: paper2 + white cards */
+      --cream: rgb(38, 32, 22);
+      --card: rgb(255, 255, 255);
+      --muted: rgba(38, 32, 22, 0.55);
+      --accent: rgb(158, 124, 62);
+      --tiles: url('tiles-light.png');
+      --card-shadow: 0 3px 12px rgba(38, 32, 22, 0.08);
+    }
   }
   * { box-sizing: border-box; }
   body {
-    background: var(--bg) url('tiles-dark.png') repeat;
+    background: var(--bg) var(--tiles) repeat;
     color: var(--cream);
     font-family: Georgia, 'Times New Roman', serif;
     margin: 0;
@@ -27,30 +41,31 @@
   .head { text-align: center; }
   .head img.logo {
     width: 96px; height: 96px; border-radius: 50%;
-    border: 2px solid var(--gold);
+    border: 2px solid var(--accent);
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
   }
   h1 { font-size: 30px; margin: 16px 0 6px; font-weight: bold; }
-  .subtitle { color: var(--gold); font-style: italic; font-size: 15px; }
+  .subtitle { color: var(--accent); font-style: italic; font-size: 15px; }
   .tagline { color: var(--muted); font-size: 13.5px; margin-top: 10px; }
-  .div { height: 2px; background: var(--gold); margin: 22px 0 26px; }
+  .div { height: 2px; background: var(--accent); margin: 22px 0 26px; }
   .card {
     background: var(--card);
     border-radius: 20px;
     padding: 18px;
     margin-bottom: 16px;
+    box-shadow: var(--card-shadow);
   }
   .card h2 {
     font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--accent);
     font-weight: 400;
     margin: 0 0 10px;
   }
   .card p { font-size: 14.5px; margin: 0 0 10px; }
   .card p:last-child { margin-bottom: 0; }
-  a { color: var(--green); }
+  a { color: var(--accent); }
   .btns { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
   .btn {
     display: inline-block;
@@ -60,14 +75,14 @@
     text-decoration: none;
   }
   .btn-primary { background: var(--gold); color: var(--bg); font-weight: bold; }
-  .btn-outline { border: 1.5px solid var(--gold); color: var(--gold); }
+  .btn-outline { border: 1.5px solid var(--accent); color: var(--accent); }
   .kofi { text-align: center; }
   .kofi .btn { margin-top: 12px; }
   .kofi .note { font-size: 13px; color: var(--muted); margin-top: 12px; }
   .row { display: flex; gap: 12px; padding: 7px 0; font-size: 14px; line-height: 1.6; }
   .row .label { color: var(--muted); flex-shrink: 0; width: 108px; }
   .foot { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 22px; }
-  .foot .free { color: var(--gold); }
+  .foot .free { color: var(--accent); }
 </style>
 </head>
 <body>
