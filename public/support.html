@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JustQuran — free trilingual Quran app</title>
+<meta name="description" content="JustQuran: the Holy Quran verse by verse in Arabic, Urdu and English. Free, no ads, no sign-in, no tracking, works offline.">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  :root {
+    --bg: rgb(16, 22, 19);
+    --cream: rgb(240, 235, 220);
+    --gold: rgb(201, 166, 88);
+    --green: rgb(167, 201, 137);
+    --card: rgb(43, 44, 47);
+    --muted: rgba(240, 235, 220, 0.55);
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg) url('tiles-dark.png') repeat;
+    color: var(--cream);
+    font-family: Georgia, 'Times New Roman', serif;
+    margin: 0;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 48px 20px 60px; }
+  .head { text-align: center; }
+  .head img.logo {
+    width: 96px; height: 96px; border-radius: 50%;
+    border: 2px solid var(--gold);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  }
+  h1 { font-size: 30px; margin: 16px 0 6px; font-weight: bold; }
+  .subtitle { color: var(--gold); font-style: italic; font-size: 15px; }
+  .tagline { color: var(--muted); font-size: 13.5px; margin-top: 10px; }
+  .div { height: 2px; background: var(--gold); margin: 22px 0 26px; }
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 400;
+    margin: 0 0 10px;
+  }
+  .card p { font-size: 14.5px; margin: 0 0 10px; }
+  .card p:last-child { margin-bottom: 0; }
+  a { color: var(--green); }
+  .btns { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+  .btn {
+    display: inline-block;
+    border-radius: 9999px;
+    padding: 10px 22px;
+    font-size: 14px;
+    text-decoration: none;
+  }
+  .btn-primary { background: var(--gold); color: var(--bg); font-weight: bold; }
+  .btn-outline { border: 1.5px solid var(--gold); color: var(--gold); }
+  .kofi { text-align: center; }
+  .kofi .btn { margin-top: 12px; }
+  .kofi .note { font-size: 13px; color: var(--muted); margin-top: 12px; }
+  .row { display: flex; gap: 12px; padding: 7px 0; font-size: 14px; line-height: 1.6; }
+  .row .label { color: var(--muted); flex-shrink: 0; width: 108px; }
+  .foot { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 22px; }
+  .foot .free { color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <img class="logo" src="icons/icon-512.png" alt="JustQuran logo">
+    <h1>JustQuran</h1>
+    <div class="subtitle">القرآن الكريم — Arabic · Urdu · English, verse by verse</div>
+    <div class="tagline">Free · No ads · No sign-in · No tracking · Works offline</div>
+  </div>
+  <div class="div"></div>
+
+  <div class="card">
+    <h2>About</h2>
+    <p>JustQuran presents the Holy Quran verse by verse in the Digital Khatt IndoPak
+    script, with the classic Urdu translation of Mawlana Fateh Muhammad Jalandhari
+    and the ClearQuran English translation — together with transliteration,
+    recitation, search, bookmarks, and a reading-friendly design in light and dark
+    themes.</p>
+    <p>The app works fully offline: all texts and fonts are bundled, and recitation
+    audio is downloaded only when you choose.</p>
+  </div>
+
+  <div class="card">
+    <h2>Get the app</h2>
+    <div class="btns">
+      <a class="btn btn-primary" href="https://justquran-app.netlify.app">Open the web app</a>
+      <a class="btn btn-outline" href="https://github.com/awaism257/justquran">Source code</a>
+    </div>
+    <p style="font-size: 13.5px; color: var(--muted);">Android: available on Google Play (rolling out).
+    iPhone: open the web app in Safari → Share → <em>Add to Home Screen</em>.</p>
+  </div>
+
+  <div class="card kofi">
+    <h2>Support this app</h2>
+    <p>JustQuran is free and contains no adverts. If it has benefited you, you can leave a
+    small tip towards hosting and development costs — entirely optional.</p>
+    <a class="btn btn-primary" href="https://ko-fi.com/awaismahmood257" target="_blank" rel="noopener noreferrer">♥ Leave a tip on Ko-fi</a>
+    <p class="note">The best support is sharing the app with someone who will benefit from it.</p>
+  </div>
+
+  <div class="card">
+    <h2>Texts &amp; licences</h2>
+    <div class="row"><span class="label">Arabic</span><span>Digital Khatt Indopak script — QUL / Tarteel Inc (qul.tarteel.ai)</span></div>
+    <div class="row"><span class="label">English</span><span>Talal Itani, ClearQuran.com — CC BY-ND 4.0</span></div>
+    <div class="row"><span class="label">Urdu</span><span>Jalandhari (public domain) — digitised by the JustQuran project from the original printed edition</span></div>
+    <div class="row"><span class="label">Transliteration</span><span>Tanzil Project (tanzil.net)</span></div>
+    <div class="row"><span class="label">Recitation</span><span>Sheikh Mahmoud Khalil Al-Hussary (Murattal)</span></div>
+    <div class="row"><span class="label">Hosting</span><span>Netlify — Open Source plan (netlify.com)</span></div>
+    <div class="row"><span class="label">Source code</span><span>Open source — MIT License (GitHub)</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Fonts</h2>
+    <p>DigitalKhatt IndoPak (Amine Anane / Tarteel Inc) · Amiri Quran · Noto Nastaliq Urdu — SIL Open Font License</p>
+  </div>
+
+  <div class="foot">
+    <p>Compiled by Awais Mahmood with the help of Kimi K3 AI.</p>
+    <p class="free">Distributed free of charge.</p>
+  </div>
+
+</div>
+</body>
+</html>
