@@ -3,61 +3,152 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Privacy Policy — JustQuran</title>
+<title>JustQuran — Privacy Policy</title>
+<meta name="description" content="Privacy policy for JustQuran: the app collects no personal data. No accounts, no ads, no analytics, no tracking.">
+<link rel="icon" href="icons/icon-192.png">
 <style>
-  body { background: rgb(16,22,19); color: rgb(240,235,220); font-family: Georgia, 'Times New Roman', serif;
-         max-width: 640px; margin: 0 auto; padding: 40px 22px 60px; line-height: 1.65; }
-  h1 { font-size: 28px; margin: 0 0 4px; }
-  .sub { color: rgb(167,201,137); font-size: 14px; margin-bottom: 8px; }
-  .div { height: 2px; background: rgb(201,166,88); margin: 14px 0 26px; }
-  h2 { font-size: 18px; color: rgb(167,201,137); margin: 26px 0 8px; }
-  p, li { font-size: 15px; }
-  ul { padding-left: 20px; }
-  .muted { color: rgba(240,235,220,0.6); font-size: 13px; margin-top: 36px; }
+  :root {
+    --bg: rgb(16, 22, 19);
+    --cream: rgb(240, 235, 220);
+    --gold: rgb(201, 166, 88);
+    --green: rgb(167, 201, 137);
+    --card: rgb(43, 44, 47);
+    --muted: rgba(240, 235, 220, 0.55);
+    --accent: var(--gold);       /* readable accent; darker gold in light mode */
+    --tiles: url('tiles-dark.png');
+    --card-shadow: none;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: rgb(238, 229, 203);  /* app light theme: paper2 + white cards */
+      --cream: rgb(38, 32, 22);
+      --card: rgb(255, 255, 255);
+      --muted: rgba(38, 32, 22, 0.55);
+      --accent: rgb(158, 124, 62);
+      --tiles: url('tiles-light.png');
+      --card-shadow: 0 3px 12px rgba(38, 32, 22, 0.08);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg) var(--tiles) repeat;
+    color: var(--cream);
+    font-family: Georgia, 'Times New Roman', serif;
+    margin: 0;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 48px 20px 60px; }
+  .head { text-align: center; }
+  .head img.logo {
+    width: 96px; height: 96px; border-radius: 50%;
+    border: 2px solid var(--accent);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  }
+  h1 { font-size: 30px; margin: 16px 0 6px; font-weight: bold; }
+  .subtitle { color: var(--accent); font-style: italic; font-size: 15px; }
+  .tagline { color: var(--muted); font-size: 13.5px; margin-top: 10px; }
+  .div { height: 2px; background: var(--accent); margin: 22px 0 26px; }
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: var(--card-shadow);
+  }
+  .card h2 {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 400;
+    margin: 0 0 10px;
+  }
+  .card p { font-size: 14.5px; margin: 0 0 10px; }
+  .card p:last-child { margin-bottom: 0; }
+  .card ul { font-size: 14.5px; margin: 0 0 10px; padding-left: 22px; }
+  .card li { margin-bottom: 6px; }
+  a { color: var(--accent); }
+  .foot { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 22px; }
+  .foot .free { color: var(--accent); }
 </style>
 </head>
 <body>
-  <h1>Privacy Policy</h1>
-  <div class="sub">JustQuran — effective 19 September 2026</div>
+<div class="wrap">
+
+  <div class="head">
+    <img class="logo" src="icons/icon-512.png" alt="JustQuran logo">
+    <h1>Privacy Policy</h1>
+    <div class="subtitle">JustQuran — القرآن الكريم</div>
+    <div class="tagline">Effective 20 September 2026</div>
+  </div>
   <div class="div"></div>
 
-  <p><strong>In short: JustQuran collects nothing.</strong> No personal data, no accounts,
-  no analytics, no advertising, no tracking — in the Android app and on this website alike.</p>
+  <div class="card">
+    <h2>The short version</h2>
+    <p>JustQuran collects <strong>no personal data whatsoever</strong>. There are no
+    accounts, no adverts, no analytics, no tracking, and no crash-reporting
+    services. The app is free and works fully offline.</p>
+  </div>
 
-  <h2>What stays on your device</h2>
-  <ul>
-    <li>Your bookmarks, last-read position, and settings (theme, font sizes, toggles) are stored
-        only on your own device. They never leave it.</li>
-    <li>Downloaded recitation audio is stored on your device for offline listening.</li>
-  </ul>
+  <div class="card">
+    <h2>What stays on your device</h2>
+    <p>The following are stored <strong>only on your device</strong> and are never
+    transmitted to us or anyone else:</p>
+    <ul>
+      <li>Bookmarks and last reading position</li>
+      <li>Display settings (theme, font sizes, translation toggles)</li>
+      <li>Any recitation audio you choose to download</li>
+    </ul>
+    <p>Uninstalling the app — or clearing its data — removes all of the above.</p>
+  </div>
 
-  <h2>What we collect</h2>
-  <ul>
-    <li>No name, email, phone number, or any other personal information.</li>
-    <li>No usage statistics, crash analytics, or device identifiers.</li>
-    <li>No advertising identifiers; the app contains no ads and no ad networks.</li>
-    <li>No location data, no contacts, no files beyond the app's own data.</li>
-  </ul>
+  <div class="card">
+    <h2>Network use</h2>
+    <p>All texts and fonts are bundled with the app. The only network activity is:</p>
+    <ul>
+      <li><strong>Optional audio downloads</strong> — recitation files are fetched
+      only when you tap download. The request carries no account, identifier, or
+      personal information.</li>
+      <li><strong>Links you choose to open</strong> — the project page, source code,
+      and store links open in your browser and are governed by those sites' own
+      privacy policies.</li>
+    </ul>
+  </div>
 
-  <h2>Network use</h2>
-  <p>The app works fully offline. The only network requests it ever makes are direct file
-  downloads you initiate yourself (recitation audio). No user data is attached to those
-  requests. This website is served as static files by Netlify; please see
-  <a href="https://www.netlify.com/privacy/" style="color: rgb(167,201,137);">Netlify's privacy policy</a>
-  for their standard server logs.</p>
+  <div class="card">
+    <h2>Hosting</h2>
+    <p>The web version of the app is served by Netlify and GitHub Pages, and the
+    Android app is distributed by Google Play. Like any host, these providers may
+    keep standard server logs under their own privacy policies. We run no
+    analytics of our own and receive no personal data from them.</p>
+  </div>
 
-  <h2>Children</h2>
-  <p>JustQuran is a general-audience religious text app. It is not directed at children under 13
-  and, since it collects no data whatsoever, it processes no children's data.</p>
+  <div class="card">
+    <h2>Data safety (Google Play)</h2>
+    <p>For the purposes of Google Play's Data safety section: JustQuran
+    <strong>collects no user data</strong> and <strong>shares no user data</strong>
+    with third parties.</p>
+  </div>
 
-  <h2>Changes</h2>
-  <p>If this policy ever changes, the updated version will be posted at this same address
-  with a new effective date.</p>
+  <div class="card">
+    <h2>Children</h2>
+    <p>The app contains no advertising, no tracking, and no in-app purchases, and
+    collects no data from anyone, of any age.</p>
+  </div>
 
-  <h2>Contact</h2>
-  <p>Questions? Please use the contact email address shown on the JustQuran
-  Google Play store listing.</p>
+  <div class="card">
+    <h2>Changes &amp; contact</h2>
+    <p>If this policy ever changes, the updated version will be posted on this page
+    before the change takes effect.</p>
+    <p>Questions? Open an issue on the
+    <a href="https://github.com/awaism257/justquran">GitHub repository</a>.</p>
+  </div>
 
-  <p class="muted">JustQuran · Fully offline · no ads · no tracking</p>
+  <div class="foot">
+    <p><a href="support.html">About &amp; support</a></p>
+    <p class="free">Distributed free of charge.</p>
+  </div>
+
+</div>
 </body>
 </html>
