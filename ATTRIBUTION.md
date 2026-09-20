@@ -33,7 +33,7 @@ Status: **public domain**.
 The text was **digitised by the JustQuran project** from a public-domain printed
 scan (archive.org) and proofread against the scan — it is *not* copied from any
 other digital source.
-(Being rolled out as a free data update.)
+Included in both the Android app and the web app.
 
 ## 4. Transliteration (romanisation)
 
