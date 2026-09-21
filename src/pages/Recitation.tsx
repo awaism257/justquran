@@ -44,6 +44,7 @@ export default function Recitation() {
   const [confirm, setConfirm] = useState<
     | { kind: 'all' }
     | { kind: 'delete'; surah: number; name: string }
+    | { kind: 'deleteAll' }
     | null
   >(null);
 
@@ -172,6 +173,17 @@ export default function Recitation() {
     [bundle],
   );
 
+  /** Remove the whole audio cache and reset every surah's done flag. */
+  const deleteAllAudio = useCallback(async () => {
+    try {
+      await caches.delete(AUDIO_CACHE);
+    } catch {
+      /* best effort */
+    }
+    setDoneMap({});
+    saveStatuses({});
+  }, []);
+
   const statusOf = (n: number): Status => {
     if (job?.surah === n) return 'downloading';
     return doneMap[n] ? 'done' : 'none';
@@ -222,7 +234,7 @@ export default function Recitation() {
                 ? `Surah ${job?.surah} of 114 · ${overallPct}%`
                 : job
                   ? `Downloading surah ${job.surah}… ${Math.round((job.done / job.total) * 100)}%`
-                  : `Whole Quran · ~600 MB · Wi-Fi recommended`}
+                  : `Whole Quran · ~1 GB · Wi-Fi recommended`}
             </span>
             {job ? (
               <span
@@ -251,9 +263,20 @@ export default function Recitation() {
           </p>
         ) : null}
 
-        <p className="px-2" style={{ fontSize: 11.5, color: 'var(--muted)' }}>
-          {doneSurahs} of 114 surahs downloaded
-        </p>
+        <div className="px-2 flex items-center justify-between">
+          <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+            {doneSurahs} of 114 surahs downloaded
+          </span>
+          {doneSurahs > 0 && !job ? (
+            <button
+              className="chip"
+              style={{ padding: '5px 10px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 5 }}
+              onClick={() => setConfirm({ kind: 'deleteAll' })}
+            >
+              <Trash2 size={13} /> Delete all
+            </button>
+          ) : null}
+        </div>
 
         {/* Per-surah rows */}
         {bundle?.surahs.map((s) => {
@@ -320,12 +343,18 @@ export default function Recitation() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="popup-label">
-              {confirm.kind === 'all' ? 'Download all audio?' : 'Delete download?'}
+              {confirm.kind === 'all'
+                ? 'Download all audio?'
+                : confirm.kind === 'deleteAll'
+                  ? 'Delete all downloads?'
+                  : 'Delete download?'}
             </div>
             <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--vc-en)', marginTop: 10 }}>
               {confirm.kind === 'all'
-                ? 'This downloads the whole Quran recitation (~600 MB). Wi-Fi is recommended.'
-                : `Remove the downloaded audio for ${confirm.name}? You can re-download it any time.`}
+                ? 'This downloads the whole Quran recitation (~1 GB). Wi-Fi is recommended.'
+                : confirm.kind === 'deleteAll'
+                  ? 'This removes every downloaded surah from this device. You can re-download them any time.'
+                  : `Remove the downloaded audio for ${confirm.name}? You can re-download it any time.`}
             </p>
             <div className="flex gap-3 mt-4">
               <button
@@ -342,6 +371,7 @@ export default function Recitation() {
                   const c = confirm;
                   setConfirm(null);
                   if (c.kind === 'all') void startAll();
+                  else if (c.kind === 'deleteAll') void deleteAllAudio();
                   else void deleteSurah(c.surah);
                 }}
               >
@@ -349,7 +379,7 @@ export default function Recitation() {
                   'Download'
                 ) : (
                   <>
-                    <Trash2 size={14} /> Delete
+                    <Trash2 size={14} /> {confirm.kind === 'deleteAll' ? 'Delete all' : 'Delete'}
                   </>
                 )}
               </button>

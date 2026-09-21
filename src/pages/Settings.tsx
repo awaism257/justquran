@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router';
 import BackBar from '@/components/BackBar';
 import { useSettings } from '@/lib/settings';
 import type { FontScales, ThemeChoice } from '@/lib/settings';
 import { isAndroidApp } from '@/lib/androidApp';
+import { BUILD_TAG } from '@/lib/build';
 
 const GREEN = 'rgb(201, 166, 88)';
 
@@ -325,7 +327,58 @@ export default function Settings() {
           <span style={{ fontSize: 14 }}>About &amp; credits</span>
           <ChevronRight size={18} className="chev" />
         </Link>
+
+        {/* Diagnostics — repair moved here from About (keeps About read-only). */}
+        <DiagnosticsCard />
       </div>
     </div>
+  );
+}
+
+/* ---------- diagnostics ---------- */
+
+function DiagnosticsCard() {
+  const [busy, setBusy] = useState(false);
+
+  // Unregister the service worker and wipe every Cache Storage bucket, then
+  // reload — the fresh sw fetches the latest app files. localStorage (bookmarks,
+  // settings) is untouched.
+  const repair = async () => {
+    setBusy(true);
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    } catch {
+      /* best effort */
+    }
+    location.reload();
+  };
+
+  return (
+    <SectionCard>
+      <CardTitle>Diagnostics</CardTitle>
+      <div style={{ fontSize: 13, color: 'var(--muted)', paddingBottom: 10 }}>Build: {BUILD_TAG}</div>
+      <button
+        onClick={repair}
+        disabled={busy}
+        style={{
+          padding: '10px 16px',
+          borderRadius: 12,
+          border: '1px solid var(--green)',
+          color: 'var(--green)',
+          background: 'transparent',
+          fontSize: 14,
+          marginBottom: 8,
+        }}
+      >
+        {busy ? 'Repairing…' : 'Repair offline files & reload'}
+      </button>
+      <div style={{ fontSize: 12, color: 'var(--muted)', paddingBottom: 12 }}>
+        Clears this device's stored app files and downloads everything fresh. Your bookmarks and
+        settings are kept.
+      </div>
+    </SectionCard>
   );
 }

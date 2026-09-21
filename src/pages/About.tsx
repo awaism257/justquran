@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import BackBar from '@/components/BackBar';
 import { isAndroidApp } from '@/lib/androidApp';
+import { BUILD_TAG } from '@/lib/build';
 
 const GREEN = 'rgb(201, 166, 88)';
 
@@ -45,48 +45,13 @@ function CreditRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-const BUILD_TAG = 'v92';
-
 function AppInfo() {
-  const [busy, setBusy] = useState(false);
-
-  const repair = async () => {
-    setBusy(true);
-    try {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map((r) => r.unregister()));
-      const keys = await caches.keys();
-      await Promise.all(keys.map((k) => caches.delete(k)));
-    } catch {
-      /* best effort */
-    }
-    location.reload();
-  };
-
+  // The "Repair offline files & reload" button lives in Settings → Diagnostics.
   return (
     <Card>
       <CardTitle>App</CardTitle>
       <div style={{ fontSize: 14, lineHeight: 2 }}>
         <div>Build: {BUILD_TAG}</div>
-      </div>
-      <button
-        onClick={repair}
-        disabled={busy}
-        style={{
-          marginTop: 12,
-          padding: '10px 16px',
-          borderRadius: 12,
-          border: '1px solid var(--green)',
-          color: 'var(--green)',
-          background: 'transparent',
-          fontSize: 14,
-        }}
-      >
-        {busy ? 'Repairing…' : 'Repair offline files & reload'}
-      </button>
-      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8 }}>
-        Clears this device's stored app files and downloads everything fresh. Your bookmarks and
-        settings are kept.
       </div>
     </Card>
   );

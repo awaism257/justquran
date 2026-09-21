@@ -353,18 +353,17 @@ export default function Help() {
 
         <CollapsibleCard title="Troubleshooting">
           <Step n={1}>
-            If the app ever looks broken, shows an old version, or gets stuck: open the app menu
-            → <b>About &amp; credits</b> (or Settings → About) and tap the{' '}
-            <b>Repair offline files &amp; reload</b> button. The app will reload itself fresh;
-            your bookmarks and settings are kept.
+            If the app ever looks broken, shows an old version, or gets stuck: open{' '}
+            <b>Settings → Diagnostics</b> and tap the <b>Repair offline files &amp; reload</b>{' '}
+            button. The app will reload itself fresh; your bookmarks and settings are kept.
           </Step>
           <Step n={2}>
             If that does not fix it, remove the app from your home screen and add it again from
             the browser — you will get the latest version.
           </Step>
           <Step n={3}>
-            Still stuck? Note the build number shown at the bottom of the About screen and let
-            the developer know what you saw.
+            Still stuck? Note the build number shown in Settings → Diagnostics (or on the About
+            screen) and let the developer know what you saw.
           </Step>
         </CollapsibleCard>
       </div>
