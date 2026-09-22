@@ -121,6 +121,38 @@ export default function BookReader() {
     [lang, nextPage, prevPage],
   );
 
+  // ---- long-press a verse (touch) → its popup, same as tapping the number ----
+  const lpTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lpFired = useRef(false);
+  const lpStart = useRef<{ x: number; y: number } | null>(null);
+  const cancelLongPress = useCallback(() => {
+    if (lpTimer.current !== null) {
+      clearTimeout(lpTimer.current);
+      lpTimer.current = null;
+    }
+  }, []);
+  const onVerseTouchStart = (i: number) => (e: React.TouchEvent) => {
+    cancelLongPress();
+    lpFired.current = false;
+    const t = e.touches[0];
+    lpStart.current = { x: t.clientX, y: t.clientY };
+    lpTimer.current = setTimeout(() => {
+      lpTimer.current = null;
+      lpFired.current = true;
+      setPopupIdx(i);
+    }, 480);
+  };
+  const onVerseTouchMove = (e: React.TouchEvent) => {
+    const s = lpStart.current;
+    if (!s) return;
+    const t = e.touches[0];
+    if (Math.abs(t.clientX - s.x) > 10 || Math.abs(t.clientY - s.y) > 10) cancelLongPress();
+  };
+  const onVerseTouchEnd = () => {
+    cancelLongPress();
+    lpStart.current = null;
+  };
+
   // ---- continue-reading: first verse on the current page ----
   useEffect(() => {
     if (!verses.length) return;
@@ -190,7 +222,20 @@ export default function BookReader() {
             )}
             <p className={lang === 'en' ? 'book-en' : 'book-ur'} style={{ margin: 0 }}>
               {verses.map((v, i) => (
-                <span key={v.v}>
+                <span
+                  key={v.v}
+                  onTouchStart={onVerseTouchStart(i)}
+                  onTouchMove={onVerseTouchMove}
+                  onTouchEnd={onVerseTouchEnd}
+                  onContextMenu={(e) => {
+                    // Swallow the browser's long-press menu only when OUR
+                    // long-press already opened the popup (keeps copy intact).
+                    if (lpFired.current) {
+                      e.preventDefault();
+                      lpFired.current = false;
+                    }
+                  }}
+                >
                   {lang === 'en' ? v.en : (v.ur ?? '')}{' '}
                   <button
                     type="button"
