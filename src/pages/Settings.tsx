@@ -232,20 +232,8 @@ const THEME_ROWS: { value: ThemeChoice; label: string }[] = [
 ];
 
 export default function Settings() {
-  const { settings, setTheme, setFontScale, toggle, set } = useSettings();
+  const { settings, setTheme, setFontScale, toggle } = useSettings();
 
-  // v112: Android parity — "Reading layout" pills drive the same four keys the
-  // reader's top-bar icon toggles (mushaf = translations off + continuous folio;
-  // cards = translations restored + verse-by-verse).
-  const arabicOnly = !settings.showEn && !settings.showUr && !settings.showTr;
-  const mushafOn = !settings.verseByVerse && arabicOnly;
-  const selectMushaf = () => {
-    if (!mushafOn) set({ showEn: false, showUr: false, showTr: false, verseByVerse: false });
-  };
-  const selectCards = () => {
-    if (arabicOnly) set({ showEn: true, showUr: true, showTr: true, verseByVerse: true });
-    else if (!settings.verseByVerse) set({ verseByVerse: true });
-  };
   // The last visible text can't be turned off (a card with nothing on it):
   // Arabic can only be hidden while a translation shows.
   const anyTranslationOn = settings.showEn || settings.showUr || settings.showTr;
@@ -279,18 +267,6 @@ export default function Settings() {
             on={settings.showTr}
             onToggle={() => toggle('showTr')}
           />
-          <RowDivider />
-          <div className="py-3">
-            <span style={{ fontSize: 14 }}>Reading layout</span>
-            <div className="chips" style={{ marginTop: 10 }}>
-              <button type="button" className={mushafOn ? 'chip' : 'chip on'} onClick={selectCards}>
-                Cards
-              </button>
-              <button type="button" className={mushafOn ? 'chip on' : 'chip'} onClick={selectMushaf}>
-                Mushaf
-              </button>
-            </div>
-          </div>
           <RowDivider />
           <ToggleRow
             label="Arabic text in card view"

@@ -27,6 +27,10 @@ export interface Settings {
   verseByVerse: boolean;
   alwaysCreamPage: boolean;
   audioAutoAdvance: boolean;
+  /** v113: exact selection remembered while in mushaf mode, so leaving mushaf
+   * restores it precisely (beta feedback: leaving used to switch ALL
+   * translations back on). Absent until the user first enters mushaf. */
+  preMushaf?: { en: boolean; ur: boolean; tr: boolean; verseByVerse: boolean };
 }
 
 export const DEFAULT_SETTINGS: Settings = {

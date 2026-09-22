@@ -424,15 +424,31 @@ export default function Reading() {
   );
 
   const arabicOnly = !settings.showEn && !settings.showUr && !settings.showTr;
-  const prevVerseByVerse = useRef(settings.verseByVerse);
+  // v113: the exact selection is remembered in the persisted settings
+  // (preMushaf) and restored precisely on the way back — no more "everything
+  // switches back on". Nothing remembered (never entered mushaf this way)
+  // still gets all translations on — the helpful first-exit default.
   const toggleArabicOnly = () => {
     if (arabicOnly) {
-      // leaving Arabic-only: restore translations and prior layout choice
-      set({ showEn: true, showUr: true, showTr: true, verseByVerse: prevVerseByVerse.current });
+      const pm = settings.preMushaf;
+      if (pm) {
+        set({ showEn: pm.en, showUr: pm.ur, showTr: pm.tr, verseByVerse: pm.verseByVerse });
+      } else {
+        set({ showEn: true, showUr: true, showTr: true, verseByVerse: true });
+      }
     } else {
-      // entering Arabic-only: switch to the continuous folio layout
-      prevVerseByVerse.current = settings.verseByVerse;
-      set({ showEn: false, showUr: false, showTr: false, verseByVerse: false });
+      set({
+        preMushaf: {
+          en: settings.showEn,
+          ur: settings.showUr,
+          tr: settings.showTr,
+          verseByVerse: settings.verseByVerse,
+        },
+        showEn: false,
+        showUr: false,
+        showTr: false,
+        verseByVerse: false,
+      });
     }
   };
 
