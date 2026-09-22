@@ -27,6 +27,9 @@ export interface Settings {
   verseByVerse: boolean;
   alwaysCreamPage: boolean;
   audioAutoAdvance: boolean;
+  /** v114: mushaf (folio) view shows fixed 604 pages (printed Medina layout)
+   * instead of one vertically scrolling page per surah. */
+  mushafPaged: boolean;
   /** v113: exact selection remembered while in mushaf mode, so leaving mushaf
    * restores it precisely (beta feedback: leaving used to switch ALL
    * translations back on). Absent until the user first enters mushaf. */
@@ -43,6 +46,7 @@ export const DEFAULT_SETTINGS: Settings = {
   verseByVerse: true,
   alwaysCreamPage: false,
   audioAutoAdvance: false,
+  mushafPaged: false,
 };
 
 const LS_KEY = 'jq-settings';
@@ -73,7 +77,7 @@ interface SettingsCtx {
   resolvedTheme: 'light' | 'dark';
   setTheme: (t: ThemeChoice) => void;
   setFontScale: (key: keyof FontScales, pct: number) => void;
-  toggle: (key: 'showEn' | 'showUr' | 'showTr' | 'showAr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance') => void;
+  toggle: (key: 'showEn' | 'showUr' | 'showTr' | 'showAr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance' | 'mushafPaged') => void;
   set: (patch: Partial<Settings>) => void;
 }
 
@@ -123,7 +127,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     [],
   );
   const toggle = useCallback(
-    (key: 'showEn' | 'showUr' | 'showTr' | 'showAr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance') =>
+    (key: 'showEn' | 'showUr' | 'showTr' | 'showAr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance' | 'mushafPaged') =>
       setSettings((s) => ({ ...s, [key]: !s[key] })),
     [],
   );

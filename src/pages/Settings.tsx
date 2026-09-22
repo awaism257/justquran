@@ -232,7 +232,7 @@ const THEME_ROWS: { value: ThemeChoice; label: string }[] = [
 ];
 
 export default function Settings() {
-  const { settings, setTheme, setFontScale, toggle } = useSettings();
+  const { settings, setTheme, setFontScale, toggle, set } = useSettings();
 
   // The last visible text can't be turned off (a card with nothing on it):
   // Arabic can only be hidden while a translation shows.
@@ -274,6 +274,26 @@ export default function Settings() {
             disabled={settings.showAr && !anyTranslationOn}
             onToggle={() => toggle('showAr')}
           />
+          <RowDivider />
+          <div className="flex items-center justify-between py-3">
+            <span style={{ fontSize: 14 }}>Mushaf page style</span>
+            <span className="flex gap-2">
+              <button
+                type="button"
+                className={!settings.mushafPaged ? 'chip on' : 'chip'}
+                onClick={() => set({ mushafPaged: false })}
+              >
+                Vertical
+              </button>
+              <button
+                type="button"
+                className={settings.mushafPaged ? 'chip on' : 'chip'}
+                onClick={() => set({ mushafPaged: true })}
+              >
+                Paged
+              </button>
+            </span>
+          </div>
         </SectionCard>
 
         {/* Recitation */}

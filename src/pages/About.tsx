@@ -84,6 +84,10 @@ export default function About() {
           />
           <CreditRow label="Transliteration" value="Tanzil Project (tanzil.net)" />
           <CreditRow label="Recitation" value="Sheikh Mahmoud Khalil Al-Hussary (Murattal)" />
+          <CreditRow
+            label="Mushaf pages"
+            value="Mushaf page boundaries (604-page Medina layout): zonetecde/mushaf-layout, ISC — metadata only"
+          />
           <CreditRow label="Hosting" value="Netlify — Open Source plan (netlify.com)" />
           <CreditRow label="Source code" value="Open source — MIT License (GitHub)" />
         </Card>

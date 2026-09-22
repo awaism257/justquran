@@ -11,6 +11,8 @@ import RecitationPage from '@/pages/Recitation';
 import About from '@/pages/About';
 import Help from '@/pages/Help';
 import Khatm from '@/pages/Khatm';
+import BookIndex from '@/pages/BookIndex';
+import BookReader from '@/pages/BookReader';
 import InstallPrompt from '@/components/InstallPrompt';
 
 export default function App() {
@@ -29,6 +31,8 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/help" element={<Help />} />
         <Route path="/khatm" element={<Khatm />} />
+        <Route path="/book" element={<BookIndex />} />
+        <Route path="/book/:lang/:n" element={<BookReader />} />
         {/* Catch-all: redirect unknown paths home. Essential for the Android
             WebView shell, whose entry URL is /assets/www/index.html — without
             this, no route matches and the app boots to a blank screen. */}

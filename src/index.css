@@ -471,7 +471,9 @@
   }
   .folio-ar {
     font-family: 'DigitalKhatt IndoPak', 'Amiri Quran', serif;
-    font-size: calc(23px * var(--fs-ar, 1));
+    /* --paged-shrink (paged mushaf, v114) scales the text down in steps so a
+       fixed page never scrolls; 1 everywhere else. */
+    font-size: calc(23px * var(--fs-ar, 1) * var(--paged-shrink, 1));
     line-height: 2.5;
     text-align: center;
     color: var(--ink);
@@ -756,6 +758,12 @@
     text-decoration: none;
     white-space: nowrap;
   }
+  /* paged mushaf / book pagers use <button> instead of <a> */
+  button.pager-link {
+    background: transparent;
+    font-family: inherit;
+    cursor: pointer;
+  }
   .pager .count {
     font-size: 12.5px;
     color: var(--muted);
@@ -763,6 +771,62 @@
   .pager .disabled {
     opacity: 0.35;
     pointer-events: none;
+  }
+
+  /* ---- book mode (v114): flowing translation prose, real page turns ---- */
+  /* Plain card-like page frame (NOT the ornate mushaf frame). The strip
+     inside is laid out by CSS multi-columns — one column per page. */
+  .book-page {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+  }
+  .book-en {
+    font-family: Georgia, 'DejaVu Serif', serif;
+    font-size: calc(15px * var(--fs-en, 1));
+    line-height: 1.85;
+    text-align: center;
+    color: var(--vc-en);
+  }
+  .book-ur {
+    font-family: 'Noto Nastaliq Urdu', serif;
+    font-size: calc(14px * var(--fs-ur, 1));
+    line-height: 2.4;
+    text-align: center;
+    direction: rtl;
+    color: var(--vc-ur);
+  }
+  /* inline superscript verse-number marker in book prose — opens the popup */
+  .bkmark {
+    background: none;
+    border: none;
+    padding: 0 3px;
+    margin: 0;
+    color: var(--green);
+    font-family: 'DejaVu Serif', Georgia, serif;
+    font-size: 0.65em;
+    vertical-align: super;
+    line-height: 1;
+    cursor: pointer;
+  }
+  /* edge-tap page-turn zones: invisible 26px strips with a faint chevron */
+  .book-edge {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--muted);
+    opacity: 0.45;
+    cursor: pointer;
+    z-index: 2;
   }
 
   /* hairline gold divider (only permitted gradient) */

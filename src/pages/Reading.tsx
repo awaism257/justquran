@@ -4,9 +4,11 @@ import BackBar from '@/components/BackBar';
 import BismillahBand from '@/components/BismillahBand';
 import BismillahCard from '@/components/BismillahCard';
 import FolioPage from '@/components/FolioPage';
+import PagedFolio from '@/components/PagedFolio';
 import VerseCard, { AUTO_ADVANCE_EVENT } from '@/components/VerseCard';
 import { getSurahMeta, getSurahVerses, juzOf, juzStartAt, loadBundle } from '@/lib/data';
 import type { Bundle, Verse } from '@/lib/data';
+import { loadPageMap, pageCount, pageOfVerse, pageStart } from '@/lib/pages';
 import { setLastRead } from '@/lib/bookmarks';
 import { playVerse, stopAudio, getPlayingVerse, getLastPlayedVerse } from '@/lib/audio';
 import type { PlayHandle } from '@/lib/audio';
@@ -28,6 +30,8 @@ export default function Reading() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
+  /** Mirrors pagedMode for callbacks whose effect deps don't include it. */
+  const pagedRef = useRef(false);
 
   // ---- Whole-surah playback (sequential per-verse, auto-scroll) ----
   const [surahPlayV, setSurahPlayV] = useState<number | null>(null);
@@ -77,10 +81,18 @@ export default function Reading() {
     loadBundle()
       .then((b) => live && setBundle(b))
       .catch((e) => live && setError(String(e)));
+    loadPageMap()
+      .then(() => live && setPageMapLoaded(true))
+      .catch(() => {});
     return () => {
       live = false;
     };
   }, []);
+
+  // ---- Paged mushaf (v114): fixed 604 pages instead of vertical scrolling ----
+  const [pageMapLoaded, setPageMapLoaded] = useState(false);
+  /** Current mushaf page, 1-based (1..604) — global, crossing surah bounds. */
+  const [pageIdx, setPageIdx] = useState(1);
 
   const surah = bundle ? getSurahMeta(bundle, n) : undefined;
   const verses: Verse[] = useMemo(
@@ -294,6 +306,15 @@ export default function Reading() {
     [surahPlayV, surah, startSurahFrom],
   );
 
+  // Continuous folio only when verse-by-verse off AND all translations off.
+  const folioMode =
+    !settings.verseByVerse && !settings.showEn && !settings.showUr && !settings.showTr;
+
+  // v114: paged mushaf — the folio renders fixed 604 pages (printed Medina
+  // pagination) instead of one scrolling page. Needs the page map.
+  const pagedMode = folioMode && settings.mushafPaged && pageMapLoaded;
+  pagedRef.current = pagedMode;
+
   // ---- Scroll behaviour ----
   // 1) #v218 hash (search/bookmark/continue-reading verse jump) → scroll to that verse.
   // 2) ?end=1 (swipe into previous surah) → bottom of surah.
@@ -349,6 +370,9 @@ export default function Reading() {
     const save = () => {
       if (t) clearTimeout(t);
       t = setTimeout(() => {
+        // Paged mushaf: a fixed page never scrolls — the paged-mode effect
+        // records the page's first verse instead.
+        if (pagedRef.current) return;
         // skip the first moments after mount, before the scroll position
         // has settled at its target (top / hash verse / end)
         if (Date.now() - mountAt > 500) setLastRead(n, verseOnScreen());
@@ -417,10 +441,16 @@ export default function Reading() {
       const dy = t.clientY - s.y;
       const dt = Date.now() - s.t;
       if (dt > 900 || Math.abs(dx) < 72 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+      if (pagedMode) {
+        // Paged mushaf: the swipe turns PAGES (drag right = next page).
+        if (dx > 0) setPageIdx((p) => Math.min(pageCount(), p + 1));
+        else setPageIdx((p) => Math.max(1, p - 1));
+        return;
+      }
       if (dx < 0 && n > 1) navigate(`/surah/${n - 1}?end=1`);
       else if (dx > 0 && n < 114) navigate(`/surah/${n + 1}`);
     },
-    [n, navigate],
+    [n, navigate, pagedMode],
   );
 
   const arabicOnly = !settings.showEn && !settings.showUr && !settings.showTr;
@@ -453,8 +483,44 @@ export default function Reading() {
   };
 
   // Continuous folio only when verse-by-verse off AND all translations off.
-  const folioMode =
-    !settings.verseByVerse && !settings.showEn && !settings.showUr && !settings.showTr;
+  // (folioMode / pagedMode are declared above, before the scroll effects.)
+
+  // Paged entry anchors: ?v= / #v → that verse's page; ?end=1 → the page of
+  // the surah's last verse; toggling the setting mid-read → the page of the
+  // verse currently at the top; otherwise the page of the surah's verse 1.
+  useEffect(() => {
+    if (!pagedMode || !surah) return;
+    const m = location.hash.match(/^#v(\d+)$/);
+    let target: number;
+    if (m) {
+      target = pageOfVerse(n, Math.min(surah.ayahs, Math.max(1, parseInt(m[1], 10))));
+    } else if (searchParams.get('end') === '1') {
+      target = pageOfVerse(n, surah.ayahs);
+    } else {
+      target = pageOfVerse(n, Math.min(surah.ayahs, Math.max(1, topVerse)));
+    }
+    setPageIdx(target);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagedMode, n, location.hash, searchParams, surah]);
+
+  // Audio follow in paged mode: the playing verse not on the current page →
+  // turn to its page (mirrors the vertical folio's auto-scroll follow).
+  useEffect(() => {
+    if (!pagedMode || surahPlayV === null || surahPlayV === 0 || !followRef.current) return;
+    const p = pageOfVerse(n, surahPlayV);
+    setPageIdx((cur) => (cur === p ? cur : p));
+  }, [pagedMode, surahPlayV, n]);
+
+  // Continue-reading in paged mode: record the first verse of the current page
+  // (the scroll-based recorder below is skipped — a fixed page never scrolls).
+  useEffect(() => {
+    if (!pagedMode) return;
+    const t = setTimeout(() => {
+      const [s, v] = pageStart(pageIdx);
+      setLastRead(s, v);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [pagedMode, pageIdx]);
 
   // Layout switch mid-playback: folio and card layouts have completely
   // different heights, so the old scroll position points at a random verse
@@ -500,7 +566,15 @@ export default function Reading() {
   const meta = surah ? `${surah.ayahs} verses · Juz ${juzOf(n, topVerse)}` : undefined;
 
   return (
-    <div className={n === 1 ? 'tiles fatiha-bg' : 'tiles'} style={{ minHeight: '100dvh' }}>
+    <div
+      className={n === 1 ? 'tiles fatiha-bg' : 'tiles'}
+      style={
+        pagedMode
+          ? // Paged mushaf: the whole screen is a fixed page — nothing scrolls.
+            { height: '100dvh', display: 'flex', flexDirection: 'column' }
+          : { minHeight: '100dvh' }
+      }
+    >
       <BackBar
         home
         title={surah ? `${n}. ${surah.name_en}` : `Surah ${n}`}
@@ -569,7 +643,20 @@ export default function Reading() {
 
       <main
         className="px-4 pt-2"
-        style={surahPlayV !== null ? { paddingBottom: 175 } : undefined}
+        style={
+          pagedMode
+            ? {
+                flex: 1,
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                paddingBottom: surahPlayV !== null ? 175 : 8,
+              }
+            : surahPlayV !== null
+              ? { paddingBottom: 175 }
+              : undefined
+        }
         onTouchStart={onTouchStartSwipe}
         onTouchEnd={onTouchEndSwipe}
         onClickCapture={(e) => {
@@ -600,7 +687,13 @@ export default function Reading() {
             )}
 
             {folioMode ? (
-              <FolioPage verses={verses} night={night} activeV={surahPlayV} fatiha={n === 1} />
+              pagedMode && bundle ? (
+                <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                  <PagedFolio bundle={bundle} page={pageIdx} night={night} activeV={surahPlayV} />
+                </div>
+              ) : (
+                <FolioPage verses={verses} night={night} activeV={surahPlayV} fatiha={n === 1} />
+              )
             ) : (
               <div className="flex flex-col gap-3">
                 {n !== 1 && n !== 9 && bismillahVerse && (
@@ -654,7 +747,38 @@ export default function Reading() {
               </Link>
             )}
 
-            {/* Bottom pager (mushaf convention): ← next surah | N verses | prev surah → */}
+            {/* Bottom pager. Paged mushaf: ‹ next page | Page N of 604 | prev ›
+                (mushaf convention: the left arrow goes FORWARD). Otherwise:
+                ← next surah | N verses | prev surah → */}
+            {pagedMode ? (
+              <nav className="pager">
+                {pageIdx < pageCount() ? (
+                  <button
+                    type="button"
+                    className="pager-link"
+                    onClick={() => setPageIdx(pageIdx + 1)}
+                  >
+                    ‹ Page {pageIdx + 1}
+                  </button>
+                ) : (
+                  <span className="pager-link disabled">‹ Next</span>
+                )}
+                <span className="count">
+                  Page {pageIdx} of {pageCount()}
+                </span>
+                {pageIdx > 1 ? (
+                  <button
+                    type="button"
+                    className="pager-link"
+                    onClick={() => setPageIdx(pageIdx - 1)}
+                  >
+                    Page {pageIdx - 1} ›
+                  </button>
+                ) : (
+                  <span className="pager-link disabled">Previous ›</span>
+                )}
+              </nav>
+            ) : (
             <nav className="pager">
               {n < 114 ? (
                 <Link to={`/surah/${n + 1}`}>← {getSurahMeta(bundle, n + 1)?.name_en ?? `Surah ${n + 1}`}</Link>
@@ -668,6 +792,7 @@ export default function Reading() {
                 <span className="pager-link disabled">Previous →</span>
               )}
             </nav>
+            )}
           </>
         )}
       </main>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
-import { BookMarked, BookOpen, ChevronRight, CircleHelp, HandHeart, History, Rows3, Search, Settings } from 'lucide-react';
+import { BookMarked, BookOpen, ChevronRight, CircleHelp, HandHeart, History, Library, Rows3, Search, Settings } from 'lucide-react';
 import { getLastRead } from '@/lib/bookmarks';
 import type { LastRead } from '@/lib/bookmarks';
 import { loadBundle } from '@/lib/data';
@@ -82,6 +82,12 @@ export default function Home() {
             <ChevronRight size={18} className="chev" />
           </Link>
         )}
+        <BigCard
+          to="/book"
+          icon={<Library size={20} />}
+          title="Book mode"
+          sub="Read translations as flowing pages"
+        />
         <BigCard to="/surahs" icon={<BookOpen size={20} />} title="Surahs" sub="All 114 surahs" />
         <BigCard to="/juz" icon={<Rows3 size={20} />} title="Juz" sub="30 parts of the Quran" />
         {/* No Bookmarks card here — the header (top-right) already links to it. */}

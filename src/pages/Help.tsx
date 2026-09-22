@@ -223,7 +223,8 @@ export default function Help() {
             <b>Arabic only</b> (mushaf style): tap the book icon
             <Ico label="Arabic only"><BookOpenText size={13} /></Ico>
             in the top bar of any surah — or the <Chip>Arabic only</Chip> chip below it — for
-            continuous Arabic text.
+            continuous Arabic text. <b>Settings → Mushaf page style</b> can turn the mushaf into
+            fixed pages (604, like a printed copy).
           </Step>
           <Step n={3}>
             The icon changes to
@@ -234,6 +235,19 @@ export default function Help() {
             Reading without the Arabic? <b>Settings → Arabic text in card view</b> hides it, so you
             can read English only, Urdu only, or transliteration only. (Mushaf view is always
             Arabic.)
+          </Step>
+        </CollapsibleCard>
+
+        <CollapsibleCard title="Book mode">
+          <Step n={1}>
+            <b>Home → Book mode</b>, then pick the English or Urdu book.
+          </Step>
+          <Step n={2}>
+            Translations flow like a book — swipe, tap the page edges, or use the arrows to turn a
+            page.
+          </Step>
+          <Step n={3}>
+            Tap a verse-number marker <Pill>15</Pill> for its Arabic, audio, bookmark and share.
           </Step>
         </CollapsibleCard>
 
