@@ -471,8 +471,8 @@
   }
   .folio-ar {
     font-family: 'DigitalKhatt IndoPak', 'Amiri Quran', serif;
-    /* --paged-shrink (paged mushaf) continuously scales the text down so a
-       fixed page always fits inside its frame; 1 everywhere else. */
+    /* --paged-shrink (paged mushaf) continuously scales the text so a fixed
+       page exactly fills its frame; 1 everywhere else. */
     font-size: calc(23px * var(--fs-ar, 1) * var(--paged-shrink, 1));
     line-height: 2.5;
     text-align: center;
@@ -514,11 +514,23 @@
     min-height: 0;
     overflow: hidden;
   }
+  /* Stage-2 fill (paged only): --paged-lh stretches the leading so a page
+     that still has slack after font-scaling fills its frame with even
+     vertical rhythm; 1 (natural) everywhere else. */
+  .folio.paged .folio-ar {
+    line-height: calc(2.5 * var(--paged-lh, 1));
+  }
   /* Inline surah bands on a paged page scale with the fit, like the text —
-     otherwise 2–3 fixed-height bands (e.g. page 604) could never fit. */
+     otherwise 2–3 fixed-height bands (e.g. page 604) could never fit. The
+     extra bottom clearance reserves room for the waqf/pause marks of the
+     following paragraph's FIRST line: .wqmark is absolutely positioned ABOVE
+     its verse-end badge (up to ~39px of box rise for a 3-mark cluster at the
+     marks' fixed 25px size — they do not scale with the text), which would
+     otherwise overlap this band. The clearance lives in normal flow inside
+     .folio-inner, so the fit's stack-height measurement picks it up. */
   .folio.paged .bism {
     padding: calc(14px * var(--paged-shrink, 1)) 16px;
-    margin: 4px 0 calc(14px * var(--paged-shrink, 1));
+    margin: 4px 0 calc(14px * var(--paged-shrink, 1) + 30px);
   }
   .folio.paged .bism-name {
     font-size: calc(11px * var(--paged-shrink, 1));
@@ -810,6 +822,9 @@
     border-radius: 18px;
     overflow: hidden;
     position: relative;
+  }
+  .book-bism {
+    margin: 0 0 0.9em;
   }
   .book-en {
     font-family: Georgia, 'DejaVu Serif', serif;

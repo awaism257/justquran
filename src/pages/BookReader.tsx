@@ -42,6 +42,15 @@ export default function BookReader() {
     [bundle, n],
   );
 
+  // Bismillah translation heads every surah except Al-Fatihah (its 1:1 IS the
+  // Bismillah) and At-Tawbah. Wording taken verbatim from the bundle's own 1:1
+  // translation so it stays the translator's exact text.
+  const bismillah = useMemo(() => {
+    if (!bundle || n === 1 || n === 9) return null;
+    const first = getSurahVerses(bundle, 1)[0];
+    return (lang === 'en' ? first?.en : first?.ur) || null;
+  }, [bundle, n, lang]);
+
   // ---- pagination (CSS multi-columns + translateX) ----
   const vpRef = useRef<HTMLDivElement>(null); // the visible page (clips the strip)
   const stripRef = useRef<HTMLDivElement>(null); // the columnised prose strip
@@ -175,6 +184,9 @@ export default function BookReader() {
               <p className="text-center" style={{ color: 'var(--muted)', fontSize: 13 }}>
                 Loading…
               </p>
+            )}
+            {bismillah && (
+              <p className={`book-bism ${lang === 'en' ? 'book-en' : 'book-ur'}`}>{bismillah}</p>
             )}
             <p className={lang === 'en' ? 'book-en' : 'book-ur'} style={{ margin: 0 }}>
               {verses.map((v, i) => (
