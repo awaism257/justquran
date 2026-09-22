@@ -126,7 +126,26 @@ function Chip({ children }: { children: ReactNode }) {
   );
 }
 
-/** Inline gold verse badge, same look as the real verse markers. */
+/** Superscript green verse number, same look as the .bkmark markers in Translations books. */
+function SuperNum({ children }: { children: ReactNode }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        padding: '0 3px',
+        color: 'var(--green)',
+        fontFamily: "'DejaVu Serif', Georgia, serif",
+        fontSize: '0.65em',
+        verticalAlign: 'super',
+        lineHeight: 1,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+/** Inline gold verse badge, same look as the verse-card / mushaf markers. */
 function Pill({ children }: { children: ReactNode }) {
   return (
     <span
@@ -238,16 +257,16 @@ export default function Help() {
           </Step>
         </CollapsibleCard>
 
-        <CollapsibleCard title="Book mode">
+        <CollapsibleCard title="Translations">
           <Step n={1}>
-            <b>Home → Book mode</b>, then pick the English or Urdu book.
+            <b>Home → Translations</b>, then pick English or اردو.
           </Step>
           <Step n={2}>
             Translations flow like a book — swipe, tap the page edges, or use the arrows to turn a
             page.
           </Step>
           <Step n={3}>
-            Tap a verse-number marker <Pill>15</Pill> for its Arabic, audio, bookmark and share.
+            Tap a verse-number marker <SuperNum>15</SuperNum> for its Arabic, audio, bookmark and share.
           </Step>
         </CollapsibleCard>
 

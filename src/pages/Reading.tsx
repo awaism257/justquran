@@ -680,16 +680,27 @@ export default function Reading() {
 
         {bundle && surah && (
           <>
-            {/* Folio keeps the plain band above the page; in card mode the
-                Bismillah (with its translation) IS the first card of the list. */}
-            {folioMode && n !== 9 && (
+            {/* Vertical folio keeps the plain band above the page (in paged
+                mode the band appears only where a surah actually begins,
+                inline inside the page — see PagedFolio); in card mode the
+                Bismillah (with its translation) IS the first card. */}
+            {folioMode && !pagedMode && n !== 9 && (
               <BismillahBand surahName={surah.name_en} reciting={surahPlayV === 0 || (n === 1 && surahPlayV === 1)} gold={n === 1} />
             )}
 
             {folioMode ? (
               pagedMode && bundle ? (
                 <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-                  <PagedFolio bundle={bundle} page={pageIdx} night={night} activeV={surahPlayV} />
+                  <PagedFolio
+                    bundle={bundle}
+                    page={pageIdx}
+                    night={night}
+                    activeV={surahPlayV}
+                    fontScale={settings.fonts.ar}
+                    recitingBand={
+                      surahPlayV === 0 ? n : n === 1 && surahPlayV === 1 ? 1 : null
+                    }
+                  />
                 </div>
               ) : (
                 <FolioPage verses={verses} night={night} activeV={surahPlayV} fatiha={n === 1} />

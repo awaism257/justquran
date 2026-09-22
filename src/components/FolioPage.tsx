@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState, type MouseEvent, type TouchEvent } from 'react';
 import { wqDisplay, wqInkOffset, wqSortDisplay, loadBundle, getSurahVerses, juzStartAt } from '@/lib/data';
 import type { Verse } from '@/lib/data';
+import BismillahBand from '@/components/BismillahBand';
 import VersePopup from '@/components/VersePopup';
 import { AUTO_ADVANCE_EVENT } from '@/components/VerseCard';
 
@@ -12,13 +13,23 @@ interface FolioPageProps {
   activeV?: number | null;
   /** Surah Al-Fatiha — the opening of the Qur'an gets a solid gold frame */
   fatiha?: boolean;
+  /** Paged mushaf: the frame fills a fixed-height box (set by PagedFolio) */
+  paged?: boolean;
+  /** Paged mushaf only: surah number → display name for every surah that
+      BEGINS on this page (its verse 1 is in `verses`). When set, the page's
+      verses render grouped per surah and the bismillah band appears INLINE
+      before a group whose first verse is s:1 (never for surah 9 — PagedFolio
+      omits it). Undefined → vertical single-surah folio, unchanged. */
+  surahBands?: Record<number, string>;
+  /** Paged mushaf: surah whose band is currently reciting (Bismillah prelude) */
+  recitingBand?: number | null;
 }
 
 /**
  * Continuous mushaf-folio: flowing Arabic with inline tappable verse
  * markers. Shown only when verse-by-verse is off and all translations off.
  */
-export default function FolioPage({ verses, night, activeV = null, fatiha = false }: FolioPageProps) {
+export default function FolioPage({ verses, night, activeV = null, fatiha = false, paged = false, surahBands, recitingBand = null }: FolioPageProps) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   // Verses the popup navigates within — normally this surah's, but
   // auto-advance across a surah boundary swaps in the next surah's verses.
@@ -81,11 +92,9 @@ export default function FolioPage({ verses, night, activeV = null, fatiha = fals
     pressPos.current = null;
   };
 
-  return (
-    <div className={['folio', night && 'night', fatiha && 'fatiha'].filter(Boolean).join(' ')}>
-      <div className="folio-inner">
-        <p className="folio-ar">
-          {verses.map((v, i) => {
+  /** One verse run (text + glued number badge + waqaf marks). `i` is the
+      index into `verses` — the popup navigates by it. */
+  const renderVerse = (v: Verse, i: number) => {
             // Al-Fatiha 1:1 IS the Bismillah — already shown in the gold band
             // above, so the folio skips it and opens at verse 2 (no duplication).
             if (fatiha && v.v === 1) return null;
@@ -169,9 +178,46 @@ export default function FolioPage({ verses, night, activeV = null, fatiha = fals
                 </span>
               </span>{' '}
             </Fragment>
+    );
+  };
+
+  // Paged mushaf only: split the page's verses into per-surah runs so a surah
+  // that BEGINS on this page gets its bismillah band inline at exactly that
+  // point (printed-mushaf convention). The vertical folio keeps its single
+  // flowing paragraph — its band lives above the page (Reading.tsx).
+  const groups: Verse[][] = [];
+  if (surahBands) {
+    for (const v of verses) {
+      const g = groups[groups.length - 1];
+      if (g && g[0].s === v.s) g.push(v);
+      else groups.push([v]);
+    }
+  }
+  let flatIdx = 0; // index into `verses`, for the popup (grouped rendering)
+
+  return (
+    <div className={['folio', night && 'night', fatiha && 'fatiha', paged && 'paged'].filter(Boolean).join(' ')}>
+      <div className="folio-inner">
+        {surahBands ? (
+          groups.map((g) => {
+            const s = g[0].s;
+            const bandName = g[0].v === 1 ? surahBands[s] : undefined;
+            return (
+              <Fragment key={s}>
+                {bandName !== undefined && (
+                  <BismillahBand
+                    surahName={bandName}
+                    gold={s === 1}
+                    reciting={recitingBand === s}
+                  />
+                )}
+                <p className="folio-ar">{g.map((v) => renderVerse(v, flatIdx++))}</p>
+              </Fragment>
             );
-          })}
-        </p>
+          })
+        ) : (
+          <p className="folio-ar">{verses.map((v, i) => renderVerse(v, i))}</p>
+        )}
       </div>
       {verse && openIdx !== null && (
         <VersePopup

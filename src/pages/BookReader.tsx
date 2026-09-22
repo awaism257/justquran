@@ -142,7 +142,7 @@ export default function BookReader() {
     <div className="tiles" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <BackBar
         title={surah ? `${n}. ${surah.name_en}` : `Surah ${n}`}
-        meta={`Page ${pageIdx + 1} of ${pageCount} · ${lang === 'en' ? 'English book' : 'Urdu book'}`}
+        meta={`Page ${pageIdx + 1} of ${pageCount} · ${lang === 'en' ? 'English translation' : 'Urdu translation'}`}
       />
       <div
         className="px-4 pt-2"

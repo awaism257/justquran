@@ -40,7 +40,7 @@ export default function BookIndex() {
 
   return (
     <div className="tiles" style={{ minHeight: '100dvh' }}>
-      <BackBar title="Book mode" meta={lang === 'en' ? 'English book' : 'Urdu book'} />
+      <BackBar title="Translations" meta={lang === 'en' ? 'English translation' : 'Urdu translation'} />
       <div className="chips" style={{ paddingTop: 12 }}>
         <button className={lang === 'en' ? 'chip on' : 'chip'} onClick={() => setLang('en')}>
           English
@@ -65,7 +65,7 @@ export default function BookIndex() {
             <BookOpen size={20} />
           </span>
           <span>
-            <span className="block" style={{ fontSize: 17 }}>English book</span>
+            <span className="block" style={{ fontSize: 17 }}>English</span>
             <span className="block" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
               ClearQuran translation
             </span>
@@ -86,7 +86,7 @@ export default function BookIndex() {
             <BookOpen size={20} />
           </span>
           <span>
-            <span className="block" style={{ fontSize: 17 }}>Urdu book</span>
+            <span className="block" style={{ fontSize: 17 }}>اردو</span>
             <span className="block" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
               جلندھری ترجمہ
             </span>

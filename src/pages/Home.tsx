@@ -82,12 +82,6 @@ export default function Home() {
             <ChevronRight size={18} className="chev" />
           </Link>
         )}
-        <BigCard
-          to="/book"
-          icon={<Library size={20} />}
-          title="Book mode"
-          sub="Read translations as flowing pages"
-        />
         <BigCard to="/surahs" icon={<BookOpen size={20} />} title="Surahs" sub="All 114 surahs" />
         <BigCard to="/juz" icon={<Rows3 size={20} />} title="Juz" sub="30 parts of the Quran" />
         {/* No Bookmarks card here — the header (top-right) already links to it. */}
@@ -96,6 +90,12 @@ export default function Home() {
           icon={<HandHeart size={20} />}
           title="Completing the Quran"
           sub="Khatm dua · دعائے ختمِ قرآن"
+        />
+        <BigCard
+          to="/book"
+          icon={<Library size={20} />}
+          title="Translations"
+          sub="Read translations as flowing pages"
         />
         <BigCard
           to="/help"

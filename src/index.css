@@ -471,8 +471,8 @@
   }
   .folio-ar {
     font-family: 'DigitalKhatt IndoPak', 'Amiri Quran', serif;
-    /* --paged-shrink (paged mushaf, v114) scales the text down in steps so a
-       fixed page never scrolls; 1 everywhere else. */
+    /* --paged-shrink (paged mushaf) continuously scales the text down so a
+       fixed page always fits inside its frame; 1 everywhere else. */
     font-size: calc(23px * var(--fs-ar, 1) * var(--paged-shrink, 1));
     line-height: 2.5;
     text-align: center;
@@ -497,6 +497,34 @@
     border: 3px solid var(--green);
     outline: 2px solid var(--frame2);
     outline-offset: 4px;
+  }
+
+  /* Paged mushaf (v115): the frame (border + ornament) sits on the
+     FIXED-height page box and fills it exactly — the bottom border is always
+     visible. The scale-to-fit text is laid out INSIDE the frame and shrunk
+     (via --paged-shrink) until it fits, so nothing is ever clipped. */
+  .folio.paged {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .folio.paged .folio-inner {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  /* Inline surah bands on a paged page scale with the fit, like the text —
+     otherwise 2–3 fixed-height bands (e.g. page 604) could never fit. */
+  .folio.paged .bism {
+    padding: calc(14px * var(--paged-shrink, 1)) 16px;
+    margin: 4px 0 calc(14px * var(--paged-shrink, 1));
+  }
+  .folio.paged .bism-name {
+    font-size: calc(11px * var(--paged-shrink, 1));
+  }
+  .folio.paged .bism-text {
+    font-size: calc(22px * var(--paged-shrink, 1));
   }
 
   /* Al-Fatiha page backdrop: the shamsa medallion, centred behind the page,
