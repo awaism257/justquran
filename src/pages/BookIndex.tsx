@@ -7,6 +7,17 @@ import type { Bundle, SurahMeta } from '@/lib/data';
 
 export type BookLang = 'en' | 'ur';
 
+const LS_KEY = 'jq-book-lang';
+
+/** Last picked book language sticks (localStorage) until the user changes it. */
+function loadBookLang(): BookLang {
+  try {
+    return localStorage.getItem(LS_KEY) === 'ur' ? 'ur' : 'en';
+  } catch {
+    return 'en';
+  }
+}
+
 /** Surah list row — same markup/classes as SurahIndex, linking into the book. */
 function BookSurahRow({ s, lang }: { s: SurahMeta; lang: BookLang }) {
   return (
@@ -32,7 +43,17 @@ function BookSurahRow({ s, lang }: { s: SurahMeta; lang: BookLang }) {
 /** Book mode (v114): read a translation as flowing pages, like a book. */
 export default function BookIndex() {
   const [bundle, setBundle] = useState<Bundle | null>(null);
-  const [lang, setLang] = useState<BookLang>('en');
+  // v117: persist the pick — it must survive leaving/returning to this list
+  // (previously useState('en') snapped back to English after reading a surah).
+  const [lang, setLangState] = useState<BookLang>(loadBookLang);
+  const setLang = (l: BookLang) => {
+    setLangState(l);
+    try {
+      localStorage.setItem(LS_KEY, l);
+    } catch {
+      /* private mode */
+    }
+  };
 
   useEffect(() => {
     loadBundle().then(setBundle).catch(() => {});
