@@ -230,6 +230,11 @@ export default function Help() {
             <Ico label="Verse by verse"><Rows3 size={13} /></Ico>
             and turns green — tap it again to switch back. The app remembers your choice.
           </Step>
+          <Step n={4}>
+            Reading without the Arabic? <b>Settings → Arabic text in card view</b> hides it, so you
+            can read English only, Urdu only, or transliteration only. (Mushaf view is always
+            Arabic.)
+          </Step>
         </CollapsibleCard>
 
         <CollapsibleCard id="pauses" title={PAUSES_NOTE.heading_en}>

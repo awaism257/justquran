@@ -233,7 +233,7 @@ export default function VerseCard({ verse, showEn, showUr, showTr, onAnyPlay, ac
         </span>
       </div>
       {bandName && <div className="bism-name vcard-bandname">{bandName}</div>}
-      <p className="vc-ar">{verse.ar}</p>
+      {settings.showAr && <p className="vc-ar">{verse.ar}</p>}
       {showTr && <p className="vc-tr">{verse.tr}</p>}
       {showEn && <p className="vc-en">{verse.en}</p>}
       {showUr && verse.ur ? <p className="vc-ur">{verse.ur}</p> : null}

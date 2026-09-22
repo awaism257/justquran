@@ -23,6 +23,7 @@ export interface Settings {
   showEn: boolean;
   showUr: boolean;
   showTr: boolean;
+  showAr: boolean; // v112: hide the Arabic line in card view (mushaf always keeps it)
   verseByVerse: boolean;
   alwaysCreamPage: boolean;
   audioAutoAdvance: boolean;
@@ -34,6 +35,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showEn: true,
   showUr: true,
   showTr: true,
+  showAr: true,
   verseByVerse: true,
   alwaysCreamPage: false,
   audioAutoAdvance: false,
@@ -67,7 +69,7 @@ interface SettingsCtx {
   resolvedTheme: 'light' | 'dark';
   setTheme: (t: ThemeChoice) => void;
   setFontScale: (key: keyof FontScales, pct: number) => void;
-  toggle: (key: 'showEn' | 'showUr' | 'showTr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance') => void;
+  toggle: (key: 'showEn' | 'showUr' | 'showTr' | 'showAr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance') => void;
   set: (patch: Partial<Settings>) => void;
 }
 
@@ -117,7 +119,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     [],
   );
   const toggle = useCallback(
-    (key: 'showEn' | 'showUr' | 'showTr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance') =>
+    (key: 'showEn' | 'showUr' | 'showTr' | 'showAr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance') =>
       setSettings((s) => ({ ...s, [key]: !s[key] })),
     [],
   );

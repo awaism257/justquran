@@ -77,10 +77,12 @@ function Toggle({
   on,
   onClick,
   label,
+  disabled = false,
 }: {
   on: boolean;
   onClick: () => void;
   label: string;
+  disabled?: boolean;
 }) {
   return (
     <button
@@ -88,7 +90,8 @@ function Toggle({
       role="switch"
       aria-checked={on}
       aria-label={label}
-      onClick={onClick}
+      aria-disabled={disabled}
+      onClick={disabled ? undefined : onClick}
       className="relative shrink-0 cursor-pointer"
       style={{
         width: 46,
@@ -98,6 +101,8 @@ function Toggle({
         background: on ? GREEN : 'var(--line)',
         transition: 'background 0.15s ease',
         padding: 0,
+        opacity: disabled ? 0.4 : 1,
+        cursor: disabled ? 'default' : 'pointer',
       }}
     >
       <span
@@ -120,15 +125,17 @@ function ToggleRow({
   label,
   on,
   onToggle,
+  disabled = false,
 }: {
   label: string;
   on: boolean;
   onToggle: () => void;
+  disabled?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between py-3">
+    <div className="flex items-center justify-between py-3" style={disabled ? { opacity: 0.6 } : undefined}>
       <span style={{ fontSize: 14 }}>{label}</span>
-      <Toggle on={on} onClick={onToggle} label={label} />
+      <Toggle on={on} onClick={onToggle} label={label} disabled={disabled} />
     </div>
   );
 }
@@ -225,7 +232,23 @@ const THEME_ROWS: { value: ThemeChoice; label: string }[] = [
 ];
 
 export default function Settings() {
-  const { settings, setTheme, setFontScale, toggle } = useSettings();
+  const { settings, setTheme, setFontScale, toggle, set } = useSettings();
+
+  // v112: Android parity — "Reading layout" pills drive the same four keys the
+  // reader's top-bar icon toggles (mushaf = translations off + continuous folio;
+  // cards = translations restored + verse-by-verse).
+  const arabicOnly = !settings.showEn && !settings.showUr && !settings.showTr;
+  const mushafOn = !settings.verseByVerse && arabicOnly;
+  const selectMushaf = () => {
+    if (!mushafOn) set({ showEn: false, showUr: false, showTr: false, verseByVerse: false });
+  };
+  const selectCards = () => {
+    if (arabicOnly) set({ showEn: true, showUr: true, showTr: true, verseByVerse: true });
+    else if (!settings.verseByVerse) set({ verseByVerse: true });
+  };
+  // The last visible text can't be turned off (a card with nothing on it):
+  // Arabic can only be hidden while a translation shows.
+  const anyTranslationOn = settings.showEn || settings.showUr || settings.showTr;
 
   return (
     <div>
@@ -257,10 +280,23 @@ export default function Settings() {
             onToggle={() => toggle('showTr')}
           />
           <RowDivider />
+          <div className="py-3">
+            <span style={{ fontSize: 14 }}>Reading layout</span>
+            <div className="chips" style={{ marginTop: 10 }}>
+              <button type="button" className={mushafOn ? 'chip' : 'chip on'} onClick={selectCards}>
+                Cards
+              </button>
+              <button type="button" className={mushafOn ? 'chip on' : 'chip'} onClick={selectMushaf}>
+                Mushaf
+              </button>
+            </div>
+          </div>
+          <RowDivider />
           <ToggleRow
-            label="Verse-by-verse layout"
-            on={settings.verseByVerse}
-            onToggle={() => toggle('verseByVerse')}
+            label="Arabic text in card view"
+            on={settings.showAr}
+            disabled={settings.showAr && !anyTranslationOn}
+            onToggle={() => toggle('showAr')}
           />
         </SectionCard>
 
