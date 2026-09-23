@@ -155,6 +155,7 @@ export default function PagedFolio({
     const lines = measureFlow(inner, true);
     if (!lines.length && verses.length) return; // layout not ready yet
     const next = paginate(surah, lines, size.h, 1, verses.length);
+    (window as unknown as { __pg?: unknown }).__pg = { surah, h: size.h, lines, next };
     cachePagination(pagKey(surah, size.w, size.h, fontScale), next);
     recordCount(surah, next.count);
     setPg(next);
@@ -212,7 +213,11 @@ export default function PagedFolio({
   const onFirstPage = surahPg ? cur === 0 : true;
 
   return (
-    <div ref={wrapRef} style={{ height: '100%', minHeight: 0, overflow: 'hidden' }}>
+    <div
+      ref={wrapRef}
+      className={measuring && !surahPg ? 'paged-measuring' : undefined}
+      style={{ height: '100%', minHeight: 0, overflow: 'hidden' }}
+    >
       <FolioPage
         key={`${surah}:${cur}`}
         verses={pageVerses}

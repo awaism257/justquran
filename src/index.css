@@ -504,19 +504,29 @@
   /* Paged mushaf: the frame (border + ornament) sits on the FIXED-height page
      box and fills it exactly — the bottom border is always visible. The whole
      surah is typeset INSIDE the frame at the reader's font scale and sliced
-     into pages at line boundaries: .folio-flow is translated so exactly one
-     page of whole lines shows (overflow hidden is the safety net — the
-     pagination guarantees nothing ever needs it). */
+     into pages at verse boundaries (overflow hidden is the safety net — the
+     pagination guarantees nothing ever needs it). The paged frame's outer
+     padding is slimmer than the scrolling folio's (user request: expand the
+     frame toward the screen edges for more reading room). */
   .folio.paged {
     height: 100%;
     min-height: 0;
     display: flex;
     flex-direction: column;
+    padding: 22px 16px;
   }
   .folio.paged .folio-inner {
     flex: 1;
     min-height: 0;
     overflow: hidden;
+  }
+  /* First-visit placeholder: before a surah's pagination is measured, a
+     top-of-surah preview renders without page slicing — its text can run past
+     the frame (overflow hidden clips it). Fade the clip edge so the brief
+     preview never shows a hard mid-glyph cut. */
+  .paged-measuring .folio.paged .folio-inner {
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 94%);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 94%);
   }
   /* Page-turn transition: the freshly sliced page fades/slides in. */
   .folio.paged {
