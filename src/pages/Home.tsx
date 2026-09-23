@@ -104,27 +104,25 @@ export default function Home() {
           sub="Quick guide — reading, search, bookmarks"
         />
 
-        <p className="text-center" style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 22 }}>
+        {/* Footer: offline promise sits next to the required Netlify Open Source
+            credit (credit must stay on the main page of the website; hidden
+            inside the Android app — no website there) */}
+        <p className="text-center" style={{ fontSize: 11.5, color: 'var(--muted)', margin: '22px 0 8px' }}>
           Fully offline · no ads · no tracking
+          {!isAndroidApp && (
+            <>
+              {' · '}This site is powered by{' '}
+              <a
+                href="https://www.netlify.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--green)', textDecoration: 'none' }}
+              >
+                Netlify
+              </a>
+            </>
+          )}
         </p>
-        {/* Required credit for the Netlify Open Source plan — keep on the main
-            page of the website; hidden inside the Android app (no website there) */}
-        {!isAndroidApp && (
-        <p
-          className="text-center"
-          style={{ fontSize: 11.5, color: 'var(--muted)', margin: '24px 0 8px' }}
-        >
-          This site is powered by{' '}
-          <a
-            href="https://www.netlify.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'var(--green)', textDecoration: 'none' }}
-          >
-            Netlify
-          </a>
-        </p>
-        )}
       </main>
     </div>
   );
