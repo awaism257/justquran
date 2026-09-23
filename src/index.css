@@ -447,6 +447,10 @@
     border-color: var(--green);
     color: rgb(16, 22, 19);
   }
+  .chip:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
 
   /* ---- folio ---- */
   .folio {
@@ -471,9 +475,7 @@
   }
   .folio-ar {
     font-family: 'DigitalKhatt IndoPak', 'Amiri Quran', serif;
-    /* --paged-shrink (paged mushaf) continuously scales the text so a fixed
-       page exactly fills its frame; 1 everywhere else. */
-    font-size: calc(23px * var(--fs-ar, 1) * var(--paged-shrink, 1));
+    font-size: calc(23px * var(--fs-ar, 1));
     line-height: 2.5;
     text-align: center;
     color: var(--ink);
@@ -499,10 +501,12 @@
     outline-offset: 4px;
   }
 
-  /* Paged mushaf (v115): the frame (border + ornament) sits on the
-     FIXED-height page box and fills it exactly — the bottom border is always
-     visible. The scale-to-fit text is laid out INSIDE the frame and shrunk
-     (via --paged-shrink) until it fits, so nothing is ever clipped. */
+  /* Paged mushaf: the frame (border + ornament) sits on the FIXED-height page
+     box and fills it exactly — the bottom border is always visible. The whole
+     surah is typeset INSIDE the frame at the reader's font scale and sliced
+     into pages at line boundaries: .folio-flow is translated so exactly one
+     page of whole lines shows (overflow hidden is the safety net — the
+     pagination guarantees nothing ever needs it). */
   .folio.paged {
     height: 100%;
     min-height: 0;
@@ -514,29 +518,44 @@
     min-height: 0;
     overflow: hidden;
   }
-  /* Stage-2 fill (paged only): --paged-lh stretches the leading so a page
-     that still has slack after font-scaling fills its frame with even
-     vertical rhythm; 1 (natural) everywhere else. */
-  .folio.paged .folio-ar {
-    line-height: calc(2.5 * var(--paged-lh, 1));
+  /* Page-turn transition: the freshly sliced page fades/slides in. */
+  .folio.paged {
+    animation: folioPageIn 0.22s ease-out;
   }
-  /* Inline surah bands on a paged page scale with the fit, like the text —
-     otherwise 2–3 fixed-height bands (e.g. page 604) could never fit. The
-     extra bottom clearance reserves room for the waqf/pause marks of the
-     following paragraph's FIRST line: .wqmark is absolutely positioned ABOVE
-     its verse-end badge (up to ~39px of box rise for a 3-mark cluster at the
-     marks' fixed 25px size — they do not scale with the text), which would
-     otherwise overlap this band. The clearance lives in normal flow inside
-     .folio-inner, so the fit's stack-height measurement picks it up. */
+  @keyframes folioPageIn {
+    from {
+      opacity: 0.35;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  /* The band's extra bottom clearance reserves room for the waqf/pause marks
+     of the following paragraph's FIRST line: .wqmark is absolutely positioned
+     ABOVE its verse-end badge (up to ~42px of box rise for a 3-mark cluster
+     at the marks' fixed 25px size), which would otherwise overlap the band. */
   .folio.paged .bism {
-    padding: calc(14px * var(--paged-shrink, 1)) 16px;
-    margin: 4px 0 calc(14px * var(--paged-shrink, 1) + 30px);
+    margin: 4px 0 44px;
   }
-  .folio.paged .bism-name {
-    font-size: calc(11px * var(--paged-shrink, 1));
+  /* Offscreen probe (PagedFolio): hidden layout replica of the live frame,
+     used to measure other surahs' page counts for the global page label.
+     visibility:hidden still allows measurement; height/overflow are released
+     so the probe's flow expands fully instead of filling a fixed frame. */
+  .paged-probe {
+    position: fixed;
+    left: -10000px;
+    top: 0;
+    pointer-events: none;
+    visibility: hidden;
   }
-  .folio.paged .bism-text {
-    font-size: calc(22px * var(--paged-shrink, 1));
+  .paged-probe .folio.paged {
+    height: auto;
+  }
+  .paged-probe .folio.paged .folio-inner {
+    flex: none;
+    overflow: visible;
   }
 
   /* Al-Fatiha page backdrop: the shamsa medallion, centred behind the page,

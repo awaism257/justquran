@@ -27,8 +27,8 @@ export interface Settings {
   verseByVerse: boolean;
   alwaysCreamPage: boolean;
   audioAutoAdvance: boolean;
-  /** v114: mushaf (folio) view shows fixed 604 pages (printed Medina layout)
-   * instead of one vertically scrolling page per surah. */
+  /** mushaf (folio) view slices each surah into pages at the chosen font
+   * scale (whole lines, never clipped) instead of one scrolling page. */
   mushafPaged: boolean;
   /** v113: exact selection remembered while in mushaf mode, so leaving mushaf
    * restores it precisely (beta feedback: leaving used to switch ALL

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import BackBar from '@/components/BackBar';
 import BismillahBand from '@/components/BismillahBand';
@@ -8,13 +8,19 @@ import PagedFolio from '@/components/PagedFolio';
 import VerseCard, { AUTO_ADVANCE_EVENT } from '@/components/VerseCard';
 import { getSurahMeta, getSurahVerses, juzOf, juzStartAt, loadBundle } from '@/lib/data';
 import type { Bundle, Verse } from '@/lib/data';
-import { loadPageMap, pageCount, pageOfVerse, pageStart } from '@/lib/pages';
+import {
+  getCounts,
+  globalPageIndex,
+  globalPageTotal,
+  subscribeCounts,
+} from '@/lib/mushafPages';
+import type { Pagination } from '@/lib/mushafPages';
 import { setLastRead } from '@/lib/bookmarks';
 import { playVerse, stopAudio, getPlayingVerse, getLastPlayedVerse } from '@/lib/audio';
 import type { PlayHandle } from '@/lib/audio';
 import SurahPlayer from '@/components/SurahPlayer';
 import { useSettings } from '@/lib/settings';
-import { BookOpenText, Rows3 } from 'lucide-react';
+import { BookOpenText, ChevronLeft, ChevronRight, Play, Rows3, Square } from 'lucide-react';
 
 /** Cross-surah auto-advance: verse to auto-play once the target surah loads. */
 let pendingAutoPlay: { s: number; v: number } | null = null;
@@ -81,18 +87,26 @@ export default function Reading() {
     loadBundle()
       .then((b) => live && setBundle(b))
       .catch((e) => live && setError(String(e)));
-    loadPageMap()
-      .then(() => live && setPageMapLoaded(true))
-      .catch(() => {});
     return () => {
       live = false;
     };
   }, []);
 
-  // ---- Paged mushaf (v114): fixed 604 pages instead of vertical scrolling ----
-  const [pageMapLoaded, setPageMapLoaded] = useState(false);
-  /** Current mushaf page, 1-based (1..604) — global, crossing surah bounds. */
-  const [pageIdx, setPageIdx] = useState(1);
+  // ---- Paged mushaf: dynamic line-sliced pages at the chosen font scale ----
+  /** Reading position: page = 0-based page within the CURRENT surah (each
+      surah starts a new page); anchor = verse owning the first line of that
+      page. Kept in ONE state so page turns and re-anchors stay atomic. */
+  const [pos, setPos] = useState({ page: 0, anchor: 1 });
+  const pageIdx = pos.page;
+  /** Current surah's pagination, reported by PagedFolio after measuring. */
+  const [pages, setPages] = useState<Pagination | null>(null);
+  /** Verse to land on once the (new surah's) pagination arrives; -1 = last page. */
+  const [jumpTarget, setJumpTarget] = useState<number | null>(null);
+  /** Surah the entry-jump effect last computed for (fresh navigation → top). */
+  const entrySurahRef = useRef(0);
+  /** Per-surah page counts across the Quran (live + lazily probed). */
+  const counts = useSyncExternalStore(subscribeCounts, getCounts);
+  const handlePaginate = useCallback((pg: Pagination) => setPages(pg), []);
 
   const surah = bundle ? getSurahMeta(bundle, n) : undefined;
   const verses: Verse[] = useMemo(
@@ -310,10 +324,13 @@ export default function Reading() {
   const folioMode =
     !settings.verseByVerse && !settings.showEn && !settings.showUr && !settings.showTr;
 
-  // v114: paged mushaf — the folio renders fixed 604 pages (printed Medina
-  // pagination) instead of one scrolling page. Needs the page map.
-  const pagedMode = folioMode && settings.mushafPaged && pageMapLoaded;
+  // Paged mushaf: the folio is sliced into dynamic pages (whole lines at the
+  // chosen font scale) instead of one scrolling page.
+  const pagedMode = folioMode && settings.mushafPaged;
   pagedRef.current = pagedMode;
+  /** This surah's measured pagination (null until PagedFolio reports). */
+  const surahPages = pages && pages.surah === n ? pages : null;
+  const surahPageCount = surahPages ? surahPages.count : 1;
 
   // ---- Scroll behaviour ----
   // 1) #v218 hash (search/bookmark/continue-reading verse jump) → scroll to that verse.
@@ -332,6 +349,9 @@ export default function Reading() {
     let raf = 0;
     const update = () => {
       raf = 0;
+      // Paged mushaf: nothing scrolls (the window is a transform), so there
+      // is no meaningful "verse at scroll top" — leave topVerse alone.
+      if (pagedRef.current) return;
       let cur = 1;
       document.querySelectorAll<HTMLElement>('[id^="v"]').forEach((el) => {
         const m = el.id.match(/^v(\d+)$/);
@@ -424,6 +444,28 @@ export default function Reading() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bundle, n, location.hash, searchParams]);
 
+  /** Turn to page `p` of the current surah, anchoring on its first verse. */
+  const turnTo = useCallback(
+    (p: number) => {
+      setPos({ page: p, anchor: surahPages?.anchors[p] ?? 1 });
+    },
+    [surahPages],
+  );
+
+  /** Turn one page forward/backward; past a surah's last page comes the next
+      surah's first page (and back across the boundary lands at ?end=1). A
+      manual turn pauses audio follow, like manual scrolling does. */
+  const nextPage = useCallback(() => {
+    followRef.current = false;
+    if (pageIdx < surahPageCount - 1) turnTo(pageIdx + 1);
+    else if (n < 114) navigate(`/surah/${n + 1}`);
+  }, [pageIdx, surahPageCount, n, navigate, turnTo]);
+  const prevPage = useCallback(() => {
+    followRef.current = false;
+    if (pageIdx > 0) turnTo(pageIdx - 1);
+    else if (n > 1) navigate(`/surah/${n - 1}?end=1`);
+  }, [pageIdx, n, navigate, turnTo]);
+
   // Horizontal swipe navigation, mushaf convention (the page turn moves
   // LEFT → RIGHT to go forward): drag right (dx > 0) → next surah (start);
   // drag left (dx < 0) → previous surah at its LAST page (?end=1).
@@ -443,14 +485,14 @@ export default function Reading() {
       if (dt > 900 || Math.abs(dx) < 72 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
       if (pagedMode) {
         // Paged mushaf: the swipe turns PAGES (drag right = next page).
-        if (dx > 0) setPageIdx((p) => Math.min(pageCount(), p + 1));
-        else setPageIdx((p) => Math.max(1, p - 1));
+        if (dx > 0) nextPage();
+        else prevPage();
         return;
       }
       if (dx < 0 && n > 1) navigate(`/surah/${n - 1}?end=1`);
       else if (dx > 0 && n < 114) navigate(`/surah/${n + 1}`);
     },
-    [n, navigate, pagedMode],
+    [n, navigate, pagedMode, nextPage, prevPage],
   );
 
   const arabicOnly = !settings.showEn && !settings.showUr && !settings.showTr;
@@ -485,42 +527,79 @@ export default function Reading() {
   // Continuous folio only when verse-by-verse off AND all translations off.
   // (folioMode / pagedMode are declared above, before the scroll effects.)
 
-  // Paged entry anchors: ?v= / #v → that verse's page; ?end=1 → the page of
-  // the surah's last verse; toggling the setting mid-read → the page of the
-  // verse currently at the top; otherwise the page of the surah's verse 1.
+  // Paged entry anchors: ?v= / #v → that verse's page; ?end=1 → the surah's
+  // last page; toggling paged on mid-read → the verse currently at the top;
+  // a fresh surah navigation → verse 1. The target is a VERSE — it is mapped
+  // to a page once the surah's pagination arrives (see the next effect).
   useEffect(() => {
     if (!pagedMode || !surah) return;
     const m = location.hash.match(/^#v(\d+)$/);
-    let target: number;
+    const freshNav = entrySurahRef.current !== n;
     if (m) {
-      target = pageOfVerse(n, Math.min(surah.ayahs, Math.max(1, parseInt(m[1], 10))));
+      setJumpTarget(Math.min(surah.ayahs, Math.max(1, parseInt(m[1], 10))));
     } else if (searchParams.get('end') === '1') {
-      target = pageOfVerse(n, surah.ayahs);
+      setJumpTarget(-1); // last page
+    } else if (freshNav) {
+      setJumpTarget(1);
     } else {
-      target = pageOfVerse(n, Math.min(surah.ayahs, Math.max(1, topVerse)));
+      setJumpTarget(Math.min(surah.ayahs, Math.max(1, topVerse)));
     }
-    setPageIdx(target);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagedMode, n, location.hash, searchParams, surah]);
+
+  // Tracks the surah of the last navigation in ANY mode (declared after the
+  // entry effect so the entry effect still sees the previous surah). This is
+  // what lets "toggling paged on mid-read" be told apart from a fresh surah
+  // navigation even though the entry effect only runs in paged mode.
+  useEffect(() => {
+    entrySurahRef.current = n;
+  }, [n]);
+
+  // Position anchoring by verse. Whenever a (re)pagination for this surah
+  // arrives: a pending jump lands on the page CONTAINING the target verse;
+  // otherwise the page holding the anchor verse (the verse that owned the
+  // first line of the page on screen) is found again — never a raw index.
+  useEffect(() => {
+    if (!surahPages) return;
+    if (jumpTarget !== null) {
+      const p =
+        jumpTarget === -1
+          ? surahPages.count - 1
+          : (surahPages.pageOfVerse[Math.max(1, jumpTarget)] ?? 0);
+      setPos({ page: p, anchor: surahPages.anchors[p] ?? 1 });
+      setJumpTarget(null);
+      return;
+    }
+    setPos((cur) => {
+      let p = 0;
+      for (let i = 0; i < surahPages.anchors.length; i++) {
+        if (surahPages.anchors[i] <= cur.anchor) p = i;
+        else break;
+      }
+      const a = surahPages.anchors[p] ?? 1;
+      return cur.page === p && cur.anchor === a ? cur : { page: p, anchor: a };
+    });
+  }, [surahPages, jumpTarget]);
 
   // Audio follow in paged mode: the playing verse not on the current page →
   // turn to its page (mirrors the vertical folio's auto-scroll follow).
   useEffect(() => {
-    if (!pagedMode || surahPlayV === null || surahPlayV === 0 || !followRef.current) return;
-    const p = pageOfVerse(n, surahPlayV);
-    setPageIdx((cur) => (cur === p ? cur : p));
-  }, [pagedMode, surahPlayV, n]);
+    if (!pagedMode || !surahPages || surahPlayV === null || surahPlayV === 0) return;
+    if (!followRef.current) return;
+    const p = surahPages.pageOfVerse[surahPlayV] ?? 0;
+    setPos((cur) =>
+      cur.page === p ? cur : { page: p, anchor: surahPages.anchors[p] ?? cur.anchor },
+    );
+  }, [pagedMode, surahPages, surahPlayV]);
 
-  // Continue-reading in paged mode: record the first verse of the current page
-  // (the scroll-based recorder below is skipped — a fixed page never scrolls).
+  // Continue-reading in paged mode: record the first verse of the current
+  // page (the scroll-based recorder above is skipped — a page never scrolls).
   useEffect(() => {
-    if (!pagedMode) return;
-    const t = setTimeout(() => {
-      const [s, v] = pageStart(pageIdx);
-      setLastRead(s, v);
-    }, 400);
+    if (!pagedMode || !surahPages) return;
+    const v = surahPages.anchors[Math.min(pageIdx, surahPages.anchors.length - 1)] ?? 1;
+    const t = setTimeout(() => setLastRead(n, v), 400);
     return () => clearTimeout(t);
-  }, [pagedMode, pageIdx]);
+  }, [pagedMode, surahPages, pageIdx, n]);
 
   // Layout switch mid-playback: folio and card layouts have completely
   // different heights, so the old scroll position points at a random verse
@@ -563,7 +642,34 @@ export default function Reading() {
   // Theme-tied folio paper: dark theme → .night, unless "always cream" override.
   const night = resolvedTheme === 'dark' && !settings.alwaysCreamPage;
 
-  const meta = surah ? `${surah.ayahs} verses · Juz ${juzOf(n, topVerse)}` : undefined;
+  // Juz label: tracks the verse at the scroll top in flowing layouts; in
+  // paged mode it tracks the verse at the top of the page on screen.
+  const metaVerse =
+    pagedMode && surahPages
+      ? (surahPages.anchors[Math.min(pageIdx, surahPages.anchors.length - 1)] ?? 1)
+      : topVerse;
+  const meta = surah ? `${surah.ayahs} verses · Juz ${juzOf(n, metaVerse)}` : undefined;
+
+  // Global "Page X of Y" across the whole Quran at this font scale/frame —
+  // X once every earlier surah's page count is known (the current surah is
+  // measured live, earlier ones lazily), Y once all 114 are; surah-local
+  // numbers until then.
+  const globalX = surahPages ? globalPageIndex(counts, n, pageIdx) : null;
+  const globalY = globalPageTotal(counts);
+  const pageLabel = surahPages
+    ? globalX !== null
+      ? globalY !== null
+        ? `Page ${globalX} of ${globalY}`
+        : `Page ${globalX}`
+      : `Page ${pageIdx + 1} of ${surahPageCount}`
+    : 'Page …';
+
+  // Card-mode layer chips: the last visible text layer can never be switched
+  // off (toggling any other layer on first re-enables it).
+  const layersOn = [settings.showAr, settings.showEn, settings.showUr, settings.showTr].filter(
+    Boolean,
+  ).length;
+  const lastLayer = (on: boolean) => on && layersOn === 1;
 
   return (
     <div
@@ -580,64 +686,94 @@ export default function Reading() {
         title={surah ? `${n}. ${surah.name_en}` : `Surah ${n}`}
         meta={meta}
         actions={
-          <button
-            className="icon-btn"
-            aria-label={arabicOnly ? 'Show verses with translations' : 'Read Arabic only (continuous)'}
-            title={arabicOnly ? 'Verse-by-verse view' : 'Arabic-only continuous view'}
-            onClick={toggleArabicOnly}
-            style={
-              arabicOnly
-                ? { color: 'var(--green)', borderColor: 'var(--green)', flexShrink: 0 }
-                : { flexShrink: 0 }
-            }
-          >
-            {arabicOnly ? <Rows3 size={18} /> : <BookOpenText size={18} />}
-          </button>
+          <>
+            {/* Folio (mushaf) view has no chips row — the surah-chain play /
+                stop lives here in the top bar instead. Same behaviour as the
+                card mode's "▶ Play surah" chip. */}
+            {folioMode && (
+              <button
+                className="icon-btn"
+                aria-label={surahPlayV !== null ? 'Stop recitation' : 'Play surah'}
+                title={surahPlayV !== null ? 'Stop recitation' : 'Play surah'}
+                onClick={toggleSurahPlay}
+                style={
+                  surahPlayV !== null
+                    ? { color: 'var(--green)', borderColor: 'var(--green)', flexShrink: 0 }
+                    : { flexShrink: 0 }
+                }
+              >
+                {surahPlayV !== null ? <Square size={16} /> : <Play size={18} />}
+              </button>
+            )}
+            <button
+              className="icon-btn"
+              aria-label={arabicOnly ? 'Show verses with translations' : 'Read Arabic only (continuous)'}
+              title={arabicOnly ? 'Verse-by-verse view' : 'Arabic-only continuous view'}
+              onClick={toggleArabicOnly}
+              style={
+                arabicOnly
+                  ? { color: 'var(--green)', borderColor: 'var(--green)', flexShrink: 0 }
+                  : { flexShrink: 0 }
+              }
+            >
+              {arabicOnly ? <Rows3 size={18} /> : <BookOpenText size={18} />}
+            </button>
+          </>
         }
       />
 
-      {/* Chips row (centred): Arabic-only toggle + per-session show-toggles */}
-      <div className="chips">
-        <button
-          className={surahPlayV !== null ? 'chip on' : 'chip'}
-          onClick={toggleSurahPlay}
-        >
-          {surahPlayV !== null
-            ? surahPlayV === 0
-              ? '■ Stop (Bismillah)'
-              : `■ Stop (${surahPlayV})`
-            : '▶ Play surah'}
-        </button>
-        <button
-          className={arabicOnly ? 'chip on' : 'chip'}
-          onClick={toggleArabicOnly}
-        >
-          Arabic only
-        </button>
-        <button
-          className={settings.showEn ? 'chip on' : 'chip'}
-          onClick={() => toggle('showEn')}
-        >
-          English
-        </button>
-        <button
-          className={settings.showUr ? 'chip on' : 'chip'}
-          onClick={() => toggle('showUr')}
-        >
-          اردو
-        </button>
-        <button
-          className={settings.showTr ? 'chip on' : 'chip'}
-          onClick={() => toggle('showTr')}
-        >
-          Translit
-        </button>
-      </div>
+      {/* Chips row (card mode only — the folio views have no chips; playback
+          there lives in the top bar). "Arabic" shows/hides the Arabic line on
+          the verse cards; entering the mushaf view happens only via the
+          top-bar layout icon. A chip is disabled while it is the LAST visible
+          text layer. */}
+      {!folioMode && (
+        <div className="chips">
+          <button
+            className={surahPlayV !== null ? 'chip on' : 'chip'}
+            onClick={toggleSurahPlay}
+          >
+            {surahPlayV !== null
+              ? surahPlayV === 0
+                ? '■ Stop (Bismillah)'
+                : `■ Stop (${surahPlayV})`
+              : '▶ Play surah'}
+          </button>
+          <button
+            className={settings.showAr ? 'chip on' : 'chip'}
+            disabled={lastLayer(settings.showAr)}
+            onClick={() => toggle('showAr')}
+          >
+            Arabic
+          </button>
+          <button
+            className={settings.showEn ? 'chip on' : 'chip'}
+            disabled={lastLayer(settings.showEn)}
+            onClick={() => toggle('showEn')}
+          >
+            English
+          </button>
+          <button
+            className={settings.showUr ? 'chip on' : 'chip'}
+            disabled={lastLayer(settings.showUr)}
+            onClick={() => toggle('showUr')}
+          >
+            اردو
+          </button>
+          <button
+            className={settings.showTr ? 'chip on' : 'chip'}
+            disabled={lastLayer(settings.showTr)}
+            onClick={() => toggle('showTr')}
+          >
+            Translit
+          </button>
+        </div>
+      )}
 
       {audioError && (
         <div className="audio-error" role="alert">
           Couldn't load the recitation audio. Check your internet connection,
-          then tap <b>▶ Play surah</b> to try again.
+          then tap <b>▶ Play</b> to try again.
         </div>
       )}
 
@@ -651,6 +787,7 @@ export default function Reading() {
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
+                position: 'relative',
                 paddingBottom: surahPlayV !== null ? 175 : 8,
               }
             : surahPlayV !== null
@@ -693,6 +830,7 @@ export default function Reading() {
                 <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
                   <PagedFolio
                     bundle={bundle}
+                    surah={n}
                     page={pageIdx}
                     night={night}
                     activeV={surahPlayV}
@@ -700,7 +838,27 @@ export default function Reading() {
                     recitingBand={
                       surahPlayV === 0 ? n : n === 1 && surahPlayV === 1 ? 1 : null
                     }
+                    onPaginate={handlePaginate}
                   />
+                  {/* edge-tap page-turn zones (mushaf convention: left = forward) */}
+                  <button
+                    type="button"
+                    className="book-edge"
+                    style={{ left: 0 }}
+                    aria-label="Next page"
+                    onClick={nextPage}
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    className="book-edge"
+                    style={{ right: 0 }}
+                    aria-label="Previous page"
+                    onClick={prevPage}
+                  >
+                    <ChevronRight size={14} />
+                  </button>
                 </div>
               ) : (
                 <FolioPage verses={verses} night={night} activeV={surahPlayV} fatiha={n === 1} />
@@ -758,32 +916,23 @@ export default function Reading() {
               </Link>
             )}
 
-            {/* Bottom pager. Paged mushaf: ‹ next page | Page N of 604 | prev ›
-                (mushaf convention: the left arrow goes FORWARD). Otherwise:
-                ← next surah | N verses | prev surah → */}
+            {/* Bottom pager. Paged mushaf: ‹ next page | Page X of Y | prev ›
+                (mushaf convention: the left arrow goes FORWARD; X/Y are global
+                across the Quran once every surah's page count is known).
+                Otherwise: ← next surah | N verses | prev surah → */}
             {pagedMode ? (
               <nav className="pager">
-                {pageIdx < pageCount() ? (
-                  <button
-                    type="button"
-                    className="pager-link"
-                    onClick={() => setPageIdx(pageIdx + 1)}
-                  >
-                    ‹ Page {pageIdx + 1}
+                {pageIdx < surahPageCount - 1 || n < 114 ? (
+                  <button type="button" className="pager-link" onClick={nextPage}>
+                    ‹ Next
                   </button>
                 ) : (
                   <span className="pager-link disabled">‹ Next</span>
                 )}
-                <span className="count">
-                  Page {pageIdx} of {pageCount()}
-                </span>
-                {pageIdx > 1 ? (
-                  <button
-                    type="button"
-                    className="pager-link"
-                    onClick={() => setPageIdx(pageIdx - 1)}
-                  >
-                    Page {pageIdx - 1} ›
+                <span className="count">{pageLabel}</span>
+                {pageIdx > 0 || n > 1 ? (
+                  <button type="button" className="pager-link" onClick={prevPage}>
+                    Previous ›
                   </button>
                 ) : (
                   <span className="pager-link disabled">Previous ›</span>

@@ -241,14 +241,17 @@ export default function Help() {
           <Step n={2}>
             <b>Arabic only</b> (mushaf style): tap the book icon
             <Ico label="Arabic only"><BookOpenText size={13} /></Ico>
-            in the top bar of any surah — or the <Chip>Arabic only</Chip> chip below it — for
-            continuous Arabic text. <b>Settings → Mushaf page style</b> can turn the mushaf into
-            fixed pages (604, like a printed copy).
+            in the top bar of any surah for continuous Arabic text. <b>Settings → Mushaf page
+            style</b> can turn the mushaf into pages that are laid out at your chosen font size —
+            the number of pages adapts so verses are never cut off.
           </Step>
           <Step n={3}>
             The icon changes to
             <Ico label="Verse by verse"><Rows3 size={13} /></Ico>
-            and turns green — tap it again to switch back. The app remembers your choice.
+            and turns green — tap it again to switch back. The app remembers your choice. In the
+            mushaf view there are no chips below the bar: a
+            <Ico label="Play surah"><Play size={13} /></Ico>
+            button next to the icon plays (or stops) the whole surah.
           </Step>
           <Step n={4}>
             Reading without the Arabic? <b>Settings → Arabic text in card view</b> hides it, so you
@@ -293,11 +296,19 @@ export default function Help() {
 
         <CollapsibleCard title="Translations on or off">
           <Step n={1}>
-            At the top of any surah there are chips: <Chip>English</Chip> <Chip>اردو</Chip>
-            <Chip>Translit</Chip>
+            In the card view, the top of any surah has chips: <Chip>Arabic</Chip> <Chip>English</Chip>
+            <Chip>اردو</Chip> <Chip>Translit</Chip>
           </Step>
-          <Step n={2}>Tap a chip to show or hide that line while reading.</Step>
-          <Step n={3}>The Urdu translation is the classic Jalandhari translation (public domain).</Step>
+          <Step n={2}>
+            Tap a chip to show or hide that line while reading — <Chip>Arabic</Chip> shows or hides
+            the Arabic line on the verse cards. The last visible line can't be switched off.
+          </Step>
+          <Step n={3}>
+            The mushaf (Arabic-only) view has no chips — use the
+            <Ico label="Play surah"><Play size={13} /></Ico>
+            play button and the layout icon in the top bar instead.
+          </Step>
+          <Step n={4}>The Urdu translation is the classic Jalandhari translation (public domain).</Step>
         </CollapsibleCard>
 
         <CollapsibleCard title="Verse details card">

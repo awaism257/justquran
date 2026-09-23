@@ -6,7 +6,9 @@ import VersePopup from '@/components/VersePopup';
 import { AUTO_ADVANCE_EVENT } from '@/components/VerseCard';
 
 interface FolioPageProps {
-  verses: Verse[];
+  /** `cutEnd` (paged mushaf slices): this verse continues past the page —
+      render its partial text with no number badge / waqaf marks. */
+  verses: (Verse & { cutEnd?: boolean })[];
   /** dark-theme folio (`.night`) vs cream paper */
   night: boolean;
   /** verse currently being recited (whole-surah playback), highlighted inline */
@@ -94,7 +96,7 @@ export default function FolioPage({ verses, night, activeV = null, fatiha = fals
 
   /** One verse run (text + glued number badge + waqaf marks). `i` is the
       index into `verses` — the popup navigates by it. */
-  const renderVerse = (v: Verse, i: number) => {
+  const renderVerse = (v: Verse & { cutEnd?: boolean }, i: number) => {
             // Al-Fatiha 1:1 IS the Bismillah — already shown in the gold band
             // above, so the folio skips it and opens at verse 2 (no duplication).
             if (fatiha && v.v === 1) return null;
@@ -120,6 +122,24 @@ export default function FolioPage({ verses, night, activeV = null, fatiha = fals
                 setOpenIdx(i);
               },
             };
+            // Verse continues past this page (paged slice): partial text only,
+            // no badge/marks — they render on the page holding the verse's end.
+            if (v.cutEnd) {
+              return (
+                <Fragment key={v.v}>
+                  {jz !== null && (
+                    <>
+                      <span className="juz-orn" title={`Juz ${jz} begins here`}>
+                        ۞
+                      </span>{' '}
+                    </>
+                  )}
+                  <span id={`v${v.v}`} className={runCls} {...press}>
+                    {ar}
+                  </span>{' '}
+                </Fragment>
+              );
+            }
             return (
             <Fragment key={v.v}>
               {jz !== null && (
