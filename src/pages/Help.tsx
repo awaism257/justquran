@@ -260,7 +260,98 @@ export default function Help() {
           </Step>
         </CollapsibleCard>
 
-        <CollapsibleCard title="Translations">
+        <CollapsibleCard title="Card View">
+          <Step n={1}>
+            In the card view, the top of any surah has chips: <Chip>Arabic</Chip> <Chip>English</Chip>
+            <Chip>اردو</Chip> <Chip>Translit</Chip>
+          </Step>
+          <Step n={2}>
+            Tap a chip to show or hide that line while reading — <Chip>Arabic</Chip> shows or hides
+            the Arabic line on the verse cards. The last visible line can't be switched off.
+          </Step>
+          <Step n={3}>
+            The mushaf (Arabic-only) view has no chips — use the
+            <Ico label="Play surah"><Play size={13} /></Ico>
+            play button and the layout icon in the top bar instead.
+          </Step>
+          <Step n={4}>The Urdu translation is the classic Jalandhari translation (public domain).</Step>
+        </CollapsibleCard>
+
+        <CollapsibleCard title="Text size &amp; theme">
+          <Step n={1}>
+            Settings has sliders for Arabic, English, Urdu and transliteration text size.
+          </Step>
+          <Step n={2}>Theme can be light, dark, or follow your phone.</Step>
+          <Step n={3}>Everything works fully offline; there are no ads, accounts or tracking.</Step>
+        </CollapsibleCard>
+
+        <CollapsibleCard title="Audio">
+          <Step n={1}>
+            <Chip>▶ Play surah</Chip> at the top of a surah plays it from the beginning, starting
+            with Bismillah (except surah 9 — in Al-Fatiha the Bismillah is verse 1 itself).
+          </Step>
+          <Step n={2}>
+            The <Ico label="Listen"><Volume2 size={13} /></Ico> button on a verse card plays just
+            that verse.
+          </Step>
+          <Step n={3}>
+            To listen without internet, first download the surah: Settings → Recitation.
+          </Step>
+          <Step n={4}>
+            To keep listening after a verse ends, open the player bar (tap any verse's{' '}
+            <Ico label="Listen"><Volume2 size={13} /></Ico> button) and tap the <b>Auto</b> toggle —
+            playback will continue verse by verse. The same option is in Settings → Recitation
+            ("Continue to next verse automatically").
+          </Step>
+        </CollapsibleCard>
+
+        <CollapsibleCard title="Search">
+          <Step n={1}>
+            Tap the magnifier <Ico label="Search"><Search size={13} /></Ico> at the top of the home
+            page.
+          </Step>
+          <Step n={2}>Type in English, Arabic or Urdu letters — all three work.</Step>
+          <Step n={3}>
+            Find a surah by name (e.g. “Tawbah” or التوبہ) or a juz by name or number (“juz 30”,
+            “para 30”, پارہ ۳۰).
+          </Step>
+          <Step n={4}>Jump straight to a verse by typing its number, e.g. 2:255.</Step>
+        </CollapsibleCard>
+
+        <CollapsibleCard title="Bookmarks">
+          <Step n={1}>
+            Tap <Ico label="Bookmark"><Bookmark size={13} /></Ico> on any verse card or verse
+            details card.
+          </Step>
+          <Step n={2}>
+            Open <b>Bookmarks</b> from the home page to see saved verses; tap one to go back to it.
+          </Step>
+          <Step n={3}>
+            <b>Continue reading</b> on the home page returns you to where you stopped.
+          </Step>
+        </CollapsibleCard>
+
+        <CollapsibleCard title="Verse details card">
+          <Step n={1}>
+            While reading, tap the small gold number badge <Pill>15</Pill> after a verse — or press
+            and hold on the verse itself.
+          </Step>
+          <Step n={2}>A card opens showing the translation and transliteration.</Step>
+          <Step n={3}>
+            Use
+            <Ico label="Previous verse"><SkipBack size={13} /></Ico>
+            <Ico label="Next verse"><SkipForward size={13} /></Ico>
+            to move to the previous or next verse.
+          </Step>
+          <Step n={4}>
+            Buttons:
+            <Ico label="Bookmark"><Bookmark size={13} /></Ico> bookmark ·
+            <Ico label="Copy or share"><Copy size={13} /></Ico> copy or share ·
+            <Ico label="Listen"><Play size={13} /></Ico> listen to this verse.
+          </Step>
+        </CollapsibleCard>
+
+        <CollapsibleCard title="Translations reader">
           <Step n={1}>
             <b>Home → Translations</b>, then pick English or اردو.
           </Step>
@@ -294,89 +385,6 @@ export default function Help() {
           </div>
         </CollapsibleCard>
 
-        <CollapsibleCard title="Translations on or off">
-          <Step n={1}>
-            In the card view, the top of any surah has chips: <Chip>Arabic</Chip> <Chip>English</Chip>
-            <Chip>اردو</Chip> <Chip>Translit</Chip>
-          </Step>
-          <Step n={2}>
-            Tap a chip to show or hide that line while reading — <Chip>Arabic</Chip> shows or hides
-            the Arabic line on the verse cards. The last visible line can't be switched off.
-          </Step>
-          <Step n={3}>
-            The mushaf (Arabic-only) view has no chips — use the
-            <Ico label="Play surah"><Play size={13} /></Ico>
-            play button and the layout icon in the top bar instead.
-          </Step>
-          <Step n={4}>The Urdu translation is the classic Jalandhari translation (public domain).</Step>
-        </CollapsibleCard>
-
-        <CollapsibleCard title="Verse details card">
-          <Step n={1}>
-            While reading, tap the small gold number badge <Pill>15</Pill> after a verse — or press
-            and hold on the verse itself.
-          </Step>
-          <Step n={2}>A card opens showing the translation and transliteration.</Step>
-          <Step n={3}>
-            Use
-            <Ico label="Previous verse"><SkipBack size={13} /></Ico>
-            <Ico label="Next verse"><SkipForward size={13} /></Ico>
-            to move to the previous or next verse.
-          </Step>
-          <Step n={4}>
-            Buttons:
-            <Ico label="Bookmark"><Bookmark size={13} /></Ico> bookmark ·
-            <Ico label="Copy or share"><Copy size={13} /></Ico> copy or share ·
-            <Ico label="Listen"><Play size={13} /></Ico> listen to this verse.
-          </Step>
-        </CollapsibleCard>
-
-        <CollapsibleCard title="Search">
-          <Step n={1}>
-            Tap the magnifier <Ico label="Search"><Search size={13} /></Ico> at the top of the home
-            page.
-          </Step>
-          <Step n={2}>Type in English, Arabic or Urdu letters — all three work.</Step>
-          <Step n={3}>
-            Find a surah by name (e.g. “Tawbah” or التوبہ) or a juz by name or number (“juz 30”,
-            “para 30”, پارہ ۳۰).
-          </Step>
-          <Step n={4}>Jump straight to a verse by typing its number, e.g. 2:255.</Step>
-        </CollapsibleCard>
-
-        <CollapsibleCard title="Bookmarks">
-          <Step n={1}>
-            Tap <Ico label="Bookmark"><Bookmark size={13} /></Ico> on any verse card or verse
-            details card.
-          </Step>
-          <Step n={2}>
-            Open <b>Bookmarks</b> from the home page to see saved verses; tap one to go back to it.
-          </Step>
-          <Step n={3}>
-            <b>Continue reading</b> on the home page returns you to where you stopped.
-          </Step>
-        </CollapsibleCard>
-
-        <CollapsibleCard title="Audio">
-          <Step n={1}>
-            <Chip>▶ Play surah</Chip> at the top of a surah plays it from the beginning, starting
-            with Bismillah (except surah 9 — in Al-Fatiha the Bismillah is verse 1 itself).
-          </Step>
-          <Step n={2}>
-            The <Ico label="Listen"><Volume2 size={13} /></Ico> button on a verse card plays just
-            that verse.
-          </Step>
-          <Step n={3}>
-            To listen without internet, first download the surah: Settings → Recitation.
-          </Step>
-          <Step n={4}>
-            To keep listening after a verse ends, open the player bar (tap any verse's{' '}
-            <Ico label="Listen"><Volume2 size={13} /></Ico> button) and tap the <b>Auto</b> toggle —
-            playback will continue verse by verse. The same option is in Settings → Recitation
-            ("Continue to next verse automatically").
-          </Step>
-        </CollapsibleCard>
-
         <CollapsibleCard title="Install the app">
           <Step n={1}>
             <b>Android:</b> tap the <b>⋮ menu</b> in Chrome → <b>Add to Home screen</b> → <b>Install</b>.
@@ -390,14 +398,6 @@ export default function Help() {
             Once installed it opens like a real app and works fully offline. You can reopen the
             install sheet any time from Settings → <b>Install app</b>.
           </Step>
-        </CollapsibleCard>
-
-        <CollapsibleCard title="Text size &amp; theme">
-          <Step n={1}>
-            Settings has sliders for Arabic, English, Urdu and transliteration text size.
-          </Step>
-          <Step n={2}>Theme can be light, dark, or follow your phone.</Step>
-          <Step n={3}>Everything works fully offline; there are no ads, accounts or tracking.</Step>
         </CollapsibleCard>
 
         <CollapsibleCard title="Troubleshooting">
