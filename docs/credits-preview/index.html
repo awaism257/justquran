@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JustQuran — Audiobook Credits Preview · The ClearQuran</title>
+<style>
+  @font-face { font-family: 'Amiri Quran'; src: url('fonts/amiri-quran.ttf'); font-display: swap; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: rgb(16,22,19); color: rgb(240,235,220);
+    font-family: Georgia, 'Times New Roman', serif;
+    max-width: 720px; margin: 0 auto; padding: 28px 18px 60px;
+  }
+  header { text-align: center; margin-bottom: 22px; }
+  h1 { font-size: 1.55rem; font-weight: bold; letter-spacing: .02em; }
+  h1 + .rule { width: 92px; height: 3px; background: rgb(167,201,137);
+               margin: 12px auto 14px; border-radius: 2px; }
+  .sub { color: rgb(167,201,137); font-size: .95rem; }
+  .pills {
+    position: sticky; top: 10px; z-index: 5;
+    display: flex; justify-content: center; gap: 10px;
+    padding: 10px 0 14px; margin-bottom: 14px;
+    background: rgba(16,22,19,.92); backdrop-filter: blur(6px);
+  }
+  .pill {
+    font-family: inherit; font-size: .95rem; cursor: pointer;
+    padding: 8px 26px; border-radius: 999px;
+    border: 1px solid rgba(167,201,137,.5);
+    background: transparent; color: rgb(167,201,137);
+  }
+  .pill.on { background: rgb(167,201,137); color: rgb(16,22,19); font-weight: bold; }
+  .card {
+    background: rgba(167,201,137,.08);
+    border: 1px solid rgba(167,201,137,.35);
+    border-radius: 14px; padding: 20px; margin-bottom: 28px;
+  }
+  .card .label { color: rgb(167,201,137); font-size: .8rem;
+                 text-transform: uppercase; letter-spacing: .12em; margin-bottom: 4px; }
+  .card .name { font-size: 1.15rem; margin-bottom: 2px; }
+  .card .ar { font-family: 'Amiri Quran', serif; direction: rtl;
+              font-size: 1.5rem; line-height: 1.9; opacity: .9; margin-bottom: 10px; }
+  .spoken {
+    background: rgba(240,235,220,.05); border-radius: 10px;
+    padding: 12px 14px; margin: 12px 0 14px;
+    font-size: .95rem; font-style: italic; line-height: 1.6; opacity: .92;
+  }
+  .spoken .k { color: rgb(167,201,137); font-style: normal; font-size: .75rem;
+               text-transform: uppercase; letter-spacing: .1em; display: block;
+               margin-bottom: 2px; }
+  .spoken .k + span { display: block; margin-bottom: 10px; }
+  .spoken .k:last-of-type + span { margin-bottom: 0; }
+  audio { width: 100%; height: 38px; display: block; }
+  .dl { display: inline-block; margin-top: 10px; font-size: .85rem;
+        color: rgb(167,201,137); text-decoration: none;
+        border: 1px solid rgba(167,201,137,.4); border-radius: 999px;
+        padding: 5px 16px; }
+  .dl:hover { background: rgba(167,201,137,.12); }
+  footer { text-align: center; margin-top: 36px; font-size: .82rem;
+           opacity: .55; line-height: 1.7; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Audiobook Credits — Preview</h1>
+  <div class="rule"></div>
+  <div class="sub">The ClearQuran, by Talal Itani · opening &amp; closing credits · two narrators</div>
+</header>
+
+<div class="pills">
+  <button class="pill on" id="pb" onclick="setNarrator('brian')">Brian</button>
+  <button class="pill" id="ps" onclick="setNarrator('sonia')">Sonia</button>
+</div>
+
+<div class="card">
+  <div class="label">Chapter 1 · opening credit · complete chapter</div>
+  <div class="name">1 · The Opening (Al-Fatihah) <span class="who">· read by Brian</span></div>
+  <div class="ar">الفاتحة</div>
+  <div class="spoken">
+    <span class="k">Opening credit — chapter 1 only</span>
+    <span>“The ClearQuran — an English translation of the Quran, by Talal Itani.
+          Read for you by <span class="vn">Brian</span>.”</span>
+    <span class="k">Title line — every chapter</span>
+    <span>“Chapter one. The Opening.”</span>
+  </div>
+  <audio controls preload="none"
+         data-b="chapter-001-brian.mp3" data-s="chapter-001-sonia.mp3"
+         src="chapter-001-brian.mp3"></audio>
+  <a class="dl" id="dl1" href="chapter-001-brian.mp3" download>Download MP3</a>
+</div>
+
+<div class="card">
+  <div class="label">Chapter 114 · closing credit · complete chapter</div>
+  <div class="name">114 · Mankind (An-Nas) <span class="who">· read by Brian</span></div>
+  <div class="ar">الناس</div>
+  <div class="spoken">
+    <span class="k">Title line — every chapter</span>
+    <span>“Chapter one hundred and fourteen. Mankind.”</span>
+    <span class="k">Closing credit — chapter 114 only</span>
+    <span>“The End. The ClearQuran, by Talal Itani, narrated by <span class="vn">Brian</span>
+          using AI text-to-speech, with the author's kind permission.
+          Produced by Awais Mahmood.”</span>
+  </div>
+  <audio controls preload="none"
+         data-b="chapter-114-brian.mp3" data-s="chapter-114-sonia.mp3"
+         src="chapter-114-brian.mp3"></audio>
+  <a class="dl" id="dl2" href="chapter-114-brian.mp3" download>Download MP3</a>
+</div>
+
+<footer>
+  Mastered to audiobook retail specification:<br>
+  44.1 kHz · 192 kbps · −20 LUFS integrated · true peak below −3 dB<br>
+  Full chapters included so the credits can be heard in context.<br>
+  Credits appear on chapters 1 and 114 only; every chapter carries its title line.
+</footer>
+
+<script>
+function setNarrator(n) {
+  const label = (n === 'brian') ? 'Brian' : 'Sonia';
+  document.querySelectorAll('audio').forEach(a => {
+    a.pause();
+    a.src = (n === 'brian') ? a.dataset.b : a.dataset.s;
+  });
+  document.getElementById('dl1').href = 'chapter-001-' + n + '.mp3';
+  document.getElementById('dl2').href = 'chapter-114-' + n + '.mp3';
+  document.querySelectorAll('.who').forEach(e => e.textContent = '· read by ' + label);
+  document.querySelectorAll('.vn').forEach(e => e.textContent = label);
+  document.getElementById('pb').classList.toggle('on', n === 'brian');
+  document.getElementById('ps').classList.toggle('on', n === 'sonia');
+}
+</script>
+</body>
+</html>
