@@ -12,15 +12,28 @@
     font-family: Georgia, 'Times New Roman', serif;
     max-width: 720px; margin: 0 auto; padding: 28px 18px 60px;
   }
-  header { text-align: center; margin-bottom: 30px; }
+  header { text-align: center; margin-bottom: 22px; }
   h1 { font-size: 1.55rem; font-weight: bold; letter-spacing: .02em; }
   h1 + .rule { width: 92px; height: 3px; background: rgb(167,201,137);
                margin: 12px auto 14px; border-radius: 2px; }
   .sub { color: rgb(167,201,137); font-size: .95rem; }
+  .pills {
+    position: sticky; top: 10px; z-index: 5;
+    display: flex; justify-content: center; gap: 10px;
+    padding: 10px 0 14px; margin-bottom: 14px;
+    background: rgba(16,22,19,.92); backdrop-filter: blur(6px);
+  }
+  .pill {
+    font-family: inherit; font-size: .95rem; cursor: pointer;
+    padding: 8px 26px; border-radius: 999px;
+    border: 1px solid rgba(167,201,137,.5);
+    background: transparent; color: rgb(167,201,137);
+  }
+  .pill.on { background: rgb(167,201,137); color: rgb(16,22,19); font-weight: bold; }
   .chapter {
     background: rgba(167,201,137,.08);
     border: 1px solid rgba(167,201,137,.35);
-    border-radius: 14px; padding: 18px 20px; margin-bottom: 34px;
+    border-radius: 14px; padding: 18px 20px; margin-bottom: 30px;
   }
   .chapter .label { color: rgb(167,201,137); font-size: .8rem;
                     text-transform: uppercase; letter-spacing: .12em; margin-bottom: 4px; }
@@ -43,13 +56,20 @@
 <header>
   <h1>Surah Al-Fatihah — Narration Preview</h1>
   <div class="rule"></div>
-  <div class="sub">The ClearQuran, by Talal Itani · read by Brian · retail (audiobook) master</div>
+  <div class="sub">The ClearQuran, by Talal Itani · retail (audiobook) master · two narrators</div>
 </header>
+
+<div class="pills">
+  <button class="pill on" id="pb" onclick="setNarrator('brian')">Brian</button>
+  <button class="pill" id="ps" onclick="setNarrator('sonia')">Sonia</button>
+</div>
 
 <div class="chapter">
   <div class="label">Complete chapter · audiobook style</div>
-  <div class="name">1 · The Opening (Al-Fatihah)</div>
-  <audio controls preload="none" src="surah-001-al-fatihah.mp3"></audio>
+  <div class="name">1 · The Opening (Al-Fatihah) <span id="who">· read by Brian</span></div>
+  <audio controls preload="none" id="chap"
+         data-b="surah-001-al-fatihah.mp3" data-s="surah-001-al-fatihah-sonia.mp3"
+         src="surah-001-al-fatihah.mp3"></audio>
 </div>
 
 <div id="verses"></div>
@@ -106,8 +126,17 @@ for (const v of VERSES) {
     `<div class="num">Verse ${v.n}</div>` +
     `<div class="ar">${v.ar}</div>` +
     `<div class="en">${v.en}</div>` +
-    `<audio controls preload="none" src="v${v.n}.mp3"></audio>`;
+    `<audio controls preload="none" data-b="v${v.n}.mp3" data-s="v${v.n}-sonia.mp3" src="v${v.n}.mp3"></audio>`;
   host.appendChild(d);
+}
+function setNarrator(n) {
+  document.querySelectorAll('audio').forEach(a => {
+    a.pause();
+    a.src = (n === 'brian') ? a.dataset.b : a.dataset.s;
+  });
+  document.getElementById('who').textContent = (n === 'brian') ? '· read by Brian' : '· read by Sonia';
+  document.getElementById('pb').classList.toggle('on', n === 'brian');
+  document.getElementById('ps').classList.toggle('on', n === 'sonia');
 }
 </script>
 </body>
