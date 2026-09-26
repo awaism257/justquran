@@ -138,8 +138,8 @@
   <p class="hint" id="hint"></p>
   <main id="cards"></main>
 
-  <div class="sect">1:6 — alternative takes</div>
-  <p class="sectsub">The distortion at the start of “Guide” lives in the raw recording, so here are three freshly recorded takes of that verse. All treated at Medium-strong, loudness-matched. Pick the cleanest one and it becomes the production file.</p>
+  <div class="sect">The final recipe</div>
+  <p class="sectsub">What the whole Brian set is now being re-recorded with: high-quality source, Medium de-ess, gain-matched. 1:6 gets two candidate takes — A is the production file unless you prefer B.</p>
   <div class="cmp" id="retakes"></div>
 
   <footer>
@@ -290,10 +290,9 @@ VERSES.forEach((v, i) => {
 
 /* 1:6 retake rows */
 const RETAKES = [
-  {file:'v6-medium-strong.mp3', name:'Current take', note:'the one in the surah above'},
-  {file:'retake-1.mp3',         name:'Take 1',       note:'fresh recording, same settings'},
-  {file:'retake-2.mp3',         name:'Take 2',       note:'fresh recording, fractionally slower'},
-  {file:'retake-3.mp3',         name:'Take 3',       note:'fresh recording, higher-quality source'},
+  {file:'final-1-1.mp3',   name:'1:1 — final recipe', note:'high-quality source · Medium'},
+  {file:'final-1-6-a.mp3', name:'1:6 — Take A',       note:'the production file', tag:'in production'},
+  {file:'final-1-6-b.mp3', name:'1:6 — Take B',       note:'alternative take'},
 ];
 const retEl = document.getElementById('retakes');
 RETAKES.forEach(c => {
