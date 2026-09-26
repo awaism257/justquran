@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JustQuran — Narration Preview · Surah Al-Fatihah</title>
+<style>
+  @font-face { font-family: 'Amiri Quran'; src: url('fonts/amiri-quran.ttf'); font-display: swap; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: rgb(16,22,19); color: rgb(240,235,220);
+    font-family: Georgia, 'Times New Roman', serif;
+    max-width: 720px; margin: 0 auto; padding: 28px 18px 60px;
+  }
+  header { text-align: center; margin-bottom: 30px; }
+  h1 { font-size: 1.55rem; font-weight: bold; letter-spacing: .02em; }
+  h1 + .rule { width: 92px; height: 3px; background: rgb(167,201,137);
+               margin: 12px auto 14px; border-radius: 2px; }
+  .sub { color: rgb(167,201,137); font-size: .95rem; }
+  .chapter {
+    background: rgba(167,201,137,.08);
+    border: 1px solid rgba(167,201,137,.35);
+    border-radius: 14px; padding: 18px 20px; margin-bottom: 34px;
+  }
+  .chapter .label { color: rgb(167,201,137); font-size: .8rem;
+                    text-transform: uppercase; letter-spacing: .12em; margin-bottom: 4px; }
+  .chapter .name { font-size: 1.15rem; margin-bottom: 12px; }
+  .verse {
+    background: rgba(240,235,220,.045);
+    border-radius: 14px; padding: 18px 20px; margin-bottom: 16px;
+  }
+  .num { color: rgb(167,201,137); font-size: .8rem;
+         letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+  .ar { font-family: 'Amiri Quran', serif; direction: rtl;
+        font-size: 1.7rem; line-height: 2.1; margin-bottom: 10px; }
+  .en { font-size: 1.02rem; line-height: 1.55; opacity: .92; margin-bottom: 14px; }
+  audio { width: 100%; height: 38px; display: block; }
+  footer { text-align: center; margin-top: 36px; font-size: .82rem;
+           opacity: .55; line-height: 1.7; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Surah Al-Fatihah — Narration Preview</h1>
+  <div class="rule"></div>
+  <div class="sub">The ClearQuran, by Talal Itani · read by Brian · retail (audiobook) master</div>
+</header>
+
+<div class="chapter">
+  <div class="label">Complete chapter · audiobook style</div>
+  <div class="name">1 · The Opening (Al-Fatihah)</div>
+  <audio controls preload="none" src="surah-001-al-fatihah.mp3"></audio>
+</div>
+
+<div id="verses"></div>
+
+<footer>
+  Mastered to audiobook retail specification:<br>
+  44.1 kHz · 192 kbps · −20 LUFS integrated · true peak below −3 dB<br>
+  Verse-by-verse files above; the same recordings in the JustQuran app use a smaller app-sized master.
+</footer>
+
+<script>
+const VERSES = [
+  {
+    "n": 1,
+    "ar": "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ",
+    "en": "In the name of Allah, the Gracious, the Merciful."
+  },
+  {
+    "n": 2,
+    "ar": "اَلْحَمْدُ لِلّٰهِ رَبِّ الْعٰلَمِيْنَ",
+    "en": "Praise be to Allah, Lord of the Worlds."
+  },
+  {
+    "n": 3,
+    "ar": "الرَّحْمٰنِ الرَّحِيْمِ",
+    "en": "The Most Gracious, the Most Merciful."
+  },
+  {
+    "n": 4,
+    "ar": "مٰلِكِ يَوْمِ الدِّيْنِ",
+    "en": "Master of the Day of Judgment."
+  },
+  {
+    "n": 5,
+    "ar": "اِيَّاكَ نَعْبُدُ وَاِيَّاكَ نَسْتَعِيْنُ",
+    "en": "It is You we worship, and upon You we call for help."
+  },
+  {
+    "n": 6,
+    "ar": "اِهْدِنَا الصِّرَاطَ الْمُسْتَقِيْمَ",
+    "en": "Guide us to the straight path."
+  },
+  {
+    "n": 7,
+    "ar": "صِرَاطَ الَّذِيْنَ اَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوْبِ عَلَيْهِمْ وَلَا الضَّا࢜لِّيْنَ",
+    "en": "The path of those You have blessed, not of those against whom there is anger, nor of those who are misguided."
+  }
+];
+const host = document.getElementById('verses');
+for (const v of VERSES) {
+  const d = document.createElement('div');
+  d.className = 'verse';
+  d.innerHTML =
+    `<div class="num">Verse ${v.n}</div>` +
+    `<div class="ar">${v.ar}</div>` +
+    `<div class="en">${v.en}</div>` +
+    `<audio controls preload="none" src="v${v.n}.mp3"></audio>`;
+  host.appendChild(d);
+}
+</script>
+</body>
+</html>
