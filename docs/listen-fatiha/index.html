@@ -24,20 +24,38 @@
     min-height:100vh; padding:0 18px 90px;
   }
   .wrap{max-width:760px;margin:0 auto}
-  header{text-align:center;padding:52px 0 34px}
+  header{text-align:center;padding:52px 0 26px}
   .wordmark{
     font-size:12px; letter-spacing:.42em; text-transform:uppercase;
     color:var(--green); margin-bottom:20px;
   }
   h1{font-size:clamp(26px,5vw,36px); font-weight:bold; letter-spacing:.01em}
   .rule{width:84px;height:2px;background:var(--green);margin:18px auto 20px;border-radius:2px}
-  .sub{color:var(--muted);font-size:14.5px;line-height:1.65;max-width:520px;margin:0 auto}
-  .sect{
-    text-align:center; font-size:13px; letter-spacing:.3em; text-transform:uppercase;
-    color:var(--green); margin:44px 0 8px;
+  .sub{color:var(--muted);font-size:14.5px;line-height:1.65;max-width:540px;margin:0 auto}
+
+  .strengthbar{
+    position:sticky; top:0; z-index:10;
+    background:rgba(16,22,19,.94);
+    padding:16px 0 14px; margin:0 -18px; padding-left:18px; padding-right:18px;
+    border-bottom:1px solid rgba(167,201,137,.12);
+    backdrop-filter:blur(6px);
   }
-  .sectsub{text-align:center;color:var(--muted);font-size:13.5px;line-height:1.6;max-width:540px;margin:0 auto 22px}
-  .controls{text-align:center;margin:30px 0 12px}
+  .strengthbar .lbl{
+    text-align:center; font-size:11px; letter-spacing:.28em; text-transform:uppercase;
+    color:var(--faint); margin-bottom:10px;
+  }
+  .pills{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+  .pill{
+    font-family:var(--serif); font-size:13.5px; letter-spacing:.04em;
+    background:transparent; color:var(--muted);
+    border:1px solid var(--line); border-radius:999px;
+    padding:8px 18px; cursor:pointer; transition:all .25s ease;
+  }
+  .pill:hover{color:var(--cream);border-color:var(--green)}
+  .pill.on{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:bold}
+  .pill .tag{font-size:10.5px;opacity:.75;margin-left:4px}
+
+  .controls{text-align:center;margin:26px 0 12px}
   .playall{
     font-family:var(--serif); font-size:15px; letter-spacing:.06em;
     background:transparent; color:var(--green);
@@ -47,6 +65,8 @@
   .playall:hover{background:rgba(167,201,137,.1)}
   .playall.on{background:var(--green);color:var(--bg)}
   .hint{text-align:center;color:var(--faint);font-size:12.5px;margin-bottom:26px;letter-spacing:.03em}
+  .hint b{color:var(--green);font-weight:bold}
+
   .card{
     background:var(--card); border:1px solid var(--line);
     border-radius:14px; padding:26px 26px 22px; margin-bottom:20px;
@@ -70,11 +90,6 @@
     font-family:'Noto Nastaliq', serif; direction:rtl; text-align:right;
     font-size:15px; line-height:2.3; color:var(--muted); margin-bottom:20px;
   }
-  .cmp .card{padding:18px 22px 16px;margin-bottom:12px}
-  .cmplabel{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
-  .cmpname{font-size:15px;font-weight:bold}
-  .cmpnote{font-size:12px;color:var(--faint);letter-spacing:.03em}
-  .cmpname .tag{color:var(--green);font-size:12px;font-weight:normal;margin-left:8px;letter-spacing:.05em}
   .player{display:flex;align-items:center;gap:14px}
   .pbtn{
     flex:none; width:44px;height:44px;border-radius:50%;
@@ -98,8 +113,8 @@
   }
   @media (max-width:560px){
     .card{padding:20px 18px 18px}
-    .cmp .card{padding:16px 16px 14px}
     .time{min-width:76px}
+    .pill{padding:7px 14px;font-size:12.5px}
   }
 </style>
 </head>
@@ -109,18 +124,18 @@
     <div class="wordmark">JustQuran</div>
     <h1>Al-Fatihah — Listening Test</h1>
     <div class="rule"></div>
-    <p class="sub">The opening surah, complete — all seven verses in Brian's final production audio. Verse 1 at four de-ess strengths first, then the full surah. Allah edition.</p>
+    <p class="sub">The complete surah in Brian's voice, at four de-ess strengths. Pick a strength below — every verse switches — then play the surah through as a listener would hear it.</p>
   </header>
 
-  <div class="sect">1:1 — de-ess strength</div>
-  <p class="sectsub">Same recording, same loudness — only the de-essing changes. “Firm” is what the app currently ships; “Original” has no de-essing at all.</p>
-  <div class="cmp" id="cmp"></div>
+  <div class="strengthbar">
+    <div class="lbl">De-ess strength</div>
+    <div class="pills" id="pills"></div>
+  </div>
 
-  <div class="sect">The full surah</div>
   <div class="controls">
     <button class="playall" id="playall">Play all seven verses</button>
   </div>
-  <p class="hint">Tap any verse to play it on its own, or play all to hear the surah as a listener would.</p>
+  <p class="hint" id="hint"></p>
   <main id="cards"></main>
   <footer>
     Arabic text: Tanzil Project (tanzil.net) · English: Talal Itani, ClearQuran.com (CC BY-ND 4.0, unmodified)<br>
@@ -129,39 +144,40 @@
 </div>
 
 <script>
-const CMP = [
-  {file:'cmp-original.mp3',      name:'Original',      note:'no de-essing'},
-  {file:'cmp-medium.mp3',        name:'Medium',        note:'gentle'},
-  {file:'cmp-medium-strong.mp3', name:'Medium-strong', note:'between the two'},
-  {file:'cmp-firm.mp3',          name:'Firm',          note:'current', tag:'in the app now'},
+const STRENGTHS = [
+  {id:'original',      name:'Original',      note:'no de-essing'},
+  {id:'medium',        name:'Medium',        note:'gentle'},
+  {id:'medium-strong', name:'Medium-strong', note:'between the two'},
+  {id:'firm',          name:'Firm',          note:'in the app now'},
 ];
+let strength = 'firm';
 
 const VERSES = [
-  {file:'v1.mp3', ref:'1:1',
+  {n:1, ref:'1:1',
    ar:'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ',
    en:'In the name of Allah, the Gracious, the Merciful.',
    ur:'شروع اللہ کا نام لے کر جو بڑا مہربان نہایت رحم والا ہے'},
-  {file:'v2.mp3', ref:'1:2',
+  {n:2, ref:'1:2',
    ar:'اَلْحَمْدُ لِلّٰهِ رَبِّ الْعٰلَمِيْنَ',
    en:'Praise be to Allah, Lord of the Worlds.',
    ur:'سب طرح کی تعریف خدا ہی کو سزاوار ہے جو تمام مخلوقات کا پروردگار ہے'},
-  {file:'v3.mp3', ref:'1:3',
+  {n:3, ref:'1:3',
    ar:'الرَّحْمٰنِ الرَّحِيْمِ',
    en:'The Most Gracious, the Most Merciful.',
    ur:'بڑا مہربان نہایت رحم والا'},
-  {file:'v4.mp3', ref:'1:4',
+  {n:4, ref:'1:4',
    ar:'مٰلِكِ يَوْمِ الدِّيْنِ',
    en:'Master of the Day of Judgment.',
    ur:'انصاف کے دن کا حاکم۔'},
-  {file:'v5.mp3', ref:'1:5',
+  {n:5, ref:'1:5',
    ar:'اِيَّاكَ نَعْبُدُ وَاِيَّاكَ نَسْتَعِيْنُ',
    en:'It is You we worship, and upon You we call for help.',
    ur:'(اے پروردگار) ہم تیری ہی عبادت کرتے ہیں اور تجھی سے مدد مانگتے ہیں۔'},
-  {file:'v6.mp3', ref:'1:6',
+  {n:6, ref:'1:6',
    ar:'اِهْدِنَا الصِّرَاطَ الْمُسْتَقِيْمَ',
    en:'Guide us to the straight path.',
    ur:'ہمیں سیدھے رستے چلا۔'},
-  {file:'v7.mp3', ref:'1:7',
+  {n:7, ref:'1:7',
    ar:'صِرَاطَ الَّذِيْنَ اَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوْبِ عَلَيْهِمْ وَلَا الضَّا࢜لِّيْنَ',
    en:'The path of those You have blessed, not of those against whom there is anger, nor of those who are misguided.',
    ur:'ان لوگوں کے رستے جن پر تو اپنا فضل و کرم کرتا رہا۔ نہ ان کے جن پر غضب ہوتا رہا اور نہ گمراہوں کے'}
@@ -171,23 +187,26 @@ const players = [];
 let current = null;
 let playAll = false;
 const playAllBtn = document.getElementById('playall');
+const hint = document.getElementById('hint');
 
 function fmt(t){
   if(!isFinite(t)) return '0:00';
   const m = Math.floor(t/60), s = Math.floor(t%60);
   return m + ':' + String(s).padStart(2,'0');
 }
+function fileFor(n){ return `v${n}-${strength}.mp3`; }
+function strengthName(){ return STRENGTHS.find(s => s.id === strength).name; }
 
 const BTN_SVG = `
   <svg class="icon-play" viewBox="0 0 16 16"><path d="M3.5 1.7v12.6c0 .8.9 1.3 1.6.9l9.4-6.3c.6-.4.6-1.4 0-1.8L5.1.8c-.7-.4-1.6.1-1.6.9z"/></svg>
   <svg class="icon-pause" viewBox="0 0 16 16"><path d="M3 2h3.4v12H3zM9.6 2H13v12H9.6z"/></svg>`;
 
-function wirePlayer(root, file, card, verseIdx){
+function wirePlayer(root, card, verseIdx){
   root.innerHTML = `
     <button class="pbtn" aria-label="Play">${BTN_SVG}</button>
     <div class="track"><div class="rail"><div class="fill"></div></div></div>
-    <div class="time">0:00 / 0:00</div>
-    <audio preload="metadata" src="${file}"></audio>`;
+    <div class="time">–:– / –:–</div>
+    <audio preload="none"></audio>`;
   const p = {
     audio: root.querySelector('audio'),
     btn: root.querySelector('.pbtn'),
@@ -211,8 +230,8 @@ function wirePlayer(root, file, card, verseIdx){
   p.audio.addEventListener('ended', () => {
     deactivate(p);
     p.audio.currentTime = 0; p.fill.style.width = '0%';
-    if (playAll && p.verseIdx >= 0 && p.verseIdx + 1 < VERSES.length) {
-      activate(players.find(q => q.verseIdx === p.verseIdx + 1), true);
+    if (playAll && p.verseIdx + 1 < VERSES.length) {
+      activate(players[p.verseIdx + 1], true);
     } else if (playAll) { playAll = false; syncPlayAllBtn(); }
   });
   root.querySelector('.track').addEventListener('click', (e) => {
@@ -245,21 +264,6 @@ function syncPlayAllBtn(){
   playAllBtn.textContent = playAll ? 'Stop' : 'Play all seven verses';
 }
 
-/* comparison rows */
-const cmpEl = document.getElementById('cmp');
-CMP.forEach(c => {
-  const card = document.createElement('section');
-  card.className = 'card';
-  card.innerHTML = `
-    <div class="cmplabel">
-      <div class="cmpname">${c.name}${c.tag ? `<span class="tag">· ${c.tag}</span>` : ''}</div>
-      <div class="cmpnote">${c.note}</div>
-    </div>
-    <div class="player"></div>`;
-  cmpEl.appendChild(card);
-  wirePlayer(card.querySelector('.player'), c.file, card, -1);
-});
-
 /* verse cards */
 const cardsEl = document.getElementById('cards');
 VERSES.forEach((v, i) => {
@@ -275,12 +279,46 @@ VERSES.forEach((v, i) => {
     <div class="ur">${v.ur}</div>
     <div class="player"></div>`;
   cardsEl.appendChild(card);
-  wirePlayer(card.querySelector('.player'), v.file, card, i);
+  const p = wirePlayer(card.querySelector('.player'), card, i);
+  p.verseNum = v.n;
 });
+
+/* strength pills */
+const pillsEl = document.getElementById('pills');
+STRENGTHS.forEach(s => {
+  const b = document.createElement('button');
+  b.className = 'pill' + (s.id === strength ? ' on' : '');
+  b.innerHTML = s.name + (s.id === 'firm' ? '<span class="tag">current</span>' : '');
+  b.title = s.note;
+  b.addEventListener('click', () => setStrength(s.id));
+  b.dataset.sid = s.id;
+  pillsEl.appendChild(b);
+});
+
+function setStrength(id){
+  if (id === strength) return;
+  stopAll();
+  strength = id;
+  pillsEl.querySelectorAll('.pill').forEach(b => b.classList.toggle('on', b.dataset.sid === id));
+  players.forEach(p => {
+    p.audio.src = fileFor(p.verseNum);
+    p.audio.load();
+    p.fill.style.width = '0%';
+    p.time.textContent = '–:– / –:–';
+  });
+  syncHint();
+}
+function syncHint(){
+  hint.innerHTML = `Hearing: <b>${strengthName()}</b> — tap any verse, or play all seven back to back.`;
+}
+
+/* initial load */
+players.forEach(p => { p.audio.src = fileFor(p.verseNum); p.audio.load(); });
+syncHint();
 
 playAllBtn.addEventListener('click', () => {
   if (playAll) { stopAll(); }
-  else { playAll = true; syncPlayAllBtn(); activate(players.find(q => q.verseIdx === 0), true); }
+  else { playAll = true; syncPlayAllBtn(); activate(players[0], true); }
 });
 </script>
 </body>
