@@ -230,7 +230,7 @@ function wirePlayer(root, card, verseIdx){
   p.audio.addEventListener('ended', () => {
     deactivate(p);
     p.audio.currentTime = 0; p.fill.style.width = '0%';
-    if (playAll && p.verseIdx + 1 < VERSES.length) {
+    if (playAll && p.verseIdx >= 0 && p.verseIdx + 1 < VERSES.length) {
       activate(players[p.verseIdx + 1], true);
     } else if (playAll) { playAll = false; syncPlayAllBtn(); }
   });
@@ -283,6 +283,31 @@ VERSES.forEach((v, i) => {
   p.verseNum = v.n;
 });
 
+/* 1:6 retake rows */
+const RETAKES = [
+  {file:'v6-medium-strong.mp3', name:'Current take', note:'the one in the surah above'},
+  {file:'retake-1.mp3',         name:'Take 1',       note:'fresh recording, same settings'},
+  {file:'retake-2.mp3',         name:'Take 2',       note:'fresh recording, fractionally slower'},
+  {file:'retake-3.mp3',         name:'Take 3',       note:'fresh recording, higher-quality source'},
+];
+const retEl = document.getElementById('retakes');
+RETAKES.forEach(c => {
+  const card = document.createElement('section');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="cmplabel">
+      <div class="cmpname">${c.name}</div>
+      <div class="cmpnote">${c.note}</div>
+    </div>
+    <div class="player"></div>`;
+  retEl.appendChild(card);
+  const p = wirePlayer(card.querySelector('.player'), card, -1);
+  p.verseNum = 6;
+  p.fixedFile = c.file;
+  p.audio.src = c.file;
+  p.audio.load();
+});
+
 /* strength pills */
 const pillsEl = document.getElementById('pills');
 STRENGTHS.forEach(s => {
@@ -301,6 +326,7 @@ function setStrength(id){
   strength = id;
   pillsEl.querySelectorAll('.pill').forEach(b => b.classList.toggle('on', b.dataset.sid === id));
   players.forEach(p => {
+    if (p.fixedFile) return;   // retake rows keep their own file
     p.audio.src = fileFor(p.verseNum);
     p.audio.load();
     p.fill.style.width = '0%';
