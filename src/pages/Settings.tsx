@@ -315,43 +315,6 @@ export default function Settings() {
           </Link>
         </SectionCard>
 
-        {/* Translation narration */}
-        <SectionCard>
-          <CardTitle>Translation narration</CardTitle>
-          <div className="flex items-center justify-between py-3">
-            <span style={{ fontSize: 14 }}>English narration voice</span>
-            <span className="flex gap-2">
-              <button
-                type="button"
-                className={settings.transVoice === 'brian' ? 'chip on' : 'chip'}
-                onClick={() => set({ transVoice: 'brian' })}
-              >
-                Brian
-              </button>
-              <button
-                type="button"
-                className={settings.transVoice === 'sonia' ? 'chip on' : 'chip'}
-                onClick={() => set({ transVoice: 'sonia' })}
-              >
-                Sonia
-              </button>
-            </span>
-          </div>
-          <RowDivider />
-          <Link
-            to="/book"
-            className="flex items-center justify-between py-3"
-            style={{ color: 'inherit', textDecoration: 'none' }}
-          >
-            <span style={{ fontSize: 14 }}>Narration playback &amp; downloads</span>
-            <ChevronRight size={18} className="chev" style={{ color: 'var(--muted)' }} />
-          </Link>
-          <div style={{ fontSize: 12, color: 'var(--muted)', paddingBottom: 10 }}>
-            Chapters read aloud in English (ClearQuran, with the author's permission) and Urdu
-            (Jalandhari, public domain) using AI text-to-speech.
-          </div>
-        </SectionCard>
-
         {/* Theme */}
         <SectionCard>
           <CardTitle>Theme</CardTitle>

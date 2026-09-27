@@ -3,6 +3,7 @@ import { Check, ChevronDown, Loader2, Trash2, X } from 'lucide-react';
 import BackBar from '@/components/BackBar';
 import { AUDIO_CACHE, verseUrl } from '@/lib/audio';
 import { loadBundle, type Bundle } from '@/lib/data';
+import { NarrationSetDownloads } from '@/components/NarrationDownloads';
 
 type Status = 'none' | 'downloading' | 'done';
 
@@ -208,9 +209,20 @@ export default function Recitation() {
 
   return (
     <div>
-      <BackBar title="Recitation" meta="Al-Hussary · Murattal" />
+      <BackBar title="Download audio" meta="Offline listening" />
 
       <div className="px-4 pt-4 pb-6 flex flex-col gap-3">
+        {/* Translation narration (AI TTS): English Brian + Urdu Jalandhari */}
+        {bundle && <NarrationSetDownloads lang="en" bundle={bundle} />}
+        {bundle && <NarrationSetDownloads lang="ur" bundle={bundle} />}
+
+        <div
+          className="px-2 pt-2"
+          style={{ fontSize: 11.5, color: 'var(--muted)', letterSpacing: '0.14em', textTransform: 'uppercase' }}
+        >
+          Recitation · Al-Hussary
+        </div>
+
         {/* Download all */}
         <button
           className="card w-full text-left"

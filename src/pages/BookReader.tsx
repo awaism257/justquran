@@ -381,21 +381,6 @@ export default function BookReader() {
         }
         actions={
           <span className="flex items-center gap-1">
-            {lang === 'en' && (
-              <button
-                type="button"
-                className="chip"
-                style={{ padding: '5px 10px', fontSize: 12 }}
-                aria-label="Switch narration voice"
-                title="Narration voice"
-                onClick={() => {
-                  stopPlayback();
-                  set({ transVoice: settings.transVoice === 'brian' ? 'sonia' : 'brian' });
-                }}
-              >
-                {settings.transVoice === 'brian' ? 'Brian' : 'Sonia'}
-              </button>
-            )}
             <button
               type="button"
               className="icon-btn"
