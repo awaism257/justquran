@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'justquran-v125';
+const CACHE_VERSION = 'justquran-v126';
 
 /*
  * ⚠️ PROJECT RULE — READ BEFORE EDITING ⚠️
@@ -25,6 +25,8 @@ const PRECACHE_URLS = [
   'fonts/nastaliq.ttf',
   'fonts/noto-naskh.ttf',
   'data/quran-bundle.json',
+  'data/surah-titles.json',
+  'data/translation-audio.json',
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/icon-maskable-512.png',
@@ -46,7 +48,10 @@ self.addEventListener('activate', (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== APP_CACHE && key !== AUDIO_CACHE)
+            .filter(
+              (key) =>
+                key !== APP_CACHE && key !== AUDIO_CACHE && key !== TRANS_AUDIO_CACHE,
+            )
             .map((key) => caches.delete(key)),
         ),
       )
@@ -77,6 +82,14 @@ self.addEventListener('fetch', (event) => {
   // justquran-audio-v1 cache for downloaded surahs. Anything streamed while
   // online is stored in the app cache for future offline plays.
   if (url.origin === 'https://everyayah.com') {
+    event.respondWith(cacheFirstAcrossCaches(request));
+    return;
+  }
+
+  // Translation narration audio (Cloudflare R2): cache-first. The app writes
+  // user downloads to justquran-trans-audio-v1; streamed files are kept for
+  // offline replay.
+  if (url.origin === 'https://pub-fafe102872f84521ab2a82e3dc2eeab0.r2.dev') {
     event.respondWith(cacheFirstAcrossCaches(request));
     return;
   }

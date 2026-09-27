@@ -1,35 +1,61 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router';
+import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import BackBar from '@/components/BackBar';
 import VersePopup from '@/components/VersePopup';
-import { getSurahMeta, getSurahVerses, loadBundle } from '@/lib/data';
-import type { Bundle, Verse } from '@/lib/data';
+import SurahPlayer from '@/components/SurahPlayer';
+import { bookTitle, getSurahMeta, getSurahVerses, loadBundle, loadSurahTitles } from '@/lib/data';
+import type { Bundle, SurahTitles, Verse } from '@/lib/data';
 import { setLastRead } from '@/lib/bookmarks';
 import { useSettings } from '@/lib/settings';
+import {
+  bismillahUrl,
+  playTranslationFile,
+  setIdFor,
+  stopTranslation,
+  translationVerseUrl,
+} from '@/lib/translationAudio';
+import type { PlayHandle } from '@/lib/translationAudio';
 
 /** Horizontal space around each text column: column-width = page width − GAP,
     column-gap = GAP, so every page gets GAP/2 of air on each side. */
 const GAP = 48;
+
+/** One item in the narration sequence: the spoken Bismillah (where the print
+    has one) followed by every verse of the chapter. */
+interface SeqItem {
+  url: Promise<string>;
+  verseIdx: number | null; // index into verses[], null = Bismillah
+  labelVerse: Verse; // pseudo-verse for the player card label
+}
 
 /**
  * Book mode (v114): one surah's translation as flowing prose, paginated with
  * CSS multi-columns (one viewport-width column per page). Pages are turned by
  * translating the strip — never by scrolling (RTL scrollLeft is inconsistent
  * across browsers).
+ *
+ * v126: narration playback — the chapter read aloud in the same translation
+ * (AI text-to-speech), streamed per verse from our own bucket, cached for
+ * offline. Pages turn automatically to keep the narrated verse on screen.
  */
 export default function BookReader() {
   const params = useParams();
+  const navigate = useNavigate();
   const lang: 'en' | 'ur' = params.lang === 'ur' ? 'ur' : 'en';
   const n = Math.min(114, Math.max(1, parseInt(params.n ?? '1', 10) || 1));
-  const { settings } = useSettings();
+  const { settings, set } = useSettings();
   const [bundle, setBundle] = useState<Bundle | null>(null);
+  const [titles, setTitles] = useState<SurahTitles | null>(null);
   const [popupIdx, setPopupIdx] = useState<number | null>(null);
 
   useEffect(() => {
     let live = true;
     loadBundle()
       .then((b) => live && setBundle(b))
+      .catch(() => {});
+    loadSurahTitles()
+      .then((t) => live && setTitles(t))
       .catch(() => {});
     return () => {
       live = false;
@@ -85,10 +111,172 @@ export default function BookReader() {
     setPageIdx((i) => Math.min(i, pageCount - 1));
   }, [pageCount]);
 
-  // New surah / language → back to the first page, close any popup.
+  // ---- narration playback ----
+  const setId = setIdFor(lang, settings.transVoice);
+  const [seq, setSeq] = useState<SeqItem[]>([]);
+  const [playIdx, setPlayIdx] = useState(0); // index into seq
+  const [playing, setPlaying] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const handleRef = useRef<PlayHandle | null>(null);
+  const playIdxRef = useRef(0);
+  const seqRef = useRef<SeqItem[]>([]);
+  const autoRef = useRef(settings.audioAutoAdvance);
+  autoRef.current = settings.audioAutoAdvance;
+  const pendingAutoRef = useRef(false); // cross-surah auto-continue
+
+  // Build the narration sequence when chapter/voice/language changes.
+  useEffect(() => {
+    if (!verses.length) return;
+    let live = true;
+    const items: SeqItem[] = [];
+    const push = async () => {
+      const bUrl = await bismillahUrl(setId, n);
+      if (bUrl) {
+        items.push({
+          url: Promise.resolve(bUrl),
+          verseIdx: null,
+          labelVerse: { s: n, v: 0, ar: '', en: '', tr: '' },
+        });
+      }
+      for (let i = 0; i < verses.length; i++) {
+        const v = verses[i];
+        items.push({ url: translationVerseUrl(setId, n, v.v), verseIdx: i, labelVerse: v });
+      }
+      if (live) {
+        seqRef.current = items;
+        setSeq(items);
+      }
+    };
+    void push();
+    return () => {
+      live = false;
+    };
+  }, [verses, setId, n]);
+
+  /** Turn pages until the given verse marker sits inside the visible page. */
+  const ensureVerseVisible = useCallback(
+    (verseIdx: number) => {
+      const vp = vpRef.current;
+      const strip = stripRef.current;
+      const el = markRefs.current[verseIdx];
+      if (!vp || !strip || !el || vw <= 0) return;
+      const r = el.getBoundingClientRect();
+      const vr = vp.getBoundingClientRect();
+      if (r.left >= vr.left - 1 && r.right <= vr.right + 1) return; // already visible
+      // stripRect.left carries the current transform, so this difference is
+      // the marker's true, transform-independent position inside the strip.
+      const d = r.left - strip.getBoundingClientRect().left;
+      const target =
+        lang === 'ur'
+          ? Math.floor((strip.scrollWidth - d) / vw) // rtl: pages run right→left
+          : Math.floor(d / vw);
+      setPageIdx(Math.max(0, Math.min(pageCount - 1, target)));
+    },
+    [lang, vw, pageCount],
+  );
+
+  const playItem = useCallback(
+    (idx: number) => {
+      const items = seqRef.current;
+      const item = items[idx];
+      if (!item) return;
+      playIdxRef.current = idx;
+      setPlayIdx(idx);
+      setPlaying(true);
+      setPaused(false);
+      setProgress(0);
+      if (item.verseIdx !== null) ensureVerseVisible(item.verseIdx);
+      const h = playTranslationFile(
+        item.url,
+        (reason) => {
+          handleRef.current = null;
+          if (reason === 'ended') {
+            const next = playIdxRef.current + 1;
+            if (next < seqRef.current.length) {
+              playItem(next);
+            } else {
+              // Chapter finished. AUTO continues into the next chapter.
+              setPlaying(false);
+              setPaused(false);
+              if (autoRef.current && n < 114) {
+                pendingAutoRef.current = true;
+                navigate(`/book/${lang}/${n + 1}`);
+              }
+            }
+          } else {
+            setPlaying(false);
+            setPaused(false);
+          }
+        },
+        (pct) => setProgress(pct),
+      );
+      handleRef.current = h;
+    },
+    [ensureVerseVisible, navigate, lang, n],
+  );
+
+  const stopPlayback = useCallback(() => {
+    handleRef.current?.stop();
+    handleRef.current = null;
+    stopTranslation();
+    setPlaying(false);
+    setPaused(false);
+    setProgress(0);
+  }, []);
+
+  // Cross-surah auto-continue: start the new chapter once its sequence exists.
+  useEffect(() => {
+    if (pendingAutoRef.current && seq.length) {
+      pendingAutoRef.current = false;
+      playIdxRef.current = 0;
+      setPlayIdx(0);
+      playItem(0);
+    }
+  }, [seq, playItem]);
+
+  // Leaving the chapter / changing voice stops the narration.
+  useEffect(() => {
+    return () => {
+      handleRef.current?.stop();
+      handleRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [n, lang, setId]);
+
+  const togglePlay = useCallback(() => {
+    if (playing && !paused) {
+      handleRef.current?.audio.pause();
+      setPaused(true);
+    } else if (playing && paused) {
+      void handleRef.current?.audio.play().catch(() => {});
+      setPaused(false);
+    } else {
+      playItem(playIdxRef.current);
+    }
+  }, [playing, paused, playItem]);
+
+  const stepItem = useCallback(
+    (delta: number) => {
+      const items = seqRef.current;
+      const next = Math.max(0, Math.min(items.length - 1, playIdxRef.current + delta));
+      if (playing || paused) playItem(next);
+      else {
+        playIdxRef.current = next;
+        setPlayIdx(next);
+        const it = items[next];
+        if (it?.verseIdx !== null && it) ensureVerseVisible(it.verseIdx);
+      }
+    },
+    [playing, paused, playItem, ensureVerseVisible],
+  );
+
+  // New surah / language → back to the first page, close any popup, stop audio.
   useEffect(() => {
     setPageIdx(0);
     setPopupIdx(null);
+    playIdxRef.current = 0;
+    setPlayIdx(0);
   }, [n, lang]);
 
   const nextPage = useCallback(
@@ -179,11 +367,46 @@ export default function BookReader() {
   // strip slides right (positive) to reach later pages.
   const offset = pageIdx * vw * (lang === 'ur' ? 1 : -1);
 
+  const chapterTitle = surah ? bookTitle(titles, lang, surah) : `Surah ${n}`;
+  const seqItem = seq[playIdx];
+
   return (
     <div className="tiles" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <BackBar
-        title={surah ? `${n}. ${surah.name_en}` : `Surah ${n}`}
-        meta={`Page ${pageIdx + 1} of ${pageCount} · ${lang === 'en' ? 'English translation' : 'Urdu translation'}`}
+        title={`${n}. ${chapterTitle}`}
+        titleStyle={
+          lang === 'ur'
+            ? { fontFamily: "'Noto Nastaliq Urdu', serif", direction: 'rtl' }
+            : undefined
+        }
+        actions={
+          <span className="flex items-center gap-1">
+            {lang === 'en' && (
+              <button
+                type="button"
+                className="chip"
+                style={{ padding: '5px 10px', fontSize: 12 }}
+                aria-label="Switch narration voice"
+                title="Narration voice"
+                onClick={() => {
+                  stopPlayback();
+                  set({ transVoice: settings.transVoice === 'brian' ? 'sonia' : 'brian' });
+                }}
+              >
+                {settings.transVoice === 'brian' ? 'Brian' : 'Sonia'}
+              </button>
+            )}
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label={playing ? 'Stop narration' : 'Listen to this chapter'}
+              title={playing ? 'Stop narration' : 'Listen to this chapter'}
+              onClick={() => (playing ? stopPlayback() : playItem(playIdxRef.current))}
+            >
+              <Play size={17} fill={playing ? 'currentColor' : 'none'} />
+            </button>
+          </span>
+        }
       />
       <div
         className="px-4 pt-2"
@@ -235,6 +458,11 @@ export default function BookReader() {
                       lpFired.current = false;
                     }
                   }}
+                  style={
+                    playing && seqItem?.verseIdx === i
+                      ? { color: 'var(--green)', transition: 'color 0.3s ease' }
+                      : { transition: 'color 0.3s ease' }
+                  }
                 >
                   {lang === 'en' ? v.en : (v.ur ?? '')}{' '}
                   <button
@@ -275,7 +503,10 @@ export default function BookReader() {
         </div>
 
         {/* Footer pager: English › = next; Urdu ‹ = next (mushaf convention). */}
-        <nav className="pager" style={{ padding: '10px 0 16px' }}>
+        <nav
+          className="pager"
+          style={{ padding: '10px 0 16px', paddingBottom: playing ? 110 : 16 }}
+        >
           {(lang === 'ur' ? pageIdx < pageCount - 1 : pageIdx > 0) ? (
             <button
               type="button"
@@ -303,6 +534,22 @@ export default function BookReader() {
           )}
         </nav>
       </div>
+
+      {playing && seqItem && (
+        <SurahPlayer
+          verse={seqItem.labelVerse}
+          playing={!paused}
+          progress={progress}
+          hasPrev={playIdx > 0}
+          hasNext={playIdx < seq.length - 1}
+          auto={settings.audioAutoAdvance}
+          onToggleAuto={() => set({ audioAutoAdvance: !settings.audioAutoAdvance })}
+          onTogglePlay={togglePlay}
+          onPrev={() => stepItem(-1)}
+          onNext={() => stepItem(1)}
+          onStop={stopPlayback}
+        />
+      )}
 
       {popupVerse && popupIdx !== null && (
         <VersePopup

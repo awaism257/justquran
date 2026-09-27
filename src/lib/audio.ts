@@ -1,5 +1,7 @@
 // Al-Hussary (Murattal) per-verse audio via everyayah.com.
 
+import { registerStopper, stopAllAudio } from '@/lib/audioBus';
+
 export const AUDIO_BASE = 'https://everyayah.com/data/Husary_64kbps';
 /** Mirror of the same everyayah files, tried once if the primary host fails. */
 const AUDIO_BASE_FALLBACK = 'https://mirrors.quranicaudio.com/everyayah/Husary_64kbps';
@@ -48,7 +50,8 @@ export function playVerse(
   onEnd?: (reason?: EndReason) => void,
   onProgress?: (pct: number) => void,
 ): PlayHandle {
-  stopAudio();
+  // Silence any other audio source (translation narration) before playing.
+  stopAllAudio();
   const url = verseUrl(s, v);
   const audio = new Audio();
   current = audio;
@@ -155,6 +158,10 @@ export function stopAudio() {
 export function isPlaying(): boolean {
   return !!current;
 }
+
+// Starting recitation anywhere in the app silences translation narration
+// (and vice versa) — only one audio source plays at a time.
+registerStopper(stopAudio);
 
 // ---- Offline cache (Cache Storage) ----
 

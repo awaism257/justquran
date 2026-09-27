@@ -135,6 +135,39 @@ export function getSurahs(b: Bundle): SurahMeta[] {
   return b.surahs;
 }
 
+// ---- Surah titles as printed by each translation's own source ----
+// en: Talal Itani's ClearQuran chapter titles (official TOC).
+// ur: Fateh Muhammad Jalandhari's printed surah headings (public domain).
+// Used by the translation books so each book's chapter names match its source.
+
+export interface SurahTitles {
+  en: Record<string, string>;
+  ur: Record<string, string>;
+}
+
+let titlesPromise: Promise<SurahTitles> | null = null;
+
+export function loadSurahTitles(): Promise<SurahTitles> {
+  if (!titlesPromise) {
+    titlesPromise = fetch(`${import.meta.env.BASE_URL}data/surah-titles.json`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`Failed to load surah titles: ${r.status}`);
+        return r.json() as Promise<SurahTitles>;
+      })
+      .catch((e) => {
+        titlesPromise = null; // allow retry
+        throw e;
+      });
+  }
+  return titlesPromise;
+}
+
+/** Source-matched chapter title for the translation books, with fallback. */
+export function bookTitle(titles: SurahTitles | null, lang: 'en' | 'ur', s: SurahMeta): string {
+  const t = titles?.[lang]?.[String(s.n)];
+  return t && t.trim() ? t : s.name_en;
+}
+
 export function getSurahMeta(b: Bundle, n: number): SurahMeta | undefined {
   return b.surahs.find((s) => s.n === n);
 }

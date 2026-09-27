@@ -10,10 +10,12 @@ interface BackBarProps {
   home?: boolean;
   /** Optional extra buttons rendered at the far right of the bar. */
   actions?: ReactNode;
+  /** Optional inline style for the title (e.g. RTL + Nastaliq for Urdu book headings). */
+  titleStyle?: React.CSSProperties;
 }
 
 /** Sub-screen header: ← back (or ⌂ home), title, right meta, optional actions, green divider below. */
-export default function BackBar({ title, meta, onBack, home, actions }: BackBarProps) {
+export default function BackBar({ title, meta, onBack, home, actions, titleStyle }: BackBarProps) {
   const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-40" style={{ background: 'var(--chrome)' }}>
@@ -25,7 +27,9 @@ export default function BackBar({ title, meta, onBack, home, actions }: BackBarP
         >
           {home ? <Home size={18} /> : <ArrowLeft size={18} />}
         </button>
-        <div className="backbar-title">{title}</div>
+        <div className="backbar-title" style={titleStyle}>
+          {title}
+        </div>
         {meta ? <div className="backbar-meta">{meta}</div> : null}
         {actions}
       </div>

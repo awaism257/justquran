@@ -34,6 +34,9 @@ export interface Settings {
    * restores it precisely (beta feedback: leaving used to switch ALL
    * translations back on). Absent until the user first enters mushaf. */
   preMushaf?: { en: boolean; ur: boolean; tr: boolean; verseByVerse: boolean };
+  /** v126: English narration voice for Book mode ('brian' | 'sonia'). Urdu has
+   * a single voice, so this only applies to the English set. */
+  transVoice: 'brian' | 'sonia';
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -47,6 +50,7 @@ export const DEFAULT_SETTINGS: Settings = {
   alwaysCreamPage: false,
   audioAutoAdvance: false,
   mushafPaged: false,
+  transVoice: 'brian',
 };
 
 const LS_KEY = 'jq-settings';

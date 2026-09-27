@@ -84,6 +84,10 @@ export default function About() {
           />
           <CreditRow label="Transliteration" value="Tanzil Project (tanzil.net)" />
           <CreditRow label="Recitation" value="Sheikh Mahmoud Khalil Al-Hussary (Murattal)" />
+          <CreditRow
+            label="Narration"
+            value="English & Urdu chapters read by AI text-to-speech — ClearQuran narration with the author's kind permission"
+          />
           <CreditRow label="Hosting" value="Netlify — Open Source plan (netlify.com)" />
           <CreditRow label="Source code" value="Open source — MIT License (GitHub)" />
         </Card>
