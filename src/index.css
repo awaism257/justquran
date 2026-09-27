@@ -51,7 +51,7 @@
     --divider: var(--green);
     --vc-ar: var(--cream);
     --vc-en: rgba(240, 235, 220, 0.85);
-    --vc-ur: rgb(228, 204, 148);
+    --vc-ur: rgba(240, 235, 220, 0.85); /* same as --vc-en: highlight stands out */
     --vc-tr: rgba(240, 235, 220, 0.4);
     --player-shadow: 0 -8px 30px rgba(0, 0, 0, 0.45);
 
@@ -76,7 +76,7 @@
     --line: rgba(158, 124, 62, 0.3);
     --vc-ar: var(--ink);
     --vc-en: rgba(38, 32, 22, 0.78);
-    --vc-ur: rgb(122, 94, 42);
+    --vc-ur: rgba(38, 32, 22, 0.78); /* same as --vc-en: highlight stands out */
     --vc-tr: rgba(38, 32, 22, 0.45);
     --player-shadow: 0 -8px 24px rgba(38, 32, 22, 0.18);
   }
