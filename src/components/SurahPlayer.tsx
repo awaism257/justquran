@@ -6,6 +6,10 @@ import { isBookmarked, toggleBookmark } from '@/lib/bookmarks';
 
 interface SurahPlayerProps {
   verse: Verse; // currently reciting verse
+  /** Optional surah/chapter name appended to the label (e.g. "The Heifer"). */
+  title?: string;
+  /** Render the title in Nastaliq (Urdu) — no uppercase/letter-spacing. */
+  titleRtl?: boolean;
   playing: boolean; // false while paused
   progress: number; // 0-100 within the current verse
   hasPrev: boolean;
@@ -27,6 +31,8 @@ interface SurahPlayerProps {
  */
 export default function SurahPlayer({
   verse,
+  title,
+  titleRtl,
   playing,
   progress,
   hasPrev,
@@ -57,6 +63,25 @@ export default function SurahPlayer({
       <div className="flex items-center justify-between">
         <span className="popup-label">
           {verse.v === 0 ? 'Bismillah' : `Surah ${verse.s} : ${verse.v}`}
+          {title ? (
+            <>
+              {' · '}
+              <span
+                style={
+                  titleRtl
+                    ? {
+                        fontFamily: "'Noto Nastaliq Urdu', serif",
+                        letterSpacing: 0,
+                        textTransform: 'none',
+                        fontSize: 14,
+                      }
+                    : undefined
+                }
+              >
+                {title}
+              </span>
+            </>
+          ) : null}
         </span>
         <span className="flex items-center gap-2">
           {verse.v !== 0 && (

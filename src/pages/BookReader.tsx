@@ -443,10 +443,8 @@ export default function BookReader() {
                       lpFired.current = false;
                     }
                   }}
-                  style={
-                    playing && seqItem?.verseIdx === i
-                      ? { color: 'var(--green)', transition: 'color 0.3s ease' }
-                      : { transition: 'color 0.3s ease' }
+                  className={
+                    playing && seqItem?.verseIdx === i ? 'verse-run reciting' : undefined
                   }
                 >
                   {lang === 'en' ? v.en : (v.ur ?? '')}{' '}
@@ -490,7 +488,7 @@ export default function BookReader() {
         {/* Footer pager: English › = next; Urdu ‹ = next (mushaf convention). */}
         <nav
           className="pager"
-          style={{ padding: '10px 0 16px', paddingBottom: playing ? 110 : 16 }}
+          style={{ padding: '10px 0 16px' }}
         >
           {(lang === 'ur' ? pageIdx < pageCount - 1 : pageIdx > 0) ? (
             <button
@@ -523,6 +521,8 @@ export default function BookReader() {
       {playing && seqItem && (
         <SurahPlayer
           verse={seqItem.labelVerse}
+          title={chapterTitle}
+          titleRtl={lang === 'ur'}
           playing={!paused}
           progress={progress}
           hasPrev={playIdx > 0}
