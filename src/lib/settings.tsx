@@ -55,7 +55,7 @@ export const DEFAULT_SETTINGS: Settings = {
   verseByVerse: true,
   alwaysCreamPage: false,
   audioAutoAdvance: false,
-  followTranslation: false,
+  followTranslation: true, // v134: on by default (card mode); users can switch it off in Settings
   followEnglish: true,
   followUrdu: true,
   mushafPaged: false,
