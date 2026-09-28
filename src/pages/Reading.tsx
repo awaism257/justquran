@@ -800,17 +800,32 @@ export default function Reading() {
           >
             Arabic
           </button>
+          {/* v136: the English/اردو chips switch the whole language — text
+              layer AND its narration leg. Turning a chip ON also wakes the
+              master "follow" toggle, otherwise the leg would stay silent. */}
           <button
             className={settings.showEn ? 'chip on' : 'chip'}
             disabled={lastLayer(settings.showEn)}
-            onClick={() => toggle('showEn')}
+            onClick={() =>
+              set({
+                showEn: !settings.showEn,
+                followEnglish: !settings.showEn,
+                ...(!settings.showEn ? { followTranslation: true } : {}),
+              })
+            }
           >
             English
           </button>
           <button
             className={settings.showUr ? 'chip on' : 'chip'}
             disabled={lastLayer(settings.showUr)}
-            onClick={() => toggle('showUr')}
+            onClick={() =>
+              set({
+                showUr: !settings.showUr,
+                followUrdu: !settings.showUr,
+                ...(!settings.showUr ? { followTranslation: true } : {}),
+              })
+            }
           >
             اردو
           </button>
