@@ -366,8 +366,10 @@ export default function Reading() {
     (delta: number) => {
       if (surahPlayV === null || !surah) return;
       const target = Math.min(surah.ayahs, Math.max(1, surahPlayV + delta));
-      // Skipping forward out of the Bismillah prelude → straight to verse 1.
-      startSurahFrom(target, surahPlayV === 0 && delta > 0);
+      // Skips land on the actual verse — never replay the Bismillah prelude
+      // (v135: prev into verse 1 used to restart the whole prelude, which
+      // felt like jumping to the top of the surah instead of back one verse).
+      startSurahFrom(target, true);
     },
     [surahPlayV, surah, startSurahFrom],
   );
