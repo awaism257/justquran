@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'justquran-v124';
+const CACHE_VERSION = 'justquran-v125';
 
 /*
  * ⚠️ PROJECT RULE — READ BEFORE EDITING ⚠️
@@ -11,6 +11,9 @@ const CACHE_VERSION = 'justquran-v124';
 
 const APP_CACHE = CACHE_VERSION;
 const AUDIO_CACHE = 'justquran-audio-v1';
+// Translation-narration downloads (written by the app). Preserved across
+// updates by the activate purge below.
+const TRANS_AUDIO_CACHE = 'justquran-trans-audio-v1';
 
 // App shell + fully-offline assets (text, fonts, icons) precached on install.
 // NOTE: paths are relative (not '/...') so they resolve correctly both at
@@ -46,10 +49,16 @@ self.addEventListener('activate', (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== APP_CACHE && key !== AUDIO_CACHE)
+            .filter(
+              (key) =>
+                key !== APP_CACHE && key !== AUDIO_CACHE && key !== TRANS_AUDIO_CACHE,
+            )
             .map((key) => caches.delete(key)),
         ),
       )
+      // A purge failure must NEVER block activation: if activate throws, the
+      // new worker is discarded and users stay stranded on the old one.
+      .catch(() => undefined)
       .then(() => self.clients.claim()),
   );
 });
@@ -60,7 +69,9 @@ async function cacheFirstAcrossCaches(request, options) {
   const cached = await caches.match(request, options);
   if (cached) return cached;
   const response = await fetch(request);
-  if (response && response.ok) {
+  // Only store complete 200 responses: audio is usually fetched in ranges
+  // (206 Partial Content), which Cache Storage rejects.
+  if (response && response.status === 200) {
     const cache = await caches.open(APP_CACHE);
     cache.put(request, response.clone());
   }

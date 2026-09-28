@@ -99,10 +99,6 @@ export async function bismillahUrl(set: TranslationSetId, s: number): Promise<st
 
 // ---- playback ----
 
-let current: HTMLAudioElement | null = null;
-let currentObjectUrl: string | null = null;
-let onStopCallbacks = new Set<() => void>();
-
 export type EndReason = 'ended' | 'stopped' | 'error';
 
 export interface PlayHandle {
@@ -110,18 +106,73 @@ export interface PlayHandle {
   audio: HTMLAudioElement;
 }
 
+interface PlaySession {
+  onEnd?: (reason?: EndReason) => void;
+  onProgress?: (pct: number) => void;
+  reported: boolean;
+  objectUrl: string | null;
+}
+
+// ONE persistent <audio> element for the whole session. Verse-by-verse chains
+// swap this element's .src instead of creating a new element per file: the
+// first play() runs inside the user's tap/click, which permanently "unlocks"
+// this element, so every later play() — fired from the 'ended' handler,
+// outside any gesture — is still allowed. A fresh element per verse is
+// blocked by strict desktop autoplay policies (sound allowed only inside a
+// user gesture), which killed chained playback there: the Bismillah (inside
+// the tap) played, verse 1 onward was silently blocked.
+let sharedAudio: HTMLAudioElement | null = null;
+let currentObjectUrl: string | null = null;
+let session: PlaySession | null = null;
+// Bumped on every play/stop so async completions and media events from an
+// earlier src are ignored.
+let playGen = 0;
+let onStopCallbacks = new Set<() => void>();
+
+function report(reason: EndReason): void {
+  const s = session;
+  if (!s || s.reported) return;
+  s.reported = true;
+  s.onEnd?.(reason);
+}
+
+function ensureAudio(): HTMLAudioElement {
+  if (!sharedAudio) {
+    sharedAudio = new Audio();
+    sharedAudio.addEventListener('ended', () => {
+      if (!session) return;
+      report('ended');
+    });
+    sharedAudio.addEventListener('error', () => {
+      if (!session) return; // element reset between plays — not a failure
+      report('error');
+    });
+    sharedAudio.addEventListener('timeupdate', () => {
+      const s = session;
+      if (s?.onProgress && sharedAudio && sharedAudio.duration > 0) {
+        s.onProgress((sharedAudio.currentTime / sharedAudio.duration) * 100);
+      }
+    });
+  }
+  return sharedAudio;
+}
+
 /** Stop whatever translation audio is playing (also called via the audio bus). */
 export function stopTranslation(): void {
-  if (current) {
-    const a = current;
-    current = null;
-    a.pause();
-    a.src = '';
+  playGen++; // invalidate pending url→play continuations and stale events
+  const s = session;
+  session = null;
+  if (sharedAudio) {
+    sharedAudio.pause();
+    sharedAudio.removeAttribute('src');
+    sharedAudio.load();
   }
-  if (currentObjectUrl) {
+  if (s?.objectUrl) {
+    URL.revokeObjectURL(s.objectUrl);
+  } else if (currentObjectUrl) {
     URL.revokeObjectURL(currentObjectUrl);
-    currentObjectUrl = null;
   }
+  currentObjectUrl = null;
   const cbs = onStopCallbacks;
   onStopCallbacks = new Set();
   cbs.forEach((cb) => {
@@ -156,58 +207,46 @@ export function playTranslationFile(
 ): PlayHandle {
   stopTranslation();
   stopAllAudio(stopTranslation); // silence recitation etc.
-  const audio = new Audio();
-  current = audio;
+  const audio = ensureAudio();
+  const gen = ++playGen;
+  const sess: PlaySession = { onEnd, onProgress, reported: false, objectUrl: null };
+  session = sess;
   if (onStopCb) onStopCallbacks.add(onStopCb);
-  let objectUrl: string | null = null;
-  let reported = false;
-  const report = (reason: EndReason) => {
-    if (reported) return;
-    reported = true;
-    onEnd?.(reason);
-  };
   urlPromise
     .then((url) => resolvePlayableUrl(url))
     .then((src) => {
-      if (current !== audio) return;
+      if (gen !== playGen) return;
       if (!src.startsWith('http')) {
-        objectUrl = src;
+        sess.objectUrl = src;
         currentObjectUrl = src;
       }
       audio.src = src;
       void audio.play().catch(() => {
-        if (current === audio) current = null;
+        if (gen !== playGen) return;
         report('error');
       });
     })
     .catch(() => {
-      if (current === audio) current = null;
+      if (gen !== playGen) return;
       report('error');
     });
-  audio.addEventListener('ended', () => {
-    if (current === audio) current = null;
-    report('ended');
-  });
-  audio.addEventListener('error', () => {
-    if (current === audio) current = null;
-    report('error');
-  });
-  if (onProgress) {
-    audio.addEventListener('timeupdate', () => {
-      if (audio.duration > 0) onProgress((audio.currentTime / audio.duration) * 100);
-    });
-  }
   return {
     audio,
     stop: () => {
-      if (current === audio) current = null;
+      if (gen !== playGen) return;
+      playGen++;
+      session = null;
       audio.pause();
-      audio.src = '';
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-        if (currentObjectUrl === objectUrl) currentObjectUrl = null;
+      audio.removeAttribute('src');
+      audio.load();
+      if (sess.objectUrl) {
+        URL.revokeObjectURL(sess.objectUrl);
+        if (currentObjectUrl === sess.objectUrl) currentObjectUrl = null;
       }
-      report('stopped');
+      if (!sess.reported) {
+        sess.reported = true;
+        sess.onEnd?.('stopped');
+      }
     },
   };
 }

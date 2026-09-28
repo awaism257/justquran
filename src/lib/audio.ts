@@ -13,6 +13,13 @@ export function verseUrl(s: number, v: number): string {
   return `${AUDIO_BASE}/${sss}${vvv}.mp3`;
 }
 
+// ONE persistent <audio> element for the whole session — verse chains swap
+// this element's .src instead of creating a new element per verse. The first
+// play() runs inside the user's tap/click, which permanently "unlocks" this
+// element, so later plays fired from the 'ended' handler (outside any
+// gesture) are still allowed. A fresh element per verse is blocked by strict
+// desktop autoplay policies, which killed chained recitation there.
+let sharedAudio: HTMLAudioElement | null = null;
 let current: HTMLAudioElement | null = null;
 let currentObjectUrl: string | null = null;
 
@@ -39,6 +46,67 @@ export interface PlayHandle {
 /** Why playback ended: 'ended' = natural end, 'stopped' = user/replaced, 'error' = failure. */
 export type EndReason = 'ended' | 'stopped' | 'error';
 
+interface PlaySession {
+  onEnd?: (reason?: EndReason) => void;
+  onProgress?: (pct: number) => void;
+  reported: boolean;
+  objectUrl: string | null;
+  // If the primary host fails, retry the verse once via the mirror before
+  // declaring failure. Skipped for cached blob: URLs.
+  triedFallback: boolean;
+}
+
+let session: PlaySession | null = null;
+// Bumped on every play/stop so async completions and media events from an
+// earlier src are ignored.
+let playGen = 0;
+
+function report(reason: EndReason): void {
+  const s = session;
+  if (!s || s.reported) return;
+  s.reported = true;
+  s.onEnd?.(reason);
+}
+
+function clearPlaybackState(): void {
+  current = null;
+  currentVerse = null;
+}
+
+function ensureAudio(): HTMLAudioElement {
+  if (!sharedAudio) {
+    sharedAudio = new Audio();
+    sharedAudio.addEventListener('ended', () => {
+      if (!session) return;
+      clearPlaybackState();
+      report('ended');
+    });
+    sharedAudio.addEventListener('error', () => {
+      const s = session;
+      if (!s || !sharedAudio) return; // element reset between plays — not a failure
+      const src = sharedAudio.src;
+      // Primary host failed and we haven't tried the mirror yet → retry once.
+      if (!s.triedFallback && src.startsWith(AUDIO_BASE)) {
+        s.triedFallback = true;
+        sharedAudio.src = AUDIO_BASE_FALLBACK + src.slice(AUDIO_BASE.length);
+        void sharedAudio.play().catch(() => {
+          /* a further 'error' event follows and is reported below */
+        });
+        return;
+      }
+      clearPlaybackState();
+      report('error');
+    });
+    sharedAudio.addEventListener('timeupdate', () => {
+      const s = session;
+      if (s?.onProgress && sharedAudio && sharedAudio.duration > 0) {
+        s.onProgress((sharedAudio.currentTime / sharedAudio.duration) * 100);
+      }
+    });
+  }
+  return sharedAudio;
+}
+
 /**
  * Stream (or play from cache) a single verse.
  * onEnd is called when playback finishes (reason 'ended') or is stopped/replaced
@@ -50,109 +118,87 @@ export function playVerse(
   onEnd?: (reason?: EndReason) => void,
   onProgress?: (pct: number) => void,
 ): PlayHandle {
-  // Silence any other audio source (translation narration) before playing.
+  // Silence any other audio source (translation narration, and any previous
+  // recitation on the shared element) before playing.
   stopAllAudio();
   const url = verseUrl(s, v);
-  const audio = new Audio();
+  const audio = ensureAudio();
+  const gen = ++playGen;
+  const sess: PlaySession = {
+    onEnd,
+    onProgress,
+    reported: false,
+    objectUrl: null,
+    triedFallback: false,
+  };
+  session = sess;
   current = audio;
   currentVerse = { s, v };
   lastVerse = { s, v };
-  let objectUrl: string | null = null;
-  // onEnd must fire exactly once per playVerse call (a rejected play() promise
-  // and the 'error' event can both fire for the same failure).
-  let reported = false;
-  const report = (reason: EndReason) => {
-    if (reported) return;
-    reported = true;
-    onEnd?.(reason);
-  };
-  // If the primary host is unreachable/down, retry the verse once via the
-  // mirror before declaring failure. Skipped for cached blob: URLs.
-  let triedFallback = false;
   // Cache-first: if this verse was downloaded into Cache Storage, play the
   // cached copy (offline support); otherwise stream from the network.
   resolvePlayableUrl(url)
     .then((src) => {
-      if (current !== audio) return;
-      if (src !== url) objectUrl = src;
+      if (gen !== playGen) return;
+      if (src !== url) {
+        sess.objectUrl = src;
+        currentObjectUrl = src;
+      }
       audio.src = src;
       void audio.play().catch(() => {
-        if (reported) return;
-        if (current === audio) {
-          current = null;
-          currentVerse = null;
-        }
+        if (gen !== playGen) return;
+        clearPlaybackState();
         report('error');
       });
     })
     .catch(() => {
       // Cache lookup failed entirely — fall back to plain streaming.
-      if (current !== audio) return;
+      if (gen !== playGen) return;
       audio.src = url;
       void audio.play().catch(() => {
-        if (reported) return;
-        if (current !== audio) {
-          current = null;
-          currentVerse = null;
-        }
+        if (gen !== playGen) return;
+        clearPlaybackState();
         report('error');
       });
     });
-  audio.addEventListener('ended', () => {
-    if (current === audio) {
-      current = null;
-      currentVerse = null;
-    }
-    report('ended');
-  });
-  audio.addEventListener('error', () => {
-    // Primary host failed and we haven't tried the mirror yet → retry once.
-    if (!triedFallback && audio.src.startsWith(AUDIO_BASE)) {
-      triedFallback = true;
-      audio.src = AUDIO_BASE_FALLBACK + audio.src.slice(AUDIO_BASE.length);
-      void audio.play().catch(() => {
-        /* a further 'error' event follows and is reported below */
-      });
-      return;
-    }
-    if (current === audio) {
-      current = null;
-      currentVerse = null;
-    }
-    report('error');
-  });
-  if (onProgress) {
-    audio.addEventListener('timeupdate', () => {
-      if (audio.duration > 0) onProgress((audio.currentTime / audio.duration) * 100);
-    });
-  }
   return {
     audio,
     stop: () => {
-      if (current === audio) {
-        current = null;
-        currentVerse = null;
-      }
+      if (gen !== playGen) return;
+      playGen++;
+      session = null;
+      clearPlaybackState();
       audio.pause();
-      audio.src = '';
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-      report('stopped');
+      audio.removeAttribute('src');
+      audio.load();
+      if (sess.objectUrl) {
+        URL.revokeObjectURL(sess.objectUrl);
+        if (currentObjectUrl === sess.objectUrl) currentObjectUrl = null;
+      }
+      if (!sess.reported) {
+        sess.reported = true;
+        sess.onEnd?.('stopped');
+      }
     },
   };
 }
 
 export function stopAudio() {
-  if (current) {
-    const a = current;
-    current = null;
-    currentVerse = null;
-    a.pause();
-    a.src = '';
+  playGen++;
+  const s = session;
+  session = null;
+  clearPlaybackState();
+  if (sharedAudio) {
+    sharedAudio.pause();
+    sharedAudio.removeAttribute('src');
+    sharedAudio.load();
   }
-  if (currentObjectUrl) {
+  if (s?.objectUrl) {
+    URL.revokeObjectURL(s.objectUrl);
+  } else if (currentObjectUrl) {
     URL.revokeObjectURL(currentObjectUrl);
-    currentObjectUrl = null;
   }
+  currentObjectUrl = null;
 }
 
 export function isPlaying(): boolean {

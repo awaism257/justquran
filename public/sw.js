@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'justquran-v130';
+const CACHE_VERSION = 'justquran-v131';
 
 /*
  * ⚠️ PROJECT RULE — READ BEFORE EDITING ⚠️
@@ -11,6 +11,11 @@ const CACHE_VERSION = 'justquran-v130';
 
 const APP_CACHE = CACHE_VERSION;
 const AUDIO_CACHE = 'justquran-audio-v1';
+// Translation-narration downloads (written by the app). Referenced in the
+// activate purge below — must be DEFINED here: an undefined reference throws
+// inside the activate handler, which fails activation and strands returning
+// users on their old worker forever (this exact bug shipped in v126).
+const TRANS_AUDIO_CACHE = 'justquran-trans-audio-v1';
 
 // App shell + fully-offline assets (text, fonts, icons) precached on install.
 // NOTE: paths are relative (not '/...') so they resolve correctly both at
@@ -55,6 +60,9 @@ self.addEventListener('activate', (event) => {
             .map((key) => caches.delete(key)),
         ),
       )
+      // A purge failure must NEVER block activation: if activate throws, the
+      // new worker is discarded and users stay stranded on the old one.
+      .catch(() => undefined)
       .then(() => self.clients.claim()),
   );
 });
@@ -65,7 +73,10 @@ async function cacheFirstAcrossCaches(request, options) {
   const cached = await caches.match(request, options);
   if (cached) return cached;
   const response = await fetch(request);
-  if (response && response.ok) {
+  // Only store complete 200 responses: audio is usually fetched in ranges
+  // (206 Partial Content), which Cache Storage rejects — the put() would
+  // throw an unhandled error for every streamed verse.
+  if (response && response.status === 200) {
     const cache = await caches.open(APP_CACHE);
     cache.put(request, response.clone());
   }
