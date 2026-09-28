@@ -842,6 +842,95 @@
     pointer-events: none;
   }
 
+  /* Paged-mushaf pager: fixed height — exactly the measured resting strip
+     height — so swapping the page links for the one-line player mid-
+     recitation NEVER resizes the folio frame (a resize re-slices every
+     page). Global box-sizing is border-box, so 74px includes padding. */
+  .pager-paged {
+    height: 74px;
+  }
+  .pager-playing {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  /* Three-zone strip: verse label left, transport DEAD CENTRE, stop right.
+     Equal flex:1 side zones keep the media buttons centred regardless of
+     label length. */
+  .pager-side {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+  .pager-side-right {
+    justify-content: flex-end;
+  }
+  /* Playback progress: absolute hairline across the top of the strip —
+     it adds no layout height. */
+  .pager-progress {
+    position: absolute;
+    top: 6px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 9999px;
+    background: rgba(201, 166, 88, 0.2);
+    overflow: hidden;
+  }
+  .pager-progress > span {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: var(--green);
+    transition: width 0.2s linear;
+  }
+  .pager-transport {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pager-transport button,
+  .pager-stop {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 9999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .pager-transport .play {
+    width: 36px;
+    height: 36px;
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .pager-transport button:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  /* 44px minimum hit area on the small transport/stop buttons
+     (visual size unchanged) */
+  .pager-transport button::before,
+  .pager-stop::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+  }
+  .pager-playing-label {
+    padding: 0 6px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   /* ---- book mode (v114): flowing translation prose, real page turns ---- */
   /* Plain card-like page frame (NOT the ornate mushaf frame). The strip
      inside is laid out by CSS multi-columns — one column per page. */

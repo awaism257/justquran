@@ -20,7 +20,7 @@ import { playVerse, stopAudio, getPlayingVerse, getLastPlayedVerse } from '@/lib
 import type { PlayHandle } from '@/lib/audio';
 import SurahPlayer from '@/components/SurahPlayer';
 import { useSettings } from '@/lib/settings';
-import { BookOpenText, ChevronLeft, ChevronRight, Play, Rows3, Square } from 'lucide-react';
+import { BookOpenText, ChevronLeft, ChevronRight, Pause, Play, Rows3, SkipBack, SkipForward, Square, X } from 'lucide-react';
 
 /** Cross-surah auto-advance: verse to auto-play once the target surah loads. */
 let pendingAutoPlay: { s: number; v: number } | null = null;
@@ -788,7 +788,11 @@ export default function Reading() {
                 flexDirection: 'column',
                 overflow: 'hidden',
                 position: 'relative',
-                paddingBottom: surahPlayV !== null ? 175 : 8,
+                // Paged mode's playback controls live INSIDE the permanent
+                // pager strip below (no bottom player sheet), so the folio
+                // frame must NEVER change size — a resize re-slices every
+                // page mid-recitation. Constant padding, playing or not.
+                paddingBottom: 8,
               }
             : surahPlayV !== null
               ? { paddingBottom: 175 }
@@ -919,23 +923,78 @@ export default function Reading() {
             {/* Bottom pager. Paged mushaf: ‹ next page | Page X of Y | prev ›
                 (mushaf convention: the left arrow goes FORWARD; X/Y are global
                 across the Quran once every surah's page count is known).
+                During surah playback the SAME strip becomes a one-line player
+                (prev / play-pause / next · verse label · stop, plus a progress
+                hairline). .pager-paged fixes the strip height, so the swap
+                never resizes the folio frame — zero re-pagination, and no
+                bottom sheet covering the last line. Page arrows hide while
+                playing: swipe still turns pages and the recitation auto-turns.
                 Otherwise: ← next surah | N verses | prev surah → */}
             {pagedMode ? (
-              <nav className="pager">
-                {pageIdx < surahPageCount - 1 || n < 114 ? (
-                  <button type="button" className="pager-link" onClick={nextPage}>
-                    ‹ Next
-                  </button>
+              <nav className={surahPlayV !== null ? 'pager pager-paged pager-playing' : 'pager pager-paged'}>
+                {surahPlayV !== null ? (
+                  <>
+                    <span className="pager-progress" aria-hidden="true">
+                      <span style={{ width: `${surahProgress}%` }} />
+                    </span>
+                    <span className="pager-side pager-playing-label popup-label">
+                      {surahPlayV === 0 ? 'Bismillah' : `Surah ${n} : ${surahPlayV}`}
+                    </span>
+                    <span className="pager-transport">
+                      <button
+                        type="button"
+                        aria-label="Previous verse"
+                        disabled={!(surahPlayV > 1)}
+                        onClick={() => skipSurahVerse(-1)}
+                      >
+                        <SkipBack size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        className="play"
+                        aria-label={surahPlaying ? 'Pause' : 'Play'}
+                        onClick={toggleSurahPause}
+                      >
+                        {surahPlaying ? <Pause size={17} /> : <Play size={17} />}
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Next verse"
+                        disabled={!(surahPlayV < verses.length)}
+                        onClick={() => skipSurahVerse(1)}
+                      >
+                        <SkipForward size={15} />
+                      </button>
+                    </span>
+                    <span className="pager-side pager-side-right">
+                      <button
+                        type="button"
+                        className="pager-stop"
+                        aria-label="Stop recitation"
+                        onClick={stopSurahPlay}
+                      >
+                        <X size={16} />
+                      </button>
+                    </span>
+                  </>
                 ) : (
-                  <span className="pager-link disabled">‹ Next</span>
-                )}
-                <span className="count">{pageLabel}</span>
-                {pageIdx > 0 || n > 1 ? (
-                  <button type="button" className="pager-link" onClick={prevPage}>
-                    Previous ›
-                  </button>
-                ) : (
-                  <span className="pager-link disabled">Previous ›</span>
+                  <>
+                    {pageIdx < surahPageCount - 1 || n < 114 ? (
+                      <button type="button" className="pager-link" onClick={nextPage}>
+                        ‹ Next
+                      </button>
+                    ) : (
+                      <span className="pager-link disabled">‹ Next</span>
+                    )}
+                    <span className="count">{pageLabel}</span>
+                    {pageIdx > 0 || n > 1 ? (
+                      <button type="button" className="pager-link" onClick={prevPage}>
+                        Previous ›
+                      </button>
+                    ) : (
+                      <span className="pager-link disabled">Previous ›</span>
+                    )}
+                  </>
                 )}
               </nav>
             ) : (
@@ -959,8 +1018,11 @@ export default function Reading() {
 
       {/* Bottom player card while the whole surah is reciting.
           During the Bismillah prelude (surahPlayV === 0) it shows the
-          Bismillah's own text, translation and transliteration. */}
-      {surahPlayV !== null && verses.length > 0 && bismillahVerse && (
+          Bismillah's own text, translation and transliteration.
+          Paged mushaf is exempt: its playback controls live inside the
+          permanent pager strip (a bottom sheet would cover the last line
+          and its clearance padding would re-slice every page). */}
+      {!pagedMode && surahPlayV !== null && verses.length > 0 && bismillahVerse && (
         <SurahPlayer
           verse={surahPlayV === 0 ? bismillahVerse : verses[surahPlayV - 1]}
           playing={surahPlaying}
