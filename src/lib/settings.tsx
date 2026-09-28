@@ -27,6 +27,12 @@ export interface Settings {
   verseByVerse: boolean;
   alwaysCreamPage: boolean;
   audioAutoAdvance: boolean;
+  /** v133: after each verse's Arabic, follow with translation narration
+   * (card mode and the folio chain — the paged mushaf stays Arabic-only). */
+  followTranslation: boolean;
+  /** Which narration legs play while followTranslation is on. */
+  followEnglish: boolean;
+  followUrdu: boolean;
   /** mushaf (folio) view slices each surah into pages at the chosen font
    * scale (whole lines, never clipped) instead of one scrolling page. */
   mushafPaged: boolean;
@@ -49,6 +55,9 @@ export const DEFAULT_SETTINGS: Settings = {
   verseByVerse: true,
   alwaysCreamPage: false,
   audioAutoAdvance: false,
+  followTranslation: false,
+  followEnglish: true,
+  followUrdu: true,
   mushafPaged: false,
   transVoice: 'brian',
 };
@@ -81,7 +90,7 @@ interface SettingsCtx {
   resolvedTheme: 'light' | 'dark';
   setTheme: (t: ThemeChoice) => void;
   setFontScale: (key: keyof FontScales, pct: number) => void;
-  toggle: (key: 'showEn' | 'showUr' | 'showTr' | 'showAr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance' | 'mushafPaged') => void;
+  toggle: (key: 'showEn' | 'showUr' | 'showTr' | 'showAr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance' | 'mushafPaged' | 'followTranslation' | 'followEnglish' | 'followUrdu') => void;
   set: (patch: Partial<Settings>) => void;
 }
 
@@ -131,7 +140,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     [],
   );
   const toggle = useCallback(
-    (key: 'showEn' | 'showUr' | 'showTr' | 'showAr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance' | 'mushafPaged') =>
+    (key: 'showEn' | 'showUr' | 'showTr' | 'showAr' | 'verseByVerse' | 'alwaysCreamPage' | 'audioAutoAdvance' | 'mushafPaged' | 'followTranslation' | 'followEnglish' | 'followUrdu') =>
       setSettings((s) => ({ ...s, [key]: !s[key] })),
     [],
   );

@@ -3,6 +3,8 @@ import { Bookmark, Check, Copy, Volume2 } from 'lucide-react';
 import { wqDisplay, wqInkOffset, wqSortDisplay, loadBundle, getSurahMeta, JUZ_NAMES } from '@/lib/data';
 import type { Verse } from '@/lib/data';
 import { playVerse, stopAudio } from '@/lib/audio';
+import type { EndReason } from '@/lib/audio';
+import { playFollowLegs } from '@/lib/followChain';
 import { isBookmarked, toggleBookmark } from '@/lib/bookmarks';
 import { shareVerse } from '@/lib/share';
 import { useSettings } from '@/lib/settings';
@@ -40,6 +42,17 @@ export default function VerseCard({ verse, showEn, showUr, showTr, onAnyPlay, ac
   const { settings, toggle } = useSettings();
   const autoRef = useRef(settings.audioAutoAdvance);
   autoRef.current = settings.audioAutoAdvance;
+  // v133: live mirror of the "follow with translation narration" toggles.
+  const followTrRef = useRef({
+    on: settings.followTranslation,
+    en: settings.followEnglish,
+    ur: settings.followUrdu,
+  });
+  followTrRef.current = {
+    on: settings.followTranslation,
+    en: settings.followEnglish,
+    ur: settings.followUrdu,
+  };
 
   useEffect(() => {
     const sync = () => setBookmarked(isBookmarked(verse.s, verse.v));
@@ -54,7 +67,9 @@ export default function VerseCard({ verse, showEn, showUr, showTr, onAnyPlay, ac
     onAnyPlay?.();
     stopAudio();
     setPlaying(true);
-    const h = playVerse(verse.s, verse.v, (reason) => {
+    // The verse's audio has fully ended (Arabic + any narration legs):
+    // reset the button, and hand off to the next verse if AUTO is on.
+    const finished = (reason: EndReason | undefined) => {
       stopRef.current = null;
       setPlaying(false);
       // Natural end + auto-advance on → hand off to the next verse. The next
@@ -76,6 +91,29 @@ export default function VerseCard({ verse, showEn, showUr, showTr, onAnyPlay, ac
           })
           .catch(() => {});
       }
+    };
+    const h = playVerse(verse.s, verse.v, (reason) => {
+      // Natural end + "follow with translation" on → read the enabled
+      // narration legs (English Brian → Urdu Jalandhari) before finishing.
+      // A failed leg is skipped silently; stop/interrupt aborts quietly.
+      if (
+        reason === 'ended' &&
+        followTrRef.current.on &&
+        (followTrRef.current.en || followTrRef.current.ur)
+      ) {
+        playFollowLegs({
+          s: verse.s,
+          v: verse.v,
+          legs: { english: followTrRef.current.en, urdu: followTrRef.current.ur },
+          isCurrent: () => stopRef.current !== null,
+          onHandle: (hh) => {
+            stopRef.current = hh.stop;
+          },
+          onDone: () => finished('ended'),
+        });
+        return;
+      }
+      finished(reason);
     });
     stopRef.current = h.stop;
   };

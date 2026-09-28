@@ -303,6 +303,13 @@ export default function Help() {
             playback will continue verse by verse. The same option is in Settings → Recitation
             ("Continue to next verse automatically").
           </Step>
+          <Step n={5}>
+            To hear each verse's meaning read aloud after its Arabic, turn on{' '}
+            <b>Settings → Recitation → Follow each verse with translation narration</b>. Playback
+            then goes Arabic → English → Urdu for every verse; the English and Urdu legs can each
+            be switched off separately just below it. (The paged mushaf always recites Arabic
+            only.)
+          </Step>
         </CollapsibleCard>
 
         <CollapsibleCard title="Search">
@@ -411,6 +418,11 @@ export default function Help() {
             the browser — you will get the latest version.
           </Step>
           <Step n={3}>
+            If recitation stops mid-surah on a shaky connection: the app retries quietly from a
+            backup audio source after a few seconds. If it still cannot load, it shows a message —
+            check your internet and tap <b>▶ Play</b> to continue.
+          </Step>
+          <Step n={4}>
             Still stuck? Note the build number shown in Settings → Diagnostics (or on the About
             screen) and let the developer know what you saw.
           </Step>

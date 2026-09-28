@@ -16,8 +16,10 @@ import {
 } from '@/lib/mushafPages';
 import type { Pagination } from '@/lib/mushafPages';
 import { setLastRead } from '@/lib/bookmarks';
-import { playVerse, stopAudio, getPlayingVerse, getLastPlayedVerse } from '@/lib/audio';
+import { playVerse, getPlayingVerse, getLastPlayedVerse } from '@/lib/audio';
 import type { PlayHandle } from '@/lib/audio';
+import { stopAllAudio } from '@/lib/audioBus';
+import { playFollowLegs } from '@/lib/followChain';
 import SurahPlayer from '@/components/SurahPlayer';
 import { useSettings } from '@/lib/settings';
 import { BookOpenText, ChevronLeft, ChevronRight, Pause, Play, Rows3, SkipBack, SkipForward, Square, X } from 'lucide-react';
@@ -46,6 +48,17 @@ export default function Reading() {
   // AUTO toggle state, mirrored into a ref so the playback chain can read it
   const autoAdvanceRef = useRef(settings.audioAutoAdvance);
   autoAdvanceRef.current = settings.audioAutoAdvance;
+  // v133 "Follow each verse with translation narration" (Settings →
+  // Recitation): after a verse's Arabic, read the enabled narration legs
+  // (English Brian → Urdu Jalandhari). Refs so the running chain reads the
+  // live values; the paged mushaf is exempt — its recitation stays
+  // Arabic-only.
+  const followTransRef = useRef(settings.followTranslation);
+  followTransRef.current = settings.followTranslation;
+  const followLegsRef = useRef({ english: settings.followEnglish, urdu: settings.followUrdu });
+  followLegsRef.current = { english: settings.followEnglish, urdu: settings.followUrdu };
+  /** Narration leg currently on air (drives the player label); null = Arabic. */
+  const [followLeg, setFollowLeg] = useState<'en' | 'ur' | null>(null);
   const [surahProgress, setSurahProgress] = useState(0); // % within current verse
   const surahGen = useRef(0);
   const surahHandle = useRef<PlayHandle | null>(null);
@@ -79,7 +92,8 @@ export default function Reading() {
     setSurahPlayV(null);
     setSurahPlaying(false);
     setSurahProgress(0);
-    stopAudio();
+    setFollowLeg(null);
+    stopAllAudio(); // recitation AND any narration leg on air
   }, []);
 
   useEffect(() => {
@@ -178,6 +192,7 @@ export default function Reading() {
   const startSurahFrom = useCallback(
     (from: number, skipBismillah = false) => {
       if (!surah) return;
+      const ayahs = surah.ayahs; // captured: hoisted fns lose the narrowing
       followRef.current = true; // (re)starting playback re-engages auto-follow
       chainCancelRef.current = false; // (re)starting also re-arms continuation
       setAudioError(false);
@@ -185,20 +200,71 @@ export default function Reading() {
       /** Audio failed to load (offline, or the host is unreachable): stop the
           chain and say so — never advance, or the page races to the surah's
           end playing nothing. */
-      const failChain = () => {
+      function failChain() {
         surahHandle.current = null;
         setSurahPlayV(null);
         setSurahPlaying(false);
         setSurahProgress(0);
+        setFollowLeg(null);
         setAudioError(true);
-      };
-      const step = (v: number) => {
+      }
+      /** The verse's full audio (Arabic + any narration legs) has ended:
+          continue the chain — unless AUTO was tapped off mid-verse. */
+      function verseDone(v: number) {
         if (surahGen.current !== gen) return;
-        if (v > surah.ayahs) {
+        setFollowLeg(null);
+        // AUTO turned off mid-chain → finish this verse, then stop.
+        if (chainCancelRef.current) {
+          chainCancelRef.current = false;
           surahHandle.current = null;
           setSurahPlayV(null);
           setSurahPlaying(false);
           setSurahProgress(0);
+          return;
+        }
+        step(v + 1);
+      }
+      /** Arabic ended naturally → if "follow with translation" is on (and
+          this isn't the paged mushaf), read the enabled narration legs —
+          English Brian → Urdu Jalandhari; v=0 plays the surah's spoken
+          Bismillahs — then finish the verse. A failed/unreachable leg is
+          skipped: the chain never dies on a missing narration file. */
+      function followThenDone(v: number) {
+        const legs = followLegsRef.current;
+        if (
+          followTransRef.current &&
+          !pagedRef.current &&
+          (legs.english || legs.urdu)
+        ) {
+          setSurahProgress(0);
+          playFollowLegs({
+            s: n,
+            v,
+            legs,
+            isCurrent: () => surahGen.current === gen,
+            onHandle: (h) => {
+              if (surahGen.current === gen) surahHandle.current = h;
+            },
+            onLegStart: (lang) => {
+              if (surahGen.current === gen) setFollowLeg(lang);
+            },
+            onProgress: (pct) => {
+              if (surahGen.current === gen) setSurahProgress(pct);
+            },
+            onDone: () => verseDone(v),
+          });
+          return;
+        }
+        verseDone(v);
+      }
+      function step(v: number) {
+        if (surahGen.current !== gen) return;
+        if (v > ayahs) {
+          surahHandle.current = null;
+          setSurahPlayV(null);
+          setSurahPlaying(false);
+          setSurahProgress(0);
+          setFollowLeg(null);
           // AUTO on → continue straight into the next surah (114 ends the chain)
           if (autoAdvanceRef.current && n < 114) {
             pendingSurahChain = n + 1;
@@ -209,6 +275,7 @@ export default function Reading() {
         setSurahPlayV(v);
         setSurahPlaying(true);
         setSurahProgress(0);
+        setFollowLeg(null);
         if (followRef.current) scrollToCentre(document.getElementById(`v${v}`));
         surahHandle.current = playVerse(
           n,
@@ -219,22 +286,13 @@ export default function Reading() {
               failChain();
               return;
             }
-            // AUTO turned off mid-chain → finish this verse, then stop.
-            if (chainCancelRef.current) {
-              chainCancelRef.current = false;
-              surahHandle.current = null;
-              setSurahPlayV(null);
-              setSurahPlaying(false);
-              setSurahProgress(0);
-              return;
-            }
-            step(v + 1);
+            followThenDone(v);
           },
           (pct) => {
             if (surahGen.current === gen) setSurahProgress(pct);
           },
         );
-      };
+      }
       // Every surah opens with the Bismillah — except Al-Fatiha (where it IS
       // verse 1) and At-Tawbah (no Bismillah by convention). When starting
       // from the top of any other surah, play Al-Hussary's 1:1 as a prelude.
@@ -253,15 +311,9 @@ export default function Reading() {
               failChain();
               return;
             }
-            if (chainCancelRef.current) {
-              chainCancelRef.current = false;
-              surahHandle.current = null;
-              setSurahPlayV(null);
-              setSurahPlaying(false);
-              setSurahProgress(0);
-              return;
-            }
-            step(1);
+            // Follow the prelude with the surah's spoken Bismillah narrations
+            // (v=0), then verse 1 — verseDone(0) steps to 1.
+            followThenDone(0);
           },
           (pct) => {
             if (surahGen.current === gen) setSurahProgress(pct);
@@ -939,6 +991,7 @@ export default function Reading() {
                     </span>
                     <span className="pager-side pager-playing-label popup-label">
                       {surahPlayV === 0 ? 'Bismillah' : `Surah ${n} : ${surahPlayV}`}
+                      {followLeg === 'en' ? ' · English' : followLeg === 'ur' ? ' · Urdu' : ''}
                     </span>
                     <span className="pager-transport">
                       <button
@@ -1025,6 +1078,7 @@ export default function Reading() {
       {!pagedMode && surahPlayV !== null && verses.length > 0 && bismillahVerse && (
         <SurahPlayer
           verse={surahPlayV === 0 ? bismillahVerse : verses[surahPlayV - 1]}
+          title={followLeg === 'en' ? 'English narration' : followLeg === 'ur' ? 'Urdu narration' : undefined}
           playing={surahPlaying}
           progress={surahProgress}
           hasPrev={surahPlayV > 1}

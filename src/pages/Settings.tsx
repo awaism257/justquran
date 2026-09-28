@@ -305,6 +305,32 @@ export default function Settings() {
             onToggle={() => toggle('audioAutoAdvance')}
           />
           <RowDivider />
+          <ToggleRow
+            label="Follow each verse with translation narration"
+            on={settings.followTranslation}
+            onToggle={() => toggle('followTranslation')}
+          />
+          <div style={{ fontSize: 12, color: 'var(--muted)', paddingBottom: 10, marginTop: -6 }}>
+            After the Arabic, each verse is read aloud in English and/or Urdu
+            (card view; the paged mushaf stays Arabic-only).
+          </div>
+          <RowDivider />
+          <div style={{ paddingLeft: 14 }}>
+            <ToggleRow
+              label="English narration · Brian"
+              on={settings.followEnglish}
+              disabled={!settings.followTranslation}
+              onToggle={() => toggle('followEnglish')}
+            />
+            <RowDivider />
+            <ToggleRow
+              label="Urdu narration · Jalandhari"
+              on={settings.followUrdu}
+              disabled={!settings.followTranslation}
+              onToggle={() => toggle('followUrdu')}
+            />
+          </div>
+          <RowDivider />
           <Link
             to="/recitation"
             className="flex items-center justify-between py-3"

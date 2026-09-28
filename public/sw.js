@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'justquran-v132';
+const CACHE_VERSION = 'justquran-v133';
 
 /*
  * ⚠️ PROJECT RULE — READ BEFORE EDITING ⚠️

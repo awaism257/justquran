@@ -54,6 +54,10 @@ interface PlaySession {
   // If the primary host fails, retry the verse once via the mirror before
   // declaring failure. Skipped for cached blob: URLs.
   triedFallback: boolean;
+  // Stall watchdog state: last audible progress, user-initiated pause, timer.
+  lastBeat: number;
+  userPaused: boolean;
+  watchdog: number | null;
 }
 
 let session: PlaySession | null = null;
@@ -73,6 +77,66 @@ function clearPlaybackState(): void {
   currentVerse = null;
 }
 
+/** A verse that makes no audible progress for this long (and isn't paused)
+ *  is a stalled connection. Host outages usually show up as a HANG — no
+ *  'error' event ever fires — which used to freeze the chain silently right
+ *  after the Bismillah until the next user gesture. The watchdog trips the
+ *  same fallback a hard error would: retry once via the mirror, then fail. */
+const STALL_MS = 12000;
+
+function beat(s: PlaySession): void {
+  s.lastBeat = Date.now();
+}
+
+/** Switch the failed/stalled verse to the mirror host once; otherwise fail. */
+function fallbackOrFail(s: PlaySession): void {
+  const a = sharedAudio;
+  if (!a) return;
+  const src = a.src;
+  // Primary host failed and we haven't tried the mirror yet → retry once.
+  if (!s.triedFallback && src.startsWith(AUDIO_BASE)) {
+    s.triedFallback = true;
+    beat(s);
+    const mirrorSrc = AUDIO_BASE_FALLBACK + src.slice(AUDIO_BASE.length);
+    a.src = mirrorSrc;
+    void a.play().catch(() => {
+      // A rejection for a src the element no longer holds is the OLD
+      // primary's play() unwinding — never a failure of the mirror.
+      if (session !== s || a.src !== mirrorSrc) return;
+      clearPlaybackState();
+      report('error');
+    });
+    return;
+  }
+  clearPlaybackState();
+  report('error');
+}
+
+function armWatchdog(s: PlaySession): void {
+  if (s.watchdog !== null) window.clearInterval(s.watchdog);
+  beat(s);
+  s.watchdog = window.setInterval(() => {
+    const a = sharedAudio;
+    if (session !== s || !a) {
+      if (s.watchdog !== null) window.clearInterval(s.watchdog);
+      s.watchdog = null;
+      return;
+    }
+    if (s.userPaused) {
+      beat(s); // user paused — never trips
+      return;
+    }
+    if (Date.now() - s.lastBeat > STALL_MS) fallbackOrFail(s);
+  }, 2000);
+}
+
+function disarmWatchdog(s: PlaySession | null): void {
+  if (s && s.watchdog !== null) {
+    window.clearInterval(s.watchdog);
+    s.watchdog = null;
+  }
+}
+
 function ensureAudio(): HTMLAudioElement {
   if (!sharedAudio) {
     sharedAudio = new Audio();
@@ -84,21 +148,22 @@ function ensureAudio(): HTMLAudioElement {
     sharedAudio.addEventListener('error', () => {
       const s = session;
       if (!s || !sharedAudio) return; // element reset between plays — not a failure
-      const src = sharedAudio.src;
-      // Primary host failed and we haven't tried the mirror yet → retry once.
-      if (!s.triedFallback && src.startsWith(AUDIO_BASE)) {
-        s.triedFallback = true;
-        sharedAudio.src = AUDIO_BASE_FALLBACK + src.slice(AUDIO_BASE.length);
-        void sharedAudio.play().catch(() => {
-          /* a further 'error' event follows and is reported below */
-        });
-        return;
+      fallbackOrFail(s);
+    });
+    sharedAudio.addEventListener('playing', () => {
+      const s = session;
+      if (s) {
+        s.userPaused = false;
+        beat(s);
       }
-      clearPlaybackState();
-      report('error');
+    });
+    sharedAudio.addEventListener('pause', () => {
+      const s = session;
+      if (s) s.userPaused = true;
     });
     sharedAudio.addEventListener('timeupdate', () => {
       const s = session;
+      if (s) beat(s);
       if (s?.onProgress && sharedAudio && sharedAudio.duration > 0) {
         s.onProgress((sharedAudio.currentTime / sharedAudio.duration) * 100);
       }
@@ -130,11 +195,29 @@ export function playVerse(
     reported: false,
     objectUrl: null,
     triedFallback: false,
+    lastBeat: Date.now(),
+    userPaused: false,
+    watchdog: null,
   };
   session = sess;
+  armWatchdog(sess);
   current = audio;
   currentVerse = { s, v };
   lastVerse = { s, v };
+  /** play() rejection handler that ignores STALE rejections: when the
+      primary src errors, the 'error' event swaps in the mirror, and the old
+      play() promise then rejects with NotSupportedError — that rejection
+      must not fail the verse the fallback is already playing. (This stale
+      rejection used to kill the whole chain right after the Bismillah.) */
+  const playChecked = (src: string) => {
+    audio.src = src;
+    void audio.play().catch(() => {
+      if (gen !== playGen) return;
+      if (audio.src !== src) return; // stale — a fallback/new src owns the element
+      clearPlaybackState();
+      report('error');
+    });
+  };
   // Cache-first: if this verse was downloaded into Cache Storage, play the
   // cached copy (offline support); otherwise stream from the network.
   resolvePlayableUrl(url)
@@ -144,28 +227,19 @@ export function playVerse(
         sess.objectUrl = src;
         currentObjectUrl = src;
       }
-      audio.src = src;
-      void audio.play().catch(() => {
-        if (gen !== playGen) return;
-        clearPlaybackState();
-        report('error');
-      });
+      playChecked(src);
     })
     .catch(() => {
       // Cache lookup failed entirely — fall back to plain streaming.
       if (gen !== playGen) return;
-      audio.src = url;
-      void audio.play().catch(() => {
-        if (gen !== playGen) return;
-        clearPlaybackState();
-        report('error');
-      });
+      playChecked(url);
     });
   return {
     audio,
     stop: () => {
       if (gen !== playGen) return;
       playGen++;
+      disarmWatchdog(sess);
       session = null;
       clearPlaybackState();
       audio.pause();
@@ -186,6 +260,7 @@ export function playVerse(
 export function stopAudio() {
   playGen++;
   const s = session;
+  disarmWatchdog(s);
   session = null;
   clearPlaybackState();
   if (sharedAudio) {

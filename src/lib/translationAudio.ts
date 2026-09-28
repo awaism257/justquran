@@ -111,6 +111,44 @@ interface PlaySession {
   onProgress?: (pct: number) => void;
   reported: boolean;
   objectUrl: string | null;
+  // Stall watchdog state: last audible progress, user-initiated pause, timer.
+  lastBeat: number;
+  userPaused: boolean;
+  watchdog: number | null;
+}
+
+/** A narration file that makes no audible progress for this long (and isn't
+ *  paused) is a stalled connection — report 'error' so the caller moves on
+ *  (the follow-with-translation chain then skips to the next leg). */
+const STALL_MS = 12000;
+
+function beat(s: PlaySession): void {
+  s.lastBeat = Date.now();
+}
+
+function armWatchdog(s: PlaySession): void {
+  if (s.watchdog !== null) window.clearInterval(s.watchdog);
+  beat(s);
+  s.watchdog = window.setInterval(() => {
+    const a = sharedAudio;
+    if (session !== s || !a) {
+      if (s.watchdog !== null) window.clearInterval(s.watchdog);
+      s.watchdog = null;
+      return;
+    }
+    if (s.userPaused) {
+      beat(s); // user paused — never trips
+      return;
+    }
+    if (Date.now() - s.lastBeat > STALL_MS) report('error');
+  }, 2000);
+}
+
+function disarmWatchdog(s: PlaySession | null): void {
+  if (s && s.watchdog !== null) {
+    window.clearInterval(s.watchdog);
+    s.watchdog = null;
+  }
 }
 
 // ONE persistent <audio> element for the whole session. Verse-by-verse chains
@@ -147,8 +185,20 @@ function ensureAudio(): HTMLAudioElement {
       if (!session) return; // element reset between plays — not a failure
       report('error');
     });
+    sharedAudio.addEventListener('playing', () => {
+      const s = session;
+      if (s) {
+        s.userPaused = false;
+        beat(s);
+      }
+    });
+    sharedAudio.addEventListener('pause', () => {
+      const s = session;
+      if (s) s.userPaused = true;
+    });
     sharedAudio.addEventListener('timeupdate', () => {
       const s = session;
+      if (s) beat(s);
       if (s?.onProgress && sharedAudio && sharedAudio.duration > 0) {
         s.onProgress((sharedAudio.currentTime / sharedAudio.duration) * 100);
       }
@@ -161,6 +211,7 @@ function ensureAudio(): HTMLAudioElement {
 export function stopTranslation(): void {
   playGen++; // invalidate pending url→play continuations and stale events
   const s = session;
+  disarmWatchdog(s);
   session = null;
   if (sharedAudio) {
     sharedAudio.pause();
@@ -209,8 +260,17 @@ export function playTranslationFile(
   stopAllAudio(stopTranslation); // silence recitation etc.
   const audio = ensureAudio();
   const gen = ++playGen;
-  const sess: PlaySession = { onEnd, onProgress, reported: false, objectUrl: null };
+  const sess: PlaySession = {
+    onEnd,
+    onProgress,
+    reported: false,
+    objectUrl: null,
+    lastBeat: Date.now(),
+    userPaused: false,
+    watchdog: null,
+  };
   session = sess;
+  armWatchdog(sess);
   if (onStopCb) onStopCallbacks.add(onStopCb);
   urlPromise
     .then((url) => resolvePlayableUrl(url))
@@ -235,6 +295,7 @@ export function playTranslationFile(
     stop: () => {
       if (gen !== playGen) return;
       playGen++;
+      disarmWatchdog(sess);
       session = null;
       audio.pause();
       audio.removeAttribute('src');
