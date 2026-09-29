@@ -66,6 +66,26 @@ export function setLabel(id: TranslationSetId): string {
 
 let cachedBase: string | null = null;
 
+/** v137: 103 Urdu narration files were re-recorded on the server (the 30
+    letter-opening verses + 73 honorific-mark verses). Anyone who played them
+    before has the OLD files in the on-device audio cache, which is
+    cache-first — so purge exactly those URLs, once per device, keyed by a
+    flag. Everything else in the cache (incl. offline downloads) is kept. */
+const PURGE_UR_FILENAMES = ["002001.mp3", "003001.mp3", "004001.mp3", "004013.mp3", "004014.mp3", "004042.mp3", "004059.mp3", "004061.mp3", "004064.mp3", "004069.mp3", "004078.mp3", "004079.mp3", "004080.mp3", "004083.mp3", "004084.mp3", "007001.mp3", "007011.mp3", "007059.mp3", "007064.mp3", "007065.mp3", "007069.mp3", "007071.mp3", "007072.mp3", "007073.mp3", "007075.mp3", "007077.mp3", "007079.mp3", "007080.mp3", "007082.mp3", "007085.mp3", "007088.mp3", "007090.mp3", "007092.mp3", "007093.mp3", "007103.mp3", "007142.mp3", "007157.mp3", "007158.mp3", "007184.mp3", "007199.mp3", "009040.mp3", "009054.mp3", "009059.mp3", "010001.mp3", "011001.mp3", "012001.mp3", "013001.mp3", "014001.mp3", "015001.mp3", "019001.mp3", "020001.mp3", "025056.mp3", "026001.mp3", "027001.mp3", "028001.mp3", "029001.mp3", "030001.mp3", "031001.mp3", "032001.mp3", "034010.mp3", "034012.mp3", "034013.mp3", "036001.mp3", "038001.mp3", "038012.mp3", "038013.mp3", "038017.mp3", "038022.mp3", "038024.mp3", "038026.mp3", "038030.mp3", "038034.mp3", "038041.mp3", "038045.mp3", "038048.mp3", "040001.mp3", "040005.mp3", "040031.mp3", "040034.mp3", "040045.mp3", "040066.mp3", "041001.mp3", "041045.mp3", "042001.mp3", "042002.mp3", "042013.mp3", "042015.mp3", "042024.mp3", "043001.mp3", "044001.mp3", "045001.mp3", "046001.mp3", "050001.mp3", "050012.mp3", "050013.mp3", "054027.mp3", "054033.mp3", "054034.mp3", "054036.mp3", "066010.mp3", "068001.mp3", "068002.mp3", "109001.mp3"];
+const PURGE_FLAG = 'jq-audiofix-v137';
+
+async function purgeReplacedAudio(base: string): Promise<void> {
+  try {
+    if (localStorage.getItem(PURGE_FLAG)) return;
+    if (typeof caches === 'undefined') return;
+    const cache = await caches.open(TRANS_AUDIO_CACHE);
+    await Promise.all(PURGE_UR_FILENAMES.map((f) => cache.delete(`${base}ur/${f}`)));
+    localStorage.setItem(PURGE_FLAG, '1');
+  } catch {
+    /* purging is best-effort; never block playback on it */
+  }
+}
+
 /** Base URL for audio files. Falls back to the known public bucket URL. */
 async function baseUrl(): Promise<string> {
   if (cachedBase) return cachedBase;
@@ -75,6 +95,7 @@ async function baseUrl(): Promise<string> {
   } catch {
     cachedBase = 'https://pub-fafe102872f84521ab2a82e3dc2eeab0.r2.dev/';
   }
+  await purgeReplacedAudio(cachedBase);
   return cachedBase;
 }
 
