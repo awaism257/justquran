@@ -140,6 +140,73 @@ export default function FolioPage({ verses, night, activeV = null, fatiha = fals
                 </Fragment>
               );
             }
+            const badgeCluster = (
+              <span className="wqwrap">
+                <button
+                  className="vmark"
+                  aria-label={`Verse ${v.v}`}
+                  {...press}
+                  onClick={() => setOpenIdx(i)}
+                >
+                  {v.v}
+                </button>
+                {v.wq && (
+                  <span className="wqmark" aria-hidden="true">
+                    {wqSortDisplay(wqDisplay(v.wq))
+                      .split('')
+                      .map((c, ci, arr) => {
+                        // 3-mark clusters: highest priority alone on top;
+                        // the other two side by side below (RTL: #2 right,
+                        // #3 left). 1–2 marks: plain vertical stack, 14px pitch.
+                        const n = arr.length;
+                        let bottom = (n - 1 - ci) * 14;
+                        let dx = 0;
+                        if (n === 3) {
+                          if (ci === 0) bottom = 14;
+                          else { bottom = 0; dx = ci === 1 ? 8 : -8; }
+                        }
+                        return (
+                          <span
+                            key={ci}
+                            className="wqch"
+                            style={{
+                              bottom: `${bottom}px`,
+                              transform: `translateX(calc(-50% + ${wqInkOffset(c) + dx}px))`,
+                            }}
+                          >
+                            {c}
+                          </span>
+                        );
+                      })}
+                  </span>
+                )}
+              </span>
+            );
+            // Paged mushaf: render the verse as ONE single text node followed
+            // by a WORD JOINER (U+2060) glued to the badge cluster. No inline
+            // element boundary exists inside the verse text, so a line break
+            // can never land exactly at a span edge — some phone GPUs
+            // (RedMagic 10 Pro) mis-paint the line-final text run in that
+            // situation and the word appears twice (seen at 36:15). U+2060 is
+            // zero-width and invisible; it keeps the badge glued to the last
+            // word exactly as .vkeep did. Vertical folio keeps .vkeep.
+            if (paged) {
+              return (
+                <Fragment key={v.v}>
+                  {jz !== null && (
+                    <>
+                      <span className="juz-orn" title={`Juz ${jz} begins here`}>
+                        ۞
+                      </span>{' '}
+                    </>
+                  )}
+                  <span id={`v${v.v}`} className={runCls} {...press}>
+                    {ar + '\u2060'}
+                  </span>
+                  {badgeCluster}{' '}
+                </Fragment>
+              );
+            }
             return (
             <Fragment key={v.v}>
               {jz !== null && (
@@ -156,46 +223,7 @@ export default function FolioPage({ verses, night, activeV = null, fatiha = fals
                 <span className={runCls} {...press}>
                   {tail}
                 </span>
-                <span className="wqwrap">
-                  <button
-                    className="vmark"
-                    aria-label={`Verse ${v.v}`}
-                    {...press}
-                    onClick={() => setOpenIdx(i)}
-                  >
-                    {v.v}
-                  </button>
-                  {v.wq && (
-                    <span className="wqmark" aria-hidden="true">
-                      {wqSortDisplay(wqDisplay(v.wq))
-                        .split('')
-                        .map((c, ci, arr) => {
-                          // 3-mark clusters: highest priority alone on top;
-                          // the other two side by side below (RTL: #2 right,
-                          // #3 left). 1–2 marks: plain vertical stack, 14px pitch.
-                          const n = arr.length;
-                          let bottom = (n - 1 - ci) * 14;
-                          let dx = 0;
-                          if (n === 3) {
-                            if (ci === 0) bottom = 14;
-                            else { bottom = 0; dx = ci === 1 ? 8 : -8; }
-                          }
-                          return (
-                            <span
-                              key={ci}
-                              className="wqch"
-                              style={{
-                                bottom: `${bottom}px`,
-                                transform: `translateX(calc(-50% + ${wqInkOffset(c) + dx}px))`,
-                              }}
-                            >
-                              {c}
-                            </span>
-                          );
-                        })}
-                    </span>
-                  )}
-                </span>
+                {badgeCluster}
               </span>{' '}
             </Fragment>
     );
