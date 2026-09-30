@@ -528,18 +528,30 @@
     -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 94%);
     mask-image: linear-gradient(to bottom, #000 55%, transparent 94%);
   }
-  /* Page-turn transition: the freshly sliced page fades/slides in. */
-  .folio.paged {
-    animation: folioPageIn 0.22s ease-out;
+  /* Page-turn transition: a solid page-coloured cover over the freshly
+     sliced page fades out. The cover carries no text, so verse text is never
+     composited onto its own animation layer — some phone GPUs mis-rasterize
+     promoted text layers (seen as a doubled word at one exact layout). */
+  .folio.paged::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    border-radius: 8px;
+    background: var(--paper);
+    pointer-events: none;
+    animation: folioCoverOut 0.22s ease-out forwards;
   }
-  @keyframes folioPageIn {
+  .folio.night.paged::after {
+    background: rgb(28, 34, 30);
+  }
+  @keyframes folioCoverOut {
     from {
-      opacity: 0.35;
-      transform: translateY(6px);
+      opacity: 1;
     }
     to {
-      opacity: 1;
-      transform: none;
+      opacity: 0;
+      visibility: hidden;
     }
   }
   /* The band's extra bottom clearance reserves room for the waqf/pause marks
