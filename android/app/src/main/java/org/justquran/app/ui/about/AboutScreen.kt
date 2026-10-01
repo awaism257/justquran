@@ -144,7 +144,7 @@ fun AboutScreen(
                                 context.startActivity(
                                     Intent(
                                         Intent.ACTION_VIEW,
-                                        Uri.parse("https://awaism257.github.io/justquran/support.html")
+                                        Uri.parse("https://justquran.app")
                                     )
                                 )
                             }
@@ -152,7 +152,7 @@ fun AboutScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "awaism257.github.io/justquran/support.html",
+                            text = "justquran.app",
                             modifier = Modifier.weight(1f),
                             color = colors.accent,
                             fontSize = 14.sp,

@@ -69,7 +69,7 @@ export default function About() {
             <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>
               Free · No ads · No sign-in · No tracking · Offline
             </div>
-            <div style={{ fontSize: 12.5, color: GREEN, marginTop: 8 }}>justquran-app.netlify.app</div>
+            <div style={{ fontSize: 12.5, color: GREEN, marginTop: 8 }}>justquran.app</div>
           </div>
         </Card>
 
@@ -88,7 +88,7 @@ export default function About() {
             label="Narration"
             value="English & Urdu chapters read by AI text-to-speech — ClearQuran narration with the author's kind permission"
           />
-          <CreditRow label="Hosting" value="Netlify — Open Source plan (netlify.com)" />
+          <CreditRow label="Hosting" value="Cloudflare / Netlify" />
           <CreditRow label="Source code" value="Open source — MIT License (GitHub)" />
         </Card>
 

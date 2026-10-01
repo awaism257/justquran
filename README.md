@@ -6,7 +6,7 @@ JustQuran is a trilingual Quran reader — **Arabic · Urdu · English** — bui
 installable web app (PWA) for Android, iOS and desktop, with a native Android app
 (Kotlin) sharing the same design family.
 
-**Live app:** https://justquran-app.netlify.app
+**Live app:** https://justquran.app
 **Android package id:** `org.justquran.app`
 
 ---

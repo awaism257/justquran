@@ -79,7 +79,7 @@
   },
   "description": "JustQuran — free, ad-free, offline trilingual Quran reader (Arabic · Urdu · English). React + Vite PWA.",
   "license": "MIT",
-  "homepage": "https://justquran-app.netlify.app",
+  "homepage": "https://justquran.app",
   "keywords": [
     "quran",
     "pwa",

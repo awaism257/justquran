@@ -18,6 +18,6 @@ Features:
 
 JustQuran is completely free and open source (MIT license). It contains no advertisements, no subscriptions, no user tracking, and requires no account.
 
-Web version: https://justquran-app.netlify.app
+Web version: https://justquran.app
 Mirror: https://awaism257.github.io/justquran/
 Source code: https://github.com/awaism257/justquran
