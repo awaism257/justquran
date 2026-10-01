@@ -982,7 +982,12 @@
     line-height: 2.4;
     text-align: center;
     direction: rtl;
-    color: var(--vc-ur);
+    color: #ffffff;
+  }
+  /* In translation book reader: verse being narrated turns yellow */
+  .book-page .verse-run.reciting {
+    color: #ffd700 !important;
+    background: rgba(255, 215, 0, 0.12);
   }
   /* inline superscript verse-number marker in book prose — opens the popup */
   .bkmark {
