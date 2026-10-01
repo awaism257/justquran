@@ -49,7 +49,7 @@ export default function Home() {
       <header className="mhead flex items-start justify-between">
         <div>
           <h1 className="mhead-title">JustQuran</h1>
-          <p className="mhead-sub">Arabic · اردو · English · Transliteration</p>
+          <p className="mhead-sub">Arabic · اردو · English</p>
         </div>
         <nav className="mhead-icons">
           <Link className="icon-btn" to="/search" aria-label="Search">

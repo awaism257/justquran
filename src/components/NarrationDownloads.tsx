@@ -38,6 +38,8 @@ export function NarrationSetDownloads({ lang, bundle }: { lang: BookLang; bundle
     { kind: 'all' } | { kind: 'delete'; surah: number; name: string } | { kind: 'deleteAll' } | null
   >(null);
   const [sizes, setSizes] = useState<Record<string, { v: number; bytes: number }> | null>(null);
+  // Collapsible dropdown card for each narration language
+  const [open, setOpen] = useState(false);
   // Per-surah download rows are collapsed by default so the chapter list
   // stays within easy reach; expanded on demand.
   const [expanded, setExpanded] = useState(false);
@@ -149,22 +151,34 @@ export function NarrationSetDownloads({ lang, bundle }: { lang: BookLang; bundle
   const doneCount = Object.keys(doneMap).length;
 
   return (
-    <div className="flex flex-col gap-3" style={{ marginTop: 6 }}>
-      <div
-        className="card"
-        style={{ cursor: 'default', border: '1px solid var(--hairline)' }}
+    <div className="flex flex-col gap-3">
+      <button
+        type="button"
+        className="card w-full text-left"
+        onClick={() => setOpen((o) => !o)}
+        style={{ border: '1px solid var(--hairline)' }}
       >
         <span className="min-w-0 flex-1">
-          <span className="block" style={{ fontSize: 15 }}>
-            Narration audio
+          <span className="block" style={{ fontSize: 16, fontWeight: 500 }}>
+            {lang === 'en' ? 'English Translation' : 'Urdu Translation'}
           </span>
           <span className="block" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-            {setLabel(setId)} · AI text-to-speech · streams online, download for offline
+            {lang === 'en'
+              ? 'Brian · Verse-by-verse English narration · ~500 MB'
+              : 'Fateh Muhammad Jalandhari · Verse-by-verse Urdu narration · ~500 MB'}
           </span>
         </span>
-      </div>
+        <span className="chev">
+          <ChevronDown
+            size={18}
+            style={{ transform: open ? 'rotate(180deg)' : undefined, transition: 'transform .15s' }}
+          />
+        </span>
+      </button>
 
-      {/* Download all */}
+      {open && (
+        <div className="flex flex-col gap-3">
+          {/* Download all */}
       <button
         className="card w-full text-left"
         onClick={() => {
@@ -295,6 +309,8 @@ export function NarrationSetDownloads({ lang, bundle }: { lang: BookLang; bundle
           </button>
         );
       })}
+        </div>
+      )}
 
       {/* Confirm dialog */}
       {confirm ? (

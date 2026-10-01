@@ -183,18 +183,31 @@
     /* iPhone notch/status bar: sticky bar background covers it, buttons sit below (0 elsewhere) */
     padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 12px;
   }
-  .backbar-title {
-    font-size: 22px;
-    font-weight: 400;
+  .backbar-content {
     flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .backbar-title {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.25;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .backbar-content:not(.has-meta) .backbar-title {
+    font-size: 20px;
+  }
   .backbar-meta {
     font-size: 11.5px;
+    line-height: 1.2;
     color: var(--muted);
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* ---- big tappable card rows ---- */

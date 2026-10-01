@@ -27,10 +27,12 @@ export default function BackBar({ title, meta, onBack, home, actions, titleStyle
         >
           {home ? <Home size={18} /> : <ArrowLeft size={18} />}
         </button>
-        <div className="backbar-title" style={titleStyle}>
-          {title}
+        <div className={`backbar-content ${meta ? 'has-meta' : ''}`}>
+          <div className="backbar-title" style={titleStyle}>
+            {title}
+          </div>
+          {meta ? <div className="backbar-meta">{meta}</div> : null}
         </div>
-        {meta ? <div className="backbar-meta">{meta}</div> : null}
         {actions}
       </div>
       <div className="greendiv" />

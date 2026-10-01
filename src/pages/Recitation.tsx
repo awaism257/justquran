@@ -48,6 +48,8 @@ export default function Recitation() {
     | { kind: 'deleteAll' }
     | null
   >(null);
+  const [arabicOpen, setArabicOpen] = useState(true);
+  const [arabicExpanded, setArabicExpanded] = useState(false);
 
   const cancelRef = useRef(false);
   const runningRef = useRef(false);
@@ -212,134 +214,176 @@ export default function Recitation() {
       <BackBar title="Download audio" meta="Offline listening" />
 
       <div className="px-4 pt-4 pb-6 flex flex-col gap-3">
-        {/* Translation narration (AI TTS): English Brian + Urdu Jalandhari */}
-        {bundle && <NarrationSetDownloads lang="en" bundle={bundle} />}
-        {bundle && <NarrationSetDownloads lang="ur" bundle={bundle} />}
-
-        <div
-          className="px-2 pt-2"
-          style={{ fontSize: 11.5, color: 'var(--muted)', letterSpacing: '0.14em', textTransform: 'uppercase' }}
-        >
-          Recitation · Al-Hussary
-        </div>
-
-        {/* Download all */}
+        {/* 1. Arabic Recitation Dropdown */}
         <button
+          type="button"
           className="card w-full text-left"
-          onClick={() => {
-            if (job) {
-              cancelRef.current = true;
-            } else {
-              setConfirm({ kind: 'all' });
-            }
-          }}
+          onClick={() => setArabicOpen((o) => !o)}
+          style={{ border: '1px solid var(--hairline)' }}
         >
-          <span className="vnum" style={{ background: 'var(--frame2)' }}>
-            <ChevronDown size={16} />
-          </span>
-          <span className="min-w-0">
-            <span className="block" style={{ fontSize: 15 }}>
-              {job ? 'Cancel download' : 'Download all audio'}
+          <span className="min-w-0 flex-1">
+            <span className="block" style={{ fontSize: 16, fontWeight: 500 }}>
+              Arabic Recitation
             </span>
             <span className="block" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-              {overallPct !== null
-                ? `Surah ${job?.surah} of 114 · ${overallPct}%`
-                : job
-                  ? `Downloading surah ${job.surah}… ${Math.round((job.done / job.total) * 100)}%`
-                  : `Whole Quran · ~1 GB · Wi-Fi recommended`}
+              Sheikh Mahmoud Khalil Al-Hussary · Murattal · ~1 GB
             </span>
-            {job ? (
-              <span
-                className="block mt-2 rounded-full overflow-hidden"
-                style={{ height: 4, background: 'var(--line)' }}
-              >
-                <span
-                  className="block h-full"
-                  style={{
-                    width: `${overallPct !== null ? overallPct : Math.round((job.done / job.total) * 100)}%`,
-                    background: 'var(--green)',
-                    transition: 'width .2s linear',
-                  }}
-                />
-              </span>
-            ) : null}
           </span>
           <span className="chev">
-            {job ? <X size={20} /> : <ChevronDown size={20} />}
+            <ChevronDown
+              size={18}
+              style={{ transform: arabicOpen ? 'rotate(180deg)' : undefined, transition: 'transform .15s' }}
+            />
           </span>
         </button>
 
-        {note ? (
-          <p className="px-2" style={{ fontSize: 12, color: 'var(--muted)' }}>
-            {note}
-          </p>
-        ) : null}
-
-        <div className="px-2 flex items-center justify-between">
-          <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
-            {doneSurahs} of 114 surahs downloaded
-          </span>
-          {doneSurahs > 0 && !job ? (
+        {arabicOpen && (
+          <div className="flex flex-col gap-3">
+            {/* Download all */}
             <button
-              className="chip"
-              style={{ padding: '5px 10px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 5 }}
-              onClick={() => setConfirm({ kind: 'deleteAll' })}
-            >
-              <Trash2 size={13} /> Delete all
-            </button>
-          ) : null}
-        </div>
-
-        {/* Per-surah rows */}
-        {bundle?.surahs.map((s) => {
-          const st = statusOf(s.n);
-          const pct = job?.surah === s.n ? Math.round((job.done / job.total) * 100) : 0;
-          return (
-            <button
-              key={s.n}
               className="card w-full text-left"
               onClick={() => {
-                if (st === 'done') setConfirm({ kind: 'delete', surah: s.n, name: s.name_en });
-                else if (st === 'none') void startSurah(s.n, s.ayahs);
-                else cancelRef.current = true; // downloading → cancel
+                if (job) {
+                  cancelRef.current = true;
+                } else {
+                  setConfirm({ kind: 'all' });
+                }
               }}
             >
-              <span className="vnum">{s.n}</span>
-              <span className="min-w-0 flex-1">
+              <span className="vnum" style={{ background: 'var(--frame2)' }}>
+                <ChevronDown size={16} />
+              </span>
+              <span className="min-w-0">
                 <span className="block" style={{ fontSize: 15 }}>
-                  {s.name_en}
+                  {job ? 'Cancel download' : 'Download all audio'}
                 </span>
                 <span className="block" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-                  {st === 'done'
-                    ? 'Downloaded ✓'
-                    : st === 'downloading'
-                      ? `Downloading… ${pct}%`
-                      : `Not downloaded · ${s.ayahs} verses`}
+                  {overallPct !== null
+                    ? `Surah ${job?.surah} of 114 · ${overallPct}%`
+                    : job
+                      ? `Downloading surah ${job.surah}… ${Math.round((job.done / job.total) * 100)}%`
+                      : `Whole Quran · ~1 GB · Wi-Fi recommended`}
                 </span>
-                {st === 'downloading' ? (
+                {job ? (
                   <span
                     className="block mt-2 rounded-full overflow-hidden"
-                    style={{ height: 3, background: 'var(--line)' }}
+                    style={{ height: 4, background: 'var(--line)' }}
                   >
                     <span
                       className="block h-full"
-                      style={{ width: `${pct}%`, background: 'var(--green)', transition: 'width .2s linear' }}
+                      style={{
+                        width: `${overallPct !== null ? overallPct : Math.round((job.done / job.total) * 100)}%`,
+                        background: 'var(--green)',
+                        transition: 'width .2s linear',
+                      }}
                     />
                   </span>
                 ) : null}
               </span>
               <span className="chev">
-                {st === 'done' ? (
-                  <Check size={18} style={{ color: 'var(--green)' }} />
-                ) : st === 'downloading' ? (
-                  <Loader2 size={18} className="animate-spin" style={{ color: 'var(--green)' }} />
-                ) : (
-                  <ChevronDown size={18} />
-                )}
+                {job ? <X size={20} /> : <ChevronDown size={20} />}
               </span>
             </button>
-          );
-        })}
+
+            {note ? (
+              <p className="px-2" style={{ fontSize: 12, color: 'var(--muted)' }}>
+                {note}
+              </p>
+            ) : null}
+
+            <div className="px-2 flex items-center justify-between">
+              <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                {doneSurahs} of 114 surahs downloaded
+              </span>
+              {doneSurahs > 0 && !job ? (
+                <button
+                  className="chip"
+                  style={{ padding: '5px 10px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 5 }}
+                  onClick={() => setConfirm({ kind: 'deleteAll' })}
+                >
+                  <Trash2 size={13} /> Delete all
+                </button>
+              ) : null}
+            </div>
+
+            <button
+              className="card w-full text-left"
+              onClick={() => setArabicExpanded((e) => !e)}
+              aria-expanded={arabicExpanded}
+            >
+              <span className="vnum" style={{ background: 'var(--frame2)' }}>
+                <ChevronDown
+                  size={16}
+                  style={{ transform: arabicExpanded ? 'rotate(180deg)' : undefined, transition: 'transform .15s' }}
+                />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block" style={{ fontSize: 15 }}>
+                  Download individual surahs
+                </span>
+                <span className="block" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+                  {arabicExpanded ? 'Tap a surah to download or delete it' : 'Pick specific surahs instead of the whole Quran'}
+                </span>
+              </span>
+            </button>
+
+            {arabicExpanded && bundle?.surahs.map((s) => {
+              const st = statusOf(s.n);
+              const pct = job?.surah === s.n ? Math.round((job.done / job.total) * 100) : 0;
+              return (
+                <button
+                  key={s.n}
+                  className="card w-full text-left"
+                  onClick={() => {
+                    if (st === 'done') setConfirm({ kind: 'delete', surah: s.n, name: s.name_en });
+                    else if (st === 'none') void startSurah(s.n, s.ayahs);
+                    else cancelRef.current = true; // downloading → cancel
+                  }}
+                >
+                  <span className="vnum">{s.n}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block" style={{ fontSize: 15 }}>
+                      {s.name_en}
+                    </span>
+                    <span className="block" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+                      {st === 'done'
+                        ? 'Downloaded ✓'
+                        : st === 'downloading'
+                          ? `Downloading… ${pct}%`
+                          : `Not downloaded · ${s.ayahs} verses`}
+                    </span>
+                    {st === 'downloading' ? (
+                      <span
+                        className="block mt-2 rounded-full overflow-hidden"
+                        style={{ height: 3, background: 'var(--line)' }}
+                      >
+                        <span
+                          className="block h-full"
+                          style={{ width: `${pct}%`, background: 'var(--green)', transition: 'width .2s linear' }}
+                        />
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="chev">
+                    {st === 'done' ? (
+                      <Check size={18} style={{ color: 'var(--green)' }} />
+                    ) : st === 'downloading' ? (
+                      <Loader2 size={18} className="animate-spin" style={{ color: 'var(--green)' }} />
+                    ) : (
+                      <ChevronDown size={18} />
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* 2. English Translation Dropdown */}
+        {bundle && <NarrationSetDownloads lang="en" bundle={bundle} />}
+
+        {/* 3. Urdu Translation Dropdown */}
+        {bundle && <NarrationSetDownloads lang="ur" bundle={bundle} />}
 
         <p className="text-center pt-2 pb-6" style={{ fontSize: 12, color: 'var(--muted)' }}>
           Streaming works online · download for offline
