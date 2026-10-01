@@ -13,13 +13,27 @@ android {
         applicationId = "org.justquran.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 75
-        versionName = "2.2.60"
+        versionCode = 76
+        versionName = "2.2.61"
     }
 
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
+    }
+
+    signingConfigs {
+        create("release") {
+            val ks = rootProject.file("keystore/munajaat-release.jks")
+            if (ks.exists()) {
+                storeFile = ks
+                storePassword = "9FtLuJDEzM6RBF26ya44"
+                keyAlias = "munajaat"
+                keyPassword = "9FtLuJDEzM6RBF26ya44"
+                enableV1Signing = true
+                enableV2Signing = true
+            }
+        }
     }
 
     buildTypes {
@@ -28,6 +42,7 @@ android {
             isShrinkResources = true
             vcsInfo.include = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
