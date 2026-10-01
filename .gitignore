@@ -27,3 +27,13 @@ Thumbs.db
 keystore.properties
 signing.properties
 **/secrets/
+
+# Android build & local files
+.gradle
+android/.gradle
+android/.kotlin
+android/local.properties
+android/**/build/
+android/keystore/
+*.apk
+*.aab

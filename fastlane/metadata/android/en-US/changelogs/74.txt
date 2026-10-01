@@ -1,0 +1,6 @@
+• Centered paged mushaf view and translation books.
+• Instant search filter added to Juz and Translation book indices.
+• Audio narration for English and Urdu with continuous audiobook background playback.
+• Real-time verse narration highlighting in translation books.
+• Dedicated collapsible sections for Arabic, English, and Urdu audio downloads.
+• Clean header display showing full Surah titles.

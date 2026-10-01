@@ -1,0 +1,23 @@
+JustQuran is a clean, modern, offline reader for the Holy Quran, presented in Arabic together with Urdu and English translations.
+
+Texts and Scripts:
+• Arabic: Digital Khatt IndoPak (QUL/CDT edition, paged layout) and Tanzil Uthmani (verse-by-verse)
+• Urdu: Authentic translation by Fateh Muhammad Jalandhari
+• English: The ClearQuran translation by Talal Itani
+• Transliteration: English phonetic transliteration for every verse
+
+Features:
+• Folio / Paged Mushaf View: Centered IndoPak paged layout with waqaf symbols, surah headers, and bismillah markers
+• Verse-by-verse Card View: Read Arabic, translation, and transliteration side by side with customizable visibility
+• Audio Recitation & Narration: Listen to Arabic recitation (Mahmoud Khalil Al-Hussary / Ibrahim Walk) alongside English and Urdu audio narrations verse-by-verse, or listen continuously like an audiobook in the background
+• Translation Books: Dedicated book view for English and Urdu translations with active verse narration highlighting
+• Full-Text Search: Fast offline search across Arabic, English, and Urdu texts
+• Navigation: Surah index, Juz index with quick filtering, bookmarks, and Khatm al-Quran supplication
+• Offline & Private: No internet required for reading; optional offline audio downloads
+• Appearance: Light and dark themes with independent font size controls for Arabic, Urdu, and English
+
+JustQuran is completely free and open source (MIT license). It contains no advertisements, no subscriptions, no user tracking, and requires no account.
+
+Web version: https://justquran-app.netlify.app
+Mirror: https://awaism257.github.io/justquran/
+Source code: https://github.com/awaism257/justquran
