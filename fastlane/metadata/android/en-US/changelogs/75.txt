@@ -1,3 +1,4 @@
-• Official ClearQuran Chapter Titles: English translation book chapters now match Talal Itani's official ClearQuran titles (e.g. The Opening, The Heifer, Livestock, The Elevations, The Spoils, History).
-• Enhanced Search: Instantly find Surahs using official English chapter names across the app.
-• Official Domain Connected: Updated links to our official custom domain https://justquran.app.
+• Official ClearQuran Titles: Surah names in English translation now match Talal Itani's official titles (e.g. The Opening, The Heifer, Livestock).
+• Centred Paged Reading: Page frame and text block in the paged Mushaf view are now centralized with balanced margins.
+• Enhanced Search: Find Surahs by official English translation names.
+• Official Domain: Connected custom domain https://justquran.app.
