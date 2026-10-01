@@ -252,7 +252,11 @@ fun paginateSurah(
     var i = 0
     var pageIdx = 0
     while (i < sortedSpans.size) {
-        val usableH = (if (pageIdx != 0 || surah == 9) maxH else maxH - band.bandH) - band.clearance - safetyPx
+        val usableH = if (pageIdx == 0 && surah != 9) {
+            maxH - band.bandH - band.clearance - safetyPx
+        } else {
+            maxH - safetyPx
+        }
         val targetH = max(usableH, 1)
         val vSpan = sortedSpans[i]
         val top = layout.getLineTop(vSpan.firstLine)
@@ -411,7 +415,7 @@ fun PagedMushafView(
             modifier = Modifier
                 .weight(1.0f)
                 .fillMaxHeight()
-                .padding(bottom = 10.dp)
+                .padding(vertical = 8.dp)
                 .shadow(TEXT_INSET_DP.dp, RoundedCornerShape(TEXT_INSET_DP.dp))
                 .background(colors.folioPaper, RoundedCornerShape(TEXT_INSET_DP.dp))
                 .padding(12.dp, 12.dp)
@@ -611,9 +615,8 @@ fun PagedMushafView(
                                     playing = audioSurah == curSurah.intValue && ((playingVerse != null && playingVerse == 0) || (curSurah.intValue == 1 && playingVerse == 1)),
                                     fatiha = curSurah.intValue == 1
                                 )
+                                Spacer(modifier = Modifier.height(with(density) { bandMetrics.clearance.toDp() }))
                             }
-
-                            Spacer(modifier = Modifier.height(with(density) { bandMetrics.clearance.toDp() }))
 
                             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                                 Text(
