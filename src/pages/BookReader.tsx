@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pause, Play, SkipBack, SkipForward, X } from 'lucide-react';
 import BackBar from '@/components/BackBar';
 import VersePopup from '@/components/VersePopup';
-import SurahPlayer from '@/components/SurahPlayer';
 import { bookTitle, getSurahMeta, getSurahVerses, loadBundle, loadSurahTitles } from '@/lib/data';
 import type { Bundle, SurahTitles, Verse } from '@/lib/data';
 import { setLastRead } from '@/lib/bookmarks';
@@ -44,7 +43,7 @@ export default function BookReader() {
   const navigate = useNavigate();
   const lang: 'en' | 'ur' = params.lang === 'ur' ? 'ur' : 'en';
   const n = Math.min(114, Math.max(1, parseInt(params.n ?? '1', 10) || 1));
-  const { settings, set } = useSettings();
+  const { settings } = useSettings();
   const [bundle, setBundle] = useState<Bundle | null>(null);
   const [titles, setTitles] = useState<SurahTitles | null>(null);
   const [popupIdx, setPopupIdx] = useState<number | null>(null);
@@ -485,56 +484,132 @@ export default function BookReader() {
           </button>
         </div>
 
-        {/* Footer pager: English › = next; Urdu ‹ = next (mushaf convention). */}
-        <nav
-          className="pager"
-          style={{ padding: '10px 0 16px' }}
-        >
-          {(lang === 'ur' ? pageIdx < pageCount - 1 : pageIdx > 0) ? (
+        {/* Bottom bar: media controls replace page footer while narration audio is active */}
+        {playing || paused ? (
+          <div
+            className="audio-bottom-bar"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'var(--card-bg, rgba(255, 255, 255, 0.05))',
+              border: '1px solid var(--line)',
+              borderRadius: 16,
+              padding: '6px 12px',
+              margin: '6px 0 12px',
+            }}
+          >
             <button
               type="button"
-              className="pager-link"
-              onClick={lang === 'ur' ? nextPage : prevPage}
+              className="icon-btn"
+              style={{ border: 'none', padding: 4 }}
+              aria-label="Previous verse"
+              onClick={() => stepItem(-1)}
             >
-              {lang === 'ur' ? '‹ Next' : '‹ Prev'}
+              <SkipBack size={16} />
             </button>
-          ) : (
-            <span className="pager-link disabled">{lang === 'ur' ? '‹ Next' : '‹ Prev'}</span>
-          )}
-          <span className="count">
-            Page {pageIdx + 1} of {pageCount}
-          </span>
-          {(lang === 'ur' ? pageIdx > 0 : pageIdx < pageCount - 1) ? (
             <button
               type="button"
-              className="pager-link"
-              onClick={lang === 'ur' ? prevPage : nextPage}
+              className="icon-btn"
+              style={{ border: 'none', padding: 4 }}
+              aria-label={paused ? 'Resume' : 'Pause'}
+              onClick={togglePlay}
             >
-              {lang === 'ur' ? 'Prev ›' : 'Next ›'}
+              {paused ? <Play size={17} fill="currentColor" /> : <Pause size={17} fill="currentColor" />}
             </button>
-          ) : (
-            <span className="pager-link disabled">{lang === 'ur' ? 'Prev ›' : 'Next ›'}</span>
-          )}
-        </nav>
-      </div>
+            <button
+              type="button"
+              className="icon-btn"
+              style={{ border: 'none', padding: 4 }}
+              aria-label="Next verse"
+              onClick={() => stepItem(1)}
+            >
+              <SkipForward size={16} />
+            </button>
 
-      {playing && seqItem && (
-        <SurahPlayer
-          verse={seqItem.labelVerse}
-          title={chapterTitle}
-          titleRtl={lang === 'ur'}
-          playing={!paused}
-          progress={progress}
-          hasPrev={playIdx > 0}
-          hasNext={playIdx < seq.length - 1}
-          auto={settings.audioAutoAdvance}
-          onToggleAuto={() => set({ audioAutoAdvance: !settings.audioAutoAdvance })}
-          onTogglePlay={togglePlay}
-          onPrev={() => stepItem(-1)}
-          onNext={() => stepItem(1)}
-          onStop={stopPlayback}
-        />
-      )}
+            <div style={{ flex: 1, minWidth: 0, padding: '0 4px' }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: 'var(--muted)',
+                  fontFamily: lang === 'ur' ? "'Noto Nastaliq Urdu', serif" : "'DejaVu Serif', serif",
+                  direction: lang === 'ur' ? 'rtl' : 'ltr',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {seqItem?.verseIdx === null
+                  ? lang === 'ur'
+                    ? 'بسم اللہ'
+                    : 'Bismillah'
+                  : seqItem
+                  ? lang === 'ur'
+                    ? `آیت ${seqItem.labelVerse.v} از ${verses.length}`
+                    : `Verse ${seqItem.labelVerse.v} of ${verses.length} · Translation`
+                  : '…'}
+              </div>
+              <div
+                style={{
+                  height: 3,
+                  borderRadius: 2,
+                  background: 'var(--line)',
+                  overflow: 'hidden',
+                  width: '100%',
+                  marginTop: 4,
+                }}
+              >
+                <div
+                  style={{
+                    height: '100%',
+                    width: `${Math.min(100, Math.max(0, progress))}%`,
+                    background: 'var(--green, #a7c989)',
+                    transition: 'width 0.1s linear',
+                  }}
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="icon-btn"
+              style={{ border: 'none', padding: 4, color: 'var(--muted)' }}
+              aria-label="Stop playback"
+              onClick={stopPlayback}
+            >
+              <X size={17} />
+            </button>
+          </div>
+        ) : (
+          <nav className="pager" style={{ padding: '10px 0 16px' }}>
+            {(lang === 'ur' ? pageIdx < pageCount - 1 : pageIdx > 0) ? (
+              <button
+                type="button"
+                className="pager-link"
+                onClick={lang === 'ur' ? nextPage : prevPage}
+              >
+                {lang === 'ur' ? '‹ Next' : '‹ Prev'}
+              </button>
+            ) : (
+              <span className="pager-link disabled">{lang === 'ur' ? '‹ Next' : '‹ Prev'}</span>
+            )}
+            <span className="count">
+              Page {pageIdx + 1} of {pageCount}
+            </span>
+            {(lang === 'ur' ? pageIdx > 0 : pageIdx < pageCount - 1) ? (
+              <button
+                type="button"
+                className="pager-link"
+                onClick={lang === 'ur' ? prevPage : nextPage}
+              >
+                {lang === 'ur' ? 'Prev ›' : 'Next ›'}
+              </button>
+            ) : (
+              <span className="pager-link disabled">{lang === 'ur' ? 'Prev ›' : 'Next ›'}</span>
+            )}
+          </nav>
+        )}
+      </div>
 
       {popupVerse && popupIdx !== null && (
         <VersePopup

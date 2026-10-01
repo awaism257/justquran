@@ -993,10 +993,16 @@
     direction: rtl;
     color: #ffffff;
   }
+  html.light .book-ur {
+    color: var(--text);
+  }
   /* In translation book reader: verse being narrated turns yellow */
   .book-page .verse-run.reciting {
     color: #ffd700 !important;
-    background: rgba(255, 215, 0, 0.12);
+    background: transparent !important;
+  }
+  html.light .book-page .verse-run.reciting {
+    color: #b57c00 !important;
   }
   /* inline superscript verse-number marker in book prose — opens the popup */
   .bkmark {
