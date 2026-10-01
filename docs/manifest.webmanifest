@@ -1,15 +1,41 @@
 {
   "name": "JustQuran",
   "short_name": "JustQuran",
+  "description": "Read and listen to the Quran with Indopak script, Jalandhari Urdu translation and ClearQuran English. Free, ad-free, works fully offline.",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "books",
+    "education",
+    "reference"
+  ],
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "theme_color": "#101613",
   "background_color": "#101613",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

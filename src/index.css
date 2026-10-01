@@ -472,6 +472,9 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     padding: 26px 20px;
     position: relative;
+    max-width: 680px;
+    margin: 0 auto;
+    width: 100%;
   }
   .folio-inner {
     border: 2px solid var(--frame);
@@ -532,6 +535,9 @@
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   /* First-visit placeholder: before a surah's pagination is measured, a
      top-of-surah preview renders without page slicing — its text can run past
@@ -965,6 +971,9 @@
     border-radius: 18px;
     overflow: hidden;
     position: relative;
+    max-width: 680px;
+    margin: 0 auto;
+    width: 100%;
   }
   .book-bism {
     margin: 0 0 0.9em;

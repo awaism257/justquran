@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'justquran-v138';
+const CACHE_VERSION = 'justquran-v144';
 
 /*
  * ⚠️ PROJECT RULE — READ BEFORE EDITING ⚠️
@@ -11,8 +11,10 @@ const CACHE_VERSION = 'justquran-v138';
 
 const APP_CACHE = CACHE_VERSION;
 const AUDIO_CACHE = 'justquran-audio-v1';
-// Translation-narration downloads (written by the app). Preserved across
-// updates by the activate purge below.
+// Translation-narration downloads (written by the app). Referenced in the
+// activate purge below — must be DEFINED here: an undefined reference throws
+// inside the activate handler, which fails activation and strands returning
+// users on their old worker forever (this exact bug shipped in v126).
 const TRANS_AUDIO_CACHE = 'justquran-trans-audio-v1';
 
 // App shell + fully-offline assets (text, fonts, icons) precached on install.
@@ -28,6 +30,8 @@ const PRECACHE_URLS = [
   'fonts/nastaliq.ttf',
   'fonts/noto-naskh.ttf',
   'data/quran-bundle.json',
+  'data/surah-titles.json',
+  'data/translation-audio.json',
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/icon-maskable-512.png',
@@ -70,7 +74,8 @@ async function cacheFirstAcrossCaches(request, options) {
   if (cached) return cached;
   const response = await fetch(request);
   // Only store complete 200 responses: audio is usually fetched in ranges
-  // (206 Partial Content), which Cache Storage rejects.
+  // (206 Partial Content), which Cache Storage rejects — the put() would
+  // throw an unhandled error for every streamed verse.
   if (response && response.status === 200) {
     const cache = await caches.open(APP_CACHE);
     cache.put(request, response.clone());
@@ -88,6 +93,14 @@ self.addEventListener('fetch', (event) => {
   // justquran-audio-v1 cache for downloaded surahs. Anything streamed while
   // online is stored in the app cache for future offline plays.
   if (url.origin === 'https://everyayah.com') {
+    event.respondWith(cacheFirstAcrossCaches(request));
+    return;
+  }
+
+  // Translation narration audio (Cloudflare R2): cache-first. The app writes
+  // user downloads to justquran-trans-audio-v1; streamed files are kept for
+  // offline replay.
+  if (url.origin === 'https://pub-fafe102872f84521ab2a82e3dc2eeab0.r2.dev') {
     event.respondWith(cacheFirstAcrossCaches(request));
     return;
   }
