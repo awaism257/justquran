@@ -280,7 +280,7 @@ fun BookReaderScreen(
     val chapterTitle = if (isUrdu) {
         SurahTitles.urduName(surahNumber)
     } else {
-        surahMeta?.nameMeaning?.ifBlank { surahMeta.nameEn } ?: "Surah $surahNumber"
+        SurahTitles.englishName(surahNumber)
     }
     val title = "${surahNumber}. $chapterTitle"
     val subtitle = if (pageCount > 0) "Page ${safePage + 1} of $pageCount · $transLabel" else transLabel

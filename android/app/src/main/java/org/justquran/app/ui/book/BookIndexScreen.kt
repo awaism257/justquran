@@ -149,9 +149,11 @@ fun BookIndexScreen(
                         val q = foldQuery(query.trim())
                         allSurahs.filter { s ->
                             val urduTitle = foldQuery(SurahTitles.urduName(s.n))
+                            val englishTitle = foldQuery(SurahTitles.englishName(s.n))
                             s.n.toString().startsWith(q) ||
                                     foldQuery(s.nameEn).contains(q) ||
                                     foldQuery(s.nameMeaning).contains(q) ||
+                                    englishTitle.contains(q) ||
                                     s.nameAr.contains(query.trim()) ||
                                     urduTitle.contains(q)
                         }
@@ -305,7 +307,7 @@ fun BookIndexScreen(
                                         )
                                     } else {
                                         Text(
-                                            text = surahMeta.nameMeaning.ifBlank { surahMeta.nameEn },
+                                            text = SurahTitles.englishName(surahMeta.n),
                                             color = colors.text,
                                             fontSize = 16.sp,
                                             fontFamily = fonts.serif

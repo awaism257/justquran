@@ -33,5 +33,42 @@ object SurahTitles {
         113 to "سورۃ فلق", 114 to "سورۃ ناس"
     )
 
+    val english: Map<Int, String> = mapOf(
+        1 to "The Opening", 2 to "The Heifer", 3 to "Family of Imran", 4 to "Women",
+        5 to "The Table", 6 to "Livestock", 7 to "The Elevations", 8 to "The Spoils",
+        9 to "Repentance", 10 to "Jonah", 11 to "Hud", 12 to "Joseph",
+        13 to "Thunder", 14 to "Abraham", 15 to "The Rock", 16 to "The Bee",
+        17 to "The Night Journey", 18 to "The Cave", 19 to "Mary", 20 to "Ta-Ha",
+        21 to "The Prophets", 22 to "The Pilgrimage", 23 to "The Believers", 24 to "The Light",
+        25 to "The Criterion", 26 to "The Poets", 27 to "The Ant", 28 to "History",
+        29 to "The Spider", 30 to "The Romans", 31 to "Luqman", 32 to "Prostration",
+        33 to "The Confederates", 34 to "Sheba", 35 to "Originator", 36 to "Ya-Seen",
+        37 to "The Aligners", 38 to "Saad", 39 to "Throngs", 40 to "Forgiver",
+        41 to "Detailed", 42 to "Consultation", 43 to "Decorations", 44 to "Smoke",
+        45 to "Kneeling", 46 to "The Dunes", 47 to "Muhammad", 48 to "Victory",
+        49 to "The Chambers", 50 to "Qaf", 51 to "The Spreaders", 52 to "The Mount",
+        53 to "The Star", 54 to "The Moon", 55 to "The Compassionate", 56 to "The Inevitable",
+        57 to "Iron", 58 to "The Argument", 59 to "The Mobilization", 60 to "The Woman Tested",
+        61 to "Column", 62 to "Friday", 63 to "The Hypocrites", 64 to "Gathering",
+        65 to "Divorce", 66 to "Prohibition", 67 to "Sovereignty", 68 to "The Pen",
+        69 to "The Reality", 70 to "Ways of Ascent", 71 to "Noah", 72 to "The Jinn",
+        73 to "The Enwrapped", 74 to "The Enrobed", 75 to "Resurrection", 76 to "Man",
+        77 to "The Unleashed", 78 to "The Event", 79 to "The Snatchers", 80 to "He Frowned",
+        81 to "The Rolling", 82 to "The Shattering", 83 to "The Defrauders", 84 to "The Rupture",
+        85 to "The Constellations", 86 to "The Nightly Visitor", 87 to "The Most High", 88 to "The Overwhelming",
+        89 to "The Dawn", 90 to "The Land", 91 to "The Sun", 92 to "The Night",
+        93 to "Morning Light", 94 to "The Soothing", 95 to "The Fig", 96 to "Clot",
+        97 to "Decree", 98 to "Clear Evidence", 99 to "The Quake", 100 to "The Racers",
+        101 to "The Shocker", 102 to "Abundance", 103 to "Time", 104 to "The Backbiter",
+        105 to "The Elephant", 106 to "Quraish", 107 to "Assistance", 108 to "Plenty",
+        109 to "The Disbelievers", 110 to "Victory", 111 to "Thorns", 112 to "Monotheism",
+        113 to "Daybreak", 114 to "Mankind"
+    )
+
     fun urduName(surah: Int): String = urdu[surah] ?: "سورۃ $surah"
+
+    fun englishName(surah: Int): String = english[surah] ?: "Surah $surah"
+
+    fun bookTitle(lang: String, surah: Int, fallback: String = ""): String =
+        if (lang == "ur") urduName(surah) else english[surah] ?: fallback.ifBlank { "Surah $surah" }
 }

@@ -41,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import org.justquran.app.AppContainer
 import org.justquran.app.data.SurahMeta
+import org.justquran.app.data.SurahTitles
 import org.justquran.app.ui.AppViewModel
 import org.justquran.app.ui.BackBar
 import org.justquran.app.ui.nav.Routes
@@ -96,6 +97,7 @@ fun SurahIndexScreen(
                         s.n.toString().startsWith(q) ||
                                 foldQuery(s.nameEn).contains(q) ||
                                 foldQuery(s.nameMeaning).contains(q) ||
+                                foldQuery(SurahTitles.englishName(s.n)).contains(q) ||
                                 s.nameAr.contains(q)
                     }
                 }

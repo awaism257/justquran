@@ -52,6 +52,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.justquran.app.AppContainer
 import org.justquran.app.data.SurahMeta
+import org.justquran.app.data.SurahTitles
 import org.justquran.app.data.Verse
 import org.justquran.app.data.displayArabic
 import org.justquran.app.ui.AppViewModel
@@ -172,7 +173,7 @@ fun SearchScreen(
             val qAr = normArScript(q)
             val all = vm.surahMeta()
             val matches = all.filter { s ->
-                (qLatin.isNotEmpty() && (normLatin(s.nameEn).contains(qLatin) || normLatin(s.nameMeaning).contains(qLatin))) ||
+                (qLatin.isNotEmpty() && (normLatin(s.nameEn).contains(qLatin) || normLatin(s.nameMeaning).contains(qLatin) || normLatin(SurahTitles.englishName(s.n)).contains(qLatin))) ||
                     (qAr.isNotEmpty() && normArScript(s.nameAr).contains(qAr))
             }
             matches.sortedWith(
