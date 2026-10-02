@@ -123,6 +123,7 @@ export default function BookReader() {
   const autoRef = useRef(settings.audioAutoAdvance);
   autoRef.current = settings.audioAutoAdvance;
   const pendingAutoRef = useRef(false); // cross-surah auto-continue
+  const gapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Build the narration sequence when chapter/voice/language changes.
   useEffect(() => {
@@ -193,7 +194,11 @@ export default function BookReader() {
           if (reason === 'ended') {
             const next = playIdxRef.current + 1;
             if (next < seqRef.current.length) {
-              playItem(next);
+              if (gapTimerRef.current) clearTimeout(gapTimerRef.current);
+              gapTimerRef.current = setTimeout(() => {
+                gapTimerRef.current = null;
+                playItem(next);
+              }, 1000);
             } else {
               // Chapter finished. AUTO continues into the next chapter.
               setPlaying(false);
@@ -216,6 +221,10 @@ export default function BookReader() {
   );
 
   const stopPlayback = useCallback(() => {
+    if (gapTimerRef.current) {
+      clearTimeout(gapTimerRef.current);
+      gapTimerRef.current = null;
+    }
     handleRef.current?.stop();
     handleRef.current = null;
     stopTranslation();
@@ -237,6 +246,10 @@ export default function BookReader() {
   // Leaving the chapter / changing voice stops the narration.
   useEffect(() => {
     return () => {
+      if (gapTimerRef.current) {
+        clearTimeout(gapTimerRef.current);
+        gapTimerRef.current = null;
+      }
       handleRef.current?.stop();
       handleRef.current = null;
     };
@@ -244,6 +257,10 @@ export default function BookReader() {
   }, [n, lang, setId]);
 
   const togglePlay = useCallback(() => {
+    if (gapTimerRef.current) {
+      clearTimeout(gapTimerRef.current);
+      gapTimerRef.current = null;
+    }
     if (playing && !paused) {
       handleRef.current?.audio.pause();
       setPaused(true);
@@ -257,6 +274,10 @@ export default function BookReader() {
 
   const stepItem = useCallback(
     (delta: number) => {
+      if (gapTimerRef.current) {
+        clearTimeout(gapTimerRef.current);
+        gapTimerRef.current = null;
+      }
       const items = seqRef.current;
       const next = Math.max(0, Math.min(items.length - 1, playIdxRef.current + delta));
       if (playing || paused) playItem(next);

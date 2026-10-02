@@ -73,6 +73,7 @@ export default function Reading() {
   // scrolling always wins: any manual wheel/touch pauses the follow, and it
   // resumes when the user uses the player controls or taps the playing verse.
   const followRef = useRef(true);
+  const verseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /** Smooth-scroll `el` to the centre of the VISIBLE reading area — the
       viewport minus the fixed player's height (~185px). Manual scrollTo
@@ -87,6 +88,10 @@ export default function Reading() {
   }, []);
 
   const stopSurahPlay = useCallback(() => {
+    if (verseTimerRef.current) {
+      clearTimeout(verseTimerRef.current);
+      verseTimerRef.current = null;
+    }
     surahGen.current++;
     surahHandle.current = null;
     setSurahPlayV(null);
@@ -192,6 +197,10 @@ export default function Reading() {
   const startSurahFrom = useCallback(
     (from: number, skipBismillah = false) => {
       if (!surah) return;
+      if (verseTimerRef.current) {
+        clearTimeout(verseTimerRef.current);
+        verseTimerRef.current = null;
+      }
       const ayahs = surah.ayahs; // captured: hoisted fns lose the narrowing
       followRef.current = true; // (re)starting playback re-engages auto-follow
       chainCancelRef.current = false; // (re)starting also re-arms continuation
@@ -222,7 +231,20 @@ export default function Reading() {
           setSurahProgress(0);
           return;
         }
-        step(v + 1);
+        // If narration/translation is active, insert a 1.0s contemplation pause between verses
+        const hasTranslation =
+          followTransRef.current &&
+          !pagedRef.current &&
+          (followLegsRef.current.english || followLegsRef.current.urdu);
+        if (hasTranslation) {
+          if (verseTimerRef.current) clearTimeout(verseTimerRef.current);
+          verseTimerRef.current = setTimeout(() => {
+            verseTimerRef.current = null;
+            if (surahGen.current === gen) step(v + 1);
+          }, 1000);
+        } else {
+          step(v + 1);
+        }
       }
       /** Arabic ended naturally → if "follow with translation" is on (and
           this isn't the paged mushaf), read the enabled narration legs —
