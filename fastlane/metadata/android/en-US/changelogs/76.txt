@@ -1,0 +1,4 @@
+• Official ClearQuran Titles: Surah names in English translation now match Talal Itani's official titles (e.g. The Opening, The Heifer, Livestock).
+• Centred Paged Reading: Page frame and text block in the paged Mushaf view are now centralized with balanced margins.
+• Enhanced Search: Find Surahs by official English translation names.
+• Official Domain: Connected custom domain https://justquran.app.

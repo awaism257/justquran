@@ -52,7 +52,7 @@ export default function JuzIndex() {
           )}
         </div>
       </div>
-      <div className="flex flex-col gap-3 px-4 py-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-4 py-4">
         {filteredJuz.map((j) => {
           const next = JUZ_STARTS.find((x) => x.juz === j.juz + 1);
           // End of juz = verse before next juz start (or end of Quran for juz 30)

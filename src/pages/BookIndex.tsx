@@ -139,7 +139,7 @@ export default function BookIndex() {
       </div>
       <div className="flex flex-col gap-3 px-4 py-4">
         {!q && (
-          <>
+          <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
               className="card"
@@ -182,11 +182,13 @@ export default function BookIndex() {
                 </span>
               </span>
             </button>
-          </>
+          </div>
         )}
 
-        {bundle &&
-          filteredSurahs.map((s) => <BookSurahRow key={s.n} s={s} lang={lang} titles={titles} />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {bundle &&
+            filteredSurahs.map((s) => <BookSurahRow key={s.n} s={s} lang={lang} titles={titles} />)}
+        </div>
         {!bundle && (
           <p className="py-10 text-center" style={{ color: 'var(--muted)', fontSize: 13 }}>
             Loading…

@@ -43,7 +43,7 @@ export default function BookmarksPage() {
   return (
     <div className="tiles" style={{ minHeight: '100dvh' }}>
       <BackBar title="Bookmarks" meta={marks.length ? `${marks.length} saved` : undefined} />
-      <div className="flex flex-col gap-3 px-4 py-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-4 py-4">
         {last && (
           <Link to={`/surah/${last.s}#v${last.v}`} className="card">
             <span style={{ color: 'var(--green)', flexShrink: 0 }}>

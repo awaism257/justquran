@@ -82,27 +82,28 @@ export default function Home() {
             <ChevronRight size={18} className="chev" />
           </Link>
         )}
-        <BigCard to="/surahs" icon={<BookOpen size={20} />} title="Surahs" sub="All 114 surahs" />
-        <BigCard to="/juz" icon={<Rows3 size={20} />} title="Juz" sub="30 parts of the Quran" />
-        {/* No Bookmarks card here — the header (top-right) already links to it. */}
-        <BigCard
-          to="/khatm"
-          icon={<HandHeart size={20} />}
-          title="Completing the Quran"
-          sub="Khatm dua · دعائے ختمِ قرآن"
-        />
-        <BigCard
-          to="/book"
-          icon={<Library size={20} />}
-          title="Translations"
-          sub="Read translations as flowing pages"
-        />
-        <BigCard
-          to="/help"
-          icon={<CircleHelp size={20} />}
-          title="How to use"
-          sub="Quick guide — reading, search, bookmarks"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <BigCard to="/surahs" icon={<BookOpen size={20} />} title="Surahs" sub="All 114 surahs" />
+          <BigCard to="/juz" icon={<Rows3 size={20} />} title="Juz" sub="30 parts of the Quran" />
+          <BigCard
+            to="/book"
+            icon={<Library size={20} />}
+            title="Translations"
+            sub="Read translations as flowing pages"
+          />
+          <BigCard
+            to="/khatm"
+            icon={<HandHeart size={20} />}
+            title="Completing the Quran"
+            sub="Khatm dua · دعائے ختمِ قرآن"
+          />
+          <BigCard
+            to="/help"
+            icon={<CircleHelp size={20} />}
+            title="How to use"
+            sub="Quick guide — reading, search, bookmarks"
+          />
+        </div>
 
         {/* Footer: offline promise sits next to the required Netlify Open Source
             credit (credit must stay on the main page of the website; hidden

@@ -66,8 +66,9 @@
   }
 
   html.light {
+    --bg: var(--paper);
     --chrome: var(--paper2);
-    --tiles-img: url('../tiles-light.png');
+    --tiles-img: url('/tiles-light.png');
     --text: var(--ink);
     --card-bg: rgb(255, 255, 255);
     --card-shadow: 0 3px 12px rgba(38, 32, 22, 0.08);
@@ -608,7 +609,7 @@
     background-attachment: fixed;
   }
   html.light .tiles.fatiha-bg {
-    background-image: linear-gradient(rgba(238, 229, 203, 0.45), rgba(238, 229, 203, 0.68)), url('../bg/fatiha-light.jpg');
+    background-image: linear-gradient(rgba(238, 229, 203, 0.45), rgba(238, 229, 203, 0.68)), url('/bg/fatiha-light.jpg');
   }
   .verse-run {
     scroll-margin-top: calc(150px + env(safe-area-inset-top, 0px));
@@ -819,6 +820,18 @@
     padding: 14px 18px calc(16px + env(safe-area-inset-bottom, 0px));
     color: var(--text);
     box-shadow: var(--player-shadow);
+  }
+
+  @media (min-width: 1024px) {
+    .surah-player {
+      left: calc(50% + 144px);
+      bottom: 24px;
+      max-width: 620px;
+      border-radius: 20px;
+      border-bottom: 1px solid var(--green);
+      padding: 14px 22px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(201, 166, 88, 0.25);
+    }
   }
 
   /* ---- juz-opening ayah in the mushaf folio: ۞ ornament + faint wash ---- */
