@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -24,14 +27,21 @@ android {
 
     signingConfigs {
         create("release") {
-            val ks = rootProject.file("keystore/munajaat-release.jks")
-            if (ks.exists()) {
-                storeFile = ks
-                storePassword = "9FtLuJDEzM6RBF26ya44"
-                keyAlias = "munajaat"
-                keyPassword = "9FtLuJDEzM6RBF26ya44"
-                enableV1Signing = true
-                enableV2Signing = true
+            val propFile = rootProject.file("signing.properties")
+            if (propFile.exists()) {
+                val props = Properties().apply {
+                    propFile.inputStream().use { load(it) }
+                }
+                val ksPath = props.getProperty("storeFile") ?: "keystore/munajaat-release.jks"
+                val ks = rootProject.file(ksPath)
+                if (ks.exists()) {
+                    storeFile = ks
+                    storePassword = props.getProperty("storePassword")
+                    keyAlias = props.getProperty("keyAlias") ?: "munajaat"
+                    keyPassword = props.getProperty("keyPassword")
+                    enableV1Signing = true
+                    enableV2Signing = true
+                }
             }
         }
     }

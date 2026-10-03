@@ -1,0 +1,3 @@
+• Smooth Translation Audio: Eliminated playback stutter and optimized memory during Urdu and English audio narrations.
+• Continuous Book Listening: Added automatic verse auto-advance and continuous narration toggle in translation book reader.
+• Enhanced Narration Alignment: Synchronized verse highlighting and audio timing across English and Urdu translations.
