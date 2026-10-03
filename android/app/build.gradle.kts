@@ -25,10 +25,10 @@ android {
         includeInBundle = false
     }
 
-    signingConfigs {
-        create("release") {
-            val propFile = rootProject.file("signing.properties")
-            if (propFile.exists()) {
+    val propFile = rootProject.file("signing.properties")
+    if (propFile.exists()) {
+        signingConfigs {
+            create("release") {
                 val props = Properties().apply {
                     propFile.inputStream().use { load(it) }
                 }
@@ -52,7 +52,11 @@ android {
             isShrinkResources = true
             vcsInfo.include = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("release")
+            signingConfigs.findByName("release")?.let {
+                if (it.storeFile?.exists() == true) {
+                    signingConfig = it
+                }
+            }
         }
     }
 
