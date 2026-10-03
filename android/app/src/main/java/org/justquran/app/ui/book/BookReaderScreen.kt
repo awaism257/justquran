@@ -465,7 +465,7 @@ fun BookReaderScreen(
                         audio = audio,
                         currentSurah = surahNumber,
                         totalAyahs = surahMeta?.ayahs,
-                        showAuto = false,
+                        showAuto = true,
                         modifier = Modifier
                             .navigationBarsPadding()
                             .padding(bottom = 6.dp)
