@@ -358,7 +358,8 @@ fun BookReaderScreen(
                         modifier = Modifier
                             .widthIn(max = 680.dp)
                             .fillMaxSize()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 16.dp, bottom = 6.dp),
                         shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(containerColor = colors.card),
                         border = BorderStroke(1.dp, colors.hairline)

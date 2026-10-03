@@ -79,7 +79,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 private const val PAGED_LINE_HEIGHT = 2.0f
-private const val TEXT_INSET_DP = 8.0f
+private const val TEXT_INSET_DP = 12.0f
 
 private val mushafPaginationCache = object : LinkedHashMap<String, SurahPages>(16, 0.75f, true) {
     override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, SurahPages>?): Boolean {
@@ -415,7 +415,7 @@ fun PagedMushafView(
             modifier = Modifier
                 .weight(1.0f)
                 .fillMaxHeight()
-                .padding(vertical = 8.dp)
+                .padding(top = 16.dp, bottom = 6.dp)
                 .shadow(TEXT_INSET_DP.dp, RoundedCornerShape(TEXT_INSET_DP.dp))
                 .background(colors.folioPaper, RoundedCornerShape(TEXT_INSET_DP.dp))
                 .padding(12.dp, 12.dp)
@@ -443,7 +443,6 @@ fun PagedMushafView(
                     BoxWithConstraints(
                         modifier = Modifier
                             .fillMaxSize()
-                            .clipToBounds()
                     ) {
                         val maxW = constraints.maxWidth
                         val maxH = constraints.maxHeight
