@@ -798,7 +798,7 @@ export default function Reading() {
         }
       />
 
-      {pagedMode && (
+      {folioMode && (
         <div className="chips" style={{ background: 'transparent', padding: '6px 16px', gap: 8 }}>
           <button type="button" className="chip on" style={{ minWidth: 72 }}>
             Arabic

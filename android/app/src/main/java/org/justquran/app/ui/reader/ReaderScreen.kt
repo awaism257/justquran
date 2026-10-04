@@ -1070,7 +1070,7 @@ fun ReaderScreen(
                         }
                     )
                 }
-            } else if (ready && pagedMushaf) {
+            } else if (ready && settings.arabicOnly) {
                 Box(modifier = Modifier.widthIn(max = maxWidth).fillMaxWidth()) {
                     PagedModePillsRow(
                         currentMode = PagedMode.ARABIC,

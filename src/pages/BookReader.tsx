@@ -448,7 +448,6 @@ export default function BookReader() {
                 showUr: false,
                 showTr: false,
                 verseByVerse: false,
-                mushafPaged: true,
               });
               navigate(`/surah/${n}#v${currentVisibleVerse}`);
             }}

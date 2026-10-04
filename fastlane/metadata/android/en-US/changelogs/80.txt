@@ -1,0 +1,2 @@
+• Mushaf Page Style Preference: Preserved your chosen Mushaf page style (Vertical vs Paged) when switching between Translations and Arabic Mushaf.
+• Bi-directional Language Switching: Quick-navigation pills now appear in both Vertical and Paged Mushaf views for seamless language switching.

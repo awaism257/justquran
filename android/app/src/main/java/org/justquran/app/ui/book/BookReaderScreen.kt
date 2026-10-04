@@ -321,7 +321,6 @@ fun BookReaderScreen(
         }
         scope.launch {
             container.settingsRepository.enterArabicOnly()
-            container.settingsRepository.setMushafPaged(true)
             nav.navigate(Routes.reader(surahNumber, currentAnchorVerse))
         }
     }
