@@ -78,15 +78,15 @@ fun HelpScreen(
 
                 CollapsibleCard(title = "Two ways to read", defaultOpen = true) {
                     Step(1, "Verse-by-verse (the default): every verse in its own card with translation and transliteration.")
-                    Step(2, "Folio (mushaf style): tap the book icon in the top bar of any surah for continuous Arabic with tappable verse-number markers. Settings → Mushaf page style can page the mushaf — pages are laid out at your chosen font size, and the number of pages adapts so verses are never cut off.")
-                    Step(3, "Tap the icon again to switch back — the app remembers your choice.")
+                    Step(2, "Folio (mushaf style): tap the book icon in the top bar of any surah for Arabic-only text with tappable verse markers. In Settings → Mushaf page style, choose between Vertical (continuous scrolling) or Paged (laid out at your chosen font size so verses are never cut off).")
+                    Step(3, "Language pills (Arabic · English · اردو) at the top let you jump straight to flowing translations at your current verse without losing your place. Your chosen Mushaf style (Vertical or Paged) is always preserved.")
                 }
 
                 CollapsibleCard(title = "Card View") {
-                    Step(1, "In card view, chips at the top of any surah: Arabic · English · اردو · Translit. (Mushaf view has no chips — the top bar has ▶ play and the layout icon.)")
+                    Step(1, "In card view, chips at the top of any surah: Arabic · English · اردو · Translit.")
                     Step(2, "Tap a chip to show or hide that line while reading. The Arabic chip shows or hides the Arabic line on the verse cards.")
                     Step(3, "The Urdu translation is the classic Jalandhari translation (public domain). Turn all three translations off for Arabic-only reading.")
-                    Step(4, "One line always stays visible — the chip of the last visible line is disabled, so a card never goes blank. (Mushaf view is always Arabic.)")
+                    Step(4, "One line always stays visible — the chip of the last visible line is disabled, so a card never goes blank. In Mushaf view, pills let you jump directly into full translations.")
                 }
 
                 CollapsibleCard(title = "Text size & theme") {
@@ -132,6 +132,7 @@ fun HelpScreen(
                     Step(1, "Home → Translations, then pick English or اردو.")
                     Step(2, "Translations flow like a book — swipe, tap the page edges, or use the arrows to turn a page.")
                     Step(3, "Tap a verse-number marker for its Arabic, audio, bookmark and share.")
+                    Step(4, "Switch languages anytime: tap Arabic, English, or اردو in the top pills row to switch translations or jump to the Mushaf at your exact verse position. If you set Vertical mode in Settings, the Mushaf opens in your preferred vertical layout.")
                 }
 
                 CollapsibleCard(title = PAUSES_NOTE.headingEn) {

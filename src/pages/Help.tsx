@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { useLocation } from 'react-router';
-import { Bookmark, ChevronDown, Copy, Play, Rows3, BookOpenText, Search, SkipBack, SkipForward, Volume2 } from 'lucide-react';
+import { Bookmark, ChevronDown, Copy, Play, BookOpenText, Search, SkipBack, SkipForward, Volume2 } from 'lucide-react';
 import BackBar from '@/components/BackBar';
 import { PAUSES_NOTE } from '@/lib/khatmDua';
 
@@ -241,22 +241,18 @@ export default function Help() {
           <Step n={2}>
             <b>Arabic only</b> (mushaf style): tap the book icon
             <Ico label="Arabic only"><BookOpenText size={13} /></Ico>
-            in the top bar of any surah for continuous Arabic text. <b>Settings → Mushaf page
-            style</b> can turn the mushaf into pages that are laid out at your chosen font size —
-            the number of pages adapts so verses are never cut off.
+            in the top bar of any surah for Arabic text. In <b>Settings → Mushaf page style</b>,
+            choose between <b>Vertical</b> (continuous scrolling folio) or <b>Paged</b> (laid out
+            at your chosen font size so verses are never cut off).
           </Step>
           <Step n={3}>
-            The icon changes to
-            <Ico label="Verse by verse"><Rows3 size={13} /></Ico>
-            and turns green — tap it again to switch back. The app remembers your choice. In the
-            mushaf view there are no chips below the bar: a
-            <Ico label="Play surah"><Play size={13} /></Ico>
-            button next to the icon plays (or stops) the whole surah.
+            Language pills (<Chip>Arabic</Chip> <Chip>English</Chip> <Chip>اردو</Chip>) at the top
+            let you jump straight to flowing translations at your current verse without losing your
+            place. Whichever Mushaf style you chose in Settings (Vertical or Paged) is always preserved.
           </Step>
           <Step n={4}>
             Reading without the Arabic? <b>Settings → Arabic text in card view</b> hides it, so you
-            can read English only, Urdu only, or transliteration only. (Mushaf view is always
-            Arabic.)
+            can read English only, Urdu only, or transliteration only.
           </Step>
         </CollapsibleCard>
 
@@ -270,9 +266,9 @@ export default function Help() {
             the Arabic line on the verse cards. The last visible line can't be switched off.
           </Step>
           <Step n={3}>
-            The mushaf (Arabic-only) view has no chips — use the
+            In the mushaf view, language pills let you switch directly into full translations, while the
             <Ico label="Play surah"><Play size={13} /></Ico>
-            play button and the layout icon in the top bar instead.
+            button in the top bar controls whole-surah recitation.
           </Step>
           <Step n={4}>The Urdu translation is the classic Jalandhari translation (public domain).</Step>
         </CollapsibleCard>
@@ -368,6 +364,12 @@ export default function Help() {
           </Step>
           <Step n={3}>
             Tap a verse-number marker <SuperNum>15</SuperNum> for its Arabic, audio, bookmark and share.
+          </Step>
+          <Step n={4}>
+            Switch languages anytime: tap <Chip>Arabic</Chip>, <Chip>English</Chip>, or <Chip>اردو</Chip>
+            in the top pills row to instantly switch translations or jump to the Mushaf at your exact
+            verse position. If you selected Vertical mode in Settings, the Mushaf opens in your preferred
+            vertical layout.
           </Step>
         </CollapsibleCard>
 

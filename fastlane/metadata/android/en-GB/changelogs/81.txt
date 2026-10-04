@@ -1,0 +1,2 @@
+• Updated Guide: Enhanced "How to use" guide explaining the quick-navigation language pills and how your Mushaf page style (Vertical vs Paged) is preserved.
+• Reading Position Anchoring: Documented position anchoring when switching between translations and Arabic Mushaf modes.
