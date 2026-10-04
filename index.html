@@ -21,8 +21,18 @@
     <meta name="twitter:description" content="Read and listen to the Holy Quran verse by verse in Arabic (IndoPak script), Urdu and English. Free, no ads, no tracking, works fully offline." />
     <meta name="twitter:image" content="https://justquran.app/icons/icon-512.png" />
     <title>JustQuran</title>
+    <!-- Suppress Netlify HUD / badge injection -->
+    <script>
+      try {
+        localStorage.setItem('nl-hud:public:v1', 'hidden');
+        localStorage.setItem('nl-hud:owner-private:v1', 'hidden');
+      } catch (_) {}
+    </script>
   </head>
   <body>
+    <!-- Netlify HUD guard sentinels -->
+    <div id="nl-badge-frame" style="display:none!important;" aria-hidden="true"></div>
+    <div id="nl-hud-frame" style="display:none!important;" aria-hidden="true"></div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
