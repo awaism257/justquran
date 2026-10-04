@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import { ChevronLeft, ChevronRight, Pause, Play, SkipBack, SkipForward, X } from 'lucide-react';
 import BackBar from '@/components/BackBar';
 import VersePopup from '@/components/VersePopup';
@@ -40,10 +40,11 @@ interface SeqItem {
  */
 export default function BookReader() {
   const params = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const lang: 'en' | 'ur' = params.lang === 'ur' ? 'ur' : 'en';
   const n = Math.min(114, Math.max(1, parseInt(params.n ?? '1', 10) || 1));
-  const { settings } = useSettings();
+  const { settings, set } = useSettings();
   const [bundle, setBundle] = useState<Bundle | null>(null);
   const [titles, setTitles] = useState<SurahTitles | null>(null);
   const [popupIdx, setPopupIdx] = useState<number | null>(null);
@@ -361,7 +362,8 @@ export default function BookReader() {
     lpStart.current = null;
   };
 
-  // ---- continue-reading: first verse on the current page ----
+  // ---- continue-reading & verse anchoring ----
+  const [currentVisibleVerse, setCurrentVisibleVerse] = useState(1);
   useEffect(() => {
     if (!verses.length) return;
     const t = setTimeout(() => {
@@ -374,13 +376,30 @@ export default function BookReader() {
         const b = el.getBoundingClientRect();
         if (b.left >= r.left - 1 && b.right <= r.right + 1) {
           setLastRead(n, verses[i].v);
+          setCurrentVisibleVerse(verses[i].v);
           return;
         }
       }
       setLastRead(n, verses[0].v);
+      setCurrentVisibleVerse(verses[0].v);
     }, 350); // after the 0.25s page-turn transition settles
     return () => clearTimeout(t);
   }, [pageIdx, pageCount, verses, n]);
+
+  // Jump to anchor verse passed via hash (#v...)
+  useEffect(() => {
+    if (!verses.length || vw <= 0) return;
+    const m = location.hash.match(/^#v(\d+)$/);
+    if (!m) return;
+    const targetV = parseInt(m[1], 10);
+    const targetIdx = verses.findIndex((v) => v.v === targetV);
+    if (targetIdx >= 0) {
+      const raf = requestAnimationFrame(() => {
+        ensureVerseVisible(targetIdx);
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [location.hash, verses, vw, ensureVerseVisible]);
 
   const popupVerse = popupIdx !== null ? (verses[popupIdx] ?? null) : null;
   // ltr: strip slides left (negative). rtl: columns flow right→left, so the
@@ -417,6 +436,52 @@ export default function BookReader() {
         className="px-4 pt-2"
         style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}
       >
+        <div className="chips" style={{ background: 'transparent', padding: '6px 16px', gap: 8, flexShrink: 0 }}>
+          <button
+            type="button"
+            className="chip"
+            style={{ minWidth: 72 }}
+            onClick={() => {
+              stopPlayback();
+              set({
+                showEn: false,
+                showUr: false,
+                showTr: false,
+                verseByVerse: false,
+                mushafPaged: true,
+              });
+              navigate(`/surah/${n}#v${currentVisibleVerse}`);
+            }}
+          >
+            Arabic
+          </button>
+          <button
+            type="button"
+            className={lang === 'en' ? 'chip on' : 'chip'}
+            style={{ minWidth: 72 }}
+            onClick={() => {
+              if (lang !== 'en') {
+                stopPlayback();
+                navigate(`/book/en/${n}#v${currentVisibleVerse}`);
+              }
+            }}
+          >
+            English
+          </button>
+          <button
+            type="button"
+            className={lang === 'ur' ? 'chip on' : 'chip'}
+            style={{ minWidth: 72, fontFamily: "'Noto Nastaliq Urdu', serif" }}
+            onClick={() => {
+              if (lang !== 'ur') {
+                stopPlayback();
+                navigate(`/book/ur/${n}#v${currentVisibleVerse}`);
+              }
+            }}
+          >
+            اردو
+          </button>
+        </div>
         <div
           ref={vpRef}
           className="book-page"

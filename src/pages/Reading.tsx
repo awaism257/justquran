@@ -798,6 +798,36 @@ export default function Reading() {
         }
       />
 
+      {pagedMode && (
+        <div className="chips" style={{ background: 'transparent', padding: '6px 16px', gap: 8 }}>
+          <button type="button" className="chip on" style={{ minWidth: 72 }}>
+            Arabic
+          </button>
+          <button
+            type="button"
+            className="chip"
+            style={{ minWidth: 72 }}
+            onClick={() => {
+              stopAll();
+              navigate(`/book/en/${n}#v${metaVerse}`);
+            }}
+          >
+            English
+          </button>
+          <button
+            type="button"
+            className="chip"
+            style={{ minWidth: 72, fontFamily: "'Noto Nastaliq Urdu', serif" }}
+            onClick={() => {
+              stopAll();
+              navigate(`/book/ur/${n}#v${metaVerse}`);
+            }}
+          >
+            اردو
+          </button>
+        </div>
+      )}
+
       {/* Chips row (card mode only — the folio views have no chips; playback
           there lives in the top bar). "Arabic" shows/hides the Arabic line on
           the verse cards; entering the mushaf view happens only via the
