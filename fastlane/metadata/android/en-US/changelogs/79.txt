@@ -1,0 +1,2 @@
+• Paged Mode Language Switcher: Added navigation pills across Translations and Arabic Mushaf reader to seamlessly toggle between Arabic, English, and Urdu.
+• Reading Position Anchor: Preserves your visible verse position across page transitions when switching between Arabic, English, and Urdu translations in paged mode.

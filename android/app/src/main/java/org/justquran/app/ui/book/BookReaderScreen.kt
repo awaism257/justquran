@@ -47,6 +47,8 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -97,7 +99,8 @@ fun BookReaderScreen(
     container: AppContainer,
     nav: NavHostController,
     lang: String,
-    surahNumber: Int
+    surahNumber: Int,
+    initialVerse: Int = 1
 ) {
     val appViewModel: AppViewModel = viewModel(factory = AppViewModel.Factory(container))
     val settings by appViewModel.settings.collectAsState()
@@ -105,7 +108,10 @@ fun BookReaderScreen(
     val bookmarks by appViewModel.bookmarks.collectAsState()
     val fonts = rememberAppFonts()
     val colors = appColors
-    val isUrdu = (lang == "ur")
+    val scope = rememberCoroutineScope()
+
+    var currentLang by remember(lang) { mutableStateOf(lang) }
+    val isUrdu = (currentLang == "ur")
 
     val surahMeta = if (bundleReady) appViewModel.surah(surahNumber) else null
     val verses = if (bundleReady) appViewModel.verses(surahNumber) else emptyList()
@@ -199,11 +205,11 @@ fun BookReaderScreen(
                 turnDir = dir
                 page = target
             } else if (dir > 0 && target >= pageCount && surahNumber < 114) {
-                nav.navigate(Routes.book(lang, surahNumber + 1)) {
+                nav.navigate(Routes.book(currentLang, surahNumber + 1)) {
                     popUpTo(Routes.BOOK) { inclusive = true }
                 }
             } else if (dir < 0 && target < 0 && surahNumber > 1) {
-                nav.navigate(Routes.book(lang, surahNumber - 1)) {
+                nav.navigate(Routes.book(currentLang, surahNumber - 1)) {
                     popUpTo(Routes.BOOK) { inclusive = true }
                 }
             }
@@ -276,6 +282,72 @@ fun BookReaderScreen(
         }
     }
 
+    val currentAnchorVerse by remember {
+        derivedStateOf {
+            val range = pageRanges.getOrNull(safePage)
+            if (range != null && bookText.isNotEmpty() && range.last >= range.first) {
+                val annotation = bookText.getStringAnnotations("verse_text", range.first, range.last).firstOrNull()
+                    ?: bookText.getStringAnnotations("verse", range.first, range.last).firstOrNull()
+                val parsed = SettingsRepository.parseLastRead(annotation?.item)
+                if (parsed != null && parsed.second >= 1) parsed.second else 1
+            } else {
+                1
+            }
+        }
+    }
+
+    var initialJumpDone by remember(surahNumber, currentLang) { mutableStateOf(false) }
+    var targetVerseToJump by remember(surahNumber) { mutableIntStateOf(initialVerse) }
+
+    LaunchedEffect(pageRanges, targetVerseToJump, initialJumpDone) {
+        if (!initialJumpDone && targetVerseToJump > 1 && pageRanges.isNotEmpty() && bookText.isNotEmpty()) {
+            val targetTag = "$surahNumber:$targetVerseToJump"
+            val targetPage = pageRanges.indexOfFirst { range ->
+                bookText.getStringAnnotations("verse_text", range.first, range.last).any { it.item == targetTag } ||
+                bookText.getStringAnnotations("verse", range.first, range.last).any { it.item == targetTag }
+            }
+            if (targetPage >= 0) {
+                page = targetPage
+            }
+            initialJumpDone = true
+        } else if (pageRanges.isNotEmpty() && !initialJumpDone) {
+            initialJumpDone = true
+        }
+    }
+
+    val onSelectArabic: () -> Unit = {
+        if (isPlayingThisSurah || activeAudio || chainActive) {
+            audio.stopAll()
+        }
+        scope.launch {
+            container.settingsRepository.enterArabicOnly()
+            container.settingsRepository.setMushafPaged(true)
+            nav.navigate(Routes.reader(surahNumber, currentAnchorVerse))
+        }
+    }
+
+    val onSelectEnglish: () -> Unit = {
+        if (currentLang != "en") {
+            targetVerseToJump = currentAnchorVerse
+            initialJumpDone = false
+            currentLang = "en"
+            scope.launch {
+                container.settingsRepository.setBookLang("en")
+            }
+        }
+    }
+
+    val onSelectUrdu: () -> Unit = {
+        if (currentLang != "ur") {
+            targetVerseToJump = currentAnchorVerse
+            initialJumpDone = false
+            currentLang = "ur"
+            scope.launch {
+                container.settingsRepository.setBookLang("ur")
+            }
+        }
+    }
+
     val transLabel = if (isUrdu) "Urdu" else "English"
     val chapterTitle = if (isUrdu) {
         SurahTitles.urduName(surahNumber)
@@ -334,6 +406,12 @@ fun BookReaderScreen(
                 .then(if (surahNumber == 1) Modifier.fatihaBackground() else Modifier.tilesBackground())
                 .padding(padding)
         ) {
+            PagedModePillsRow(
+                currentMode = if (isUrdu) PagedMode.URDU else PagedMode.ENGLISH,
+                onSelectArabic = onSelectArabic,
+                onSelectEnglish = onSelectEnglish,
+                onSelectUrdu = onSelectUrdu
+            )
 
             if (!bundleReady) {
                 Text(

@@ -16,8 +16,8 @@ android {
         applicationId = "org.justquran.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 78
-        versionName = "2.2.63"
+        versionCode = 79
+        versionName = "2.2.64"
     }
 
     dependenciesInfo {

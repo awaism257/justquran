@@ -13,7 +13,7 @@ object Routes {
     const val HELP: String = "help"
     const val KHATM: String = "khatm"
     const val BOOK_HOME: String = "book"
-    const val BOOK: String = "book/{lang}/{n}"
+    const val BOOK: String = "book/{lang}/{n}?v={v}"
 
     fun reader(surah: Int, verse: Int? = null, end: Boolean = false): String {
         val sb = StringBuilder("surah/").append(surah)
@@ -28,7 +28,7 @@ object Routes {
 
     fun reader(s: Int, v: Int? = null): String = reader(surah = s, verse = v, end = false)
 
-    fun book(lang: String, n: Int): String {
-        return "book/$lang/$n"
+    fun book(lang: String, n: Int, v: Int? = null): String {
+        return if (v != null && v > 0) "book/$lang/$n?v=$v" else "book/$lang/$n"
     }
 }

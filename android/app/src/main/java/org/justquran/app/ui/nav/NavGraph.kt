@@ -144,12 +144,17 @@ fun JustQuranNavHost(
             route = Routes.BOOK,
             arguments = listOf(
                 navArgument("lang") { type = NavType.StringType },
-                navArgument("n") { type = NavType.IntType }
+                navArgument("n") { type = NavType.IntType },
+                navArgument("v") {
+                    type = NavType.IntType
+                    defaultValue = 1
+                }
             )
         ) { entry ->
             val lang = entry.arguments?.getString("lang") ?: "en"
             val n = entry.arguments?.getInt("n") ?: 1
-            BookReaderScreen(container, navController, lang, n)
+            val v = entry.arguments?.getInt("v")?.takeIf { it > 0 } ?: 1
+            BookReaderScreen(container, navController, lang, n, initialVerse = v)
         }
     }
 }

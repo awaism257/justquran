@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import org.justquran.app.ui.AudioBottomBar
+import org.justquran.app.ui.book.PagedMode
+import org.justquran.app.ui.book.PagedModePillsRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -1065,6 +1067,25 @@ fun ReaderScreen(
                                 ensureNotificationPermission(context, permissionLauncher)
                                 audioController.startChain(activeSurah, 1)
                             }
+                        }
+                    )
+                }
+            } else if (ready && pagedMushaf) {
+                Box(modifier = Modifier.widthIn(max = maxWidth).fillMaxWidth()) {
+                    PagedModePillsRow(
+                        currentMode = PagedMode.ARABIC,
+                        onSelectArabic = { /* Already in Arabic */ },
+                        onSelectEnglish = {
+                            if (audioActive || chainActive) {
+                                audioController.stopAll()
+                            }
+                            nav.navigate(Routes.book("en", activeSurah, topVerse))
+                        },
+                        onSelectUrdu = {
+                            if (audioActive || chainActive) {
+                                audioController.stopAll()
+                            }
+                            nav.navigate(Routes.book("ur", activeSurah, topVerse))
                         }
                     )
                 }
