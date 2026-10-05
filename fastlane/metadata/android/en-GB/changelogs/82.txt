@@ -1,0 +1,3 @@
+• Fixed Volume Key Navigation: Resolved an issue where pressing volume keys in the translations book reader jumped whole Surahs instead of turning pages.
+• Smooth Reverse Transitions: Turning backwards past the first page now lands smoothly on the last page of the preceding Surah.
+• Audio Passthrough: Volume keys now adjust hardware volume when recitation or translation audio is active.

@@ -58,6 +58,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -194,13 +195,14 @@ fun BookReaderScreen(
     var pageRanges by remember(surahNumber) { mutableStateOf<List<IntRange>>(emptyList()) }
     var turnDir by remember { mutableIntStateOf(0) }
     val turnMotion = remember { Animatable(1f) }
-    var bookPageTurn by remember { mutableStateOf<Int?>(null) }
-
     val safePage = page.coerceIn(0, (pageCount - 1).coerceAtLeast(0))
+
+    val currentAudioActive by rememberUpdatedState(isPlaying || activeAudio || chainActive)
 
     fun turn(dir: Int) {
         if (pageCount >= 1) {
-            val target = safePage + dir
+            val cur = page.coerceIn(0, pageCount - 1)
+            val target = cur + dir
             if (target in 0 until pageCount) {
                 turnDir = dir
                 page = target
@@ -209,19 +211,27 @@ fun BookReaderScreen(
                     popUpTo(Routes.BOOK) { inclusive = true }
                 }
             } else if (dir < 0 && target < 0 && surahNumber > 1) {
-                nav.navigate(Routes.book(currentLang, surahNumber - 1)) {
+                val prevSurah = surahNumber - 1
+                val lastVerse = appViewModel.surah(prevSurah)?.ayahs ?: 1
+                nav.navigate(Routes.book(currentLang, prevSurah, lastVerse)) {
                     popUpTo(Routes.BOOK) { inclusive = true }
                 }
             }
         }
     }
 
+    val currentTurn by rememberUpdatedState(::turn)
+
     DisposableEffect(settings.volumeKeysTurnPages, bundleReady) {
         if (settings.volumeKeysTurnPages && bundleReady) {
             val handler: (Int) -> Boolean = { keyCode ->
-                val delta = if (keyCode == 25) 1 else -1
-                turn(delta)
-                true
+                if (currentAudioActive) {
+                    false
+                } else {
+                    val delta = if (keyCode == 25) 1 else -1
+                    currentTurn(delta)
+                    true
+                }
             }
             container.volumeKeyBus.handler = handler
             onDispose {
@@ -232,12 +242,6 @@ fun BookReaderScreen(
         } else {
             onDispose {}
         }
-    }
-
-    LaunchedEffect(bookPageTurn) {
-        val dir = bookPageTurn ?: return@LaunchedEffect
-        bookPageTurn = null
-        turn(dir)
     }
 
     LaunchedEffect(pageCount) {
