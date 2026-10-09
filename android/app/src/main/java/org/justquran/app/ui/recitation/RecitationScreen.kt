@@ -56,6 +56,7 @@ import org.justquran.app.data.AudioDownloadRepository
 import org.justquran.app.data.SurahMeta
 import org.justquran.app.ui.AppViewModel
 import org.justquran.app.ui.BackBar
+import org.justquran.app.ui.NumberBadge
 import org.justquran.app.ui.theme.AppColors
 import org.justquran.app.ui.theme.AppFonts
 import org.justquran.app.ui.theme.appColors
@@ -587,19 +588,12 @@ private fun SurahCard(
                 .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .background(colors.accent, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = meta.n.toString(),
-                    color = colors.bg,
-                    fontSize = 13.sp,
-                    fontFamily = fonts.serif
-                )
-            }
+            NumberBadge(
+                number = meta.n,
+                backgroundColor = colors.accent,
+                textColor = colors.bg,
+                fontFamily = fonts.serif
+            )
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(

@@ -58,6 +58,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import org.justquran.app.ui.NumberBadge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -510,20 +511,13 @@ private fun VerseCard(
                         WaqafMark(verse.wq, colors.accent)
                     }
                     Spacer(modifier = Modifier.height(1.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(30.dp)
-                            .background(colors.accent, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = verse.v.toString(),
-                            color = colors.bg,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = fonts.serif
-                        )
-                    }
+                    NumberBadge(
+                        number = verse.v,
+                        backgroundColor = colors.accent,
+                        textColor = colors.bg,
+                        fontFamily = fonts.serif,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

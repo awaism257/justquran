@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import org.justquran.app.ui.NumberBadge
 import org.justquran.app.AppContainer
 import org.justquran.app.data.JUZ_NAMES
 import org.justquran.app.data.JUZ_NAMES_AR
@@ -132,19 +133,12 @@ fun JuzIndexScreen(
                                 .padding(18.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(30.dp)
-                                    .background(colors.folioFrame, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = juz.juz.toString(),
-                                    color = Tokens.CreamFolioPaper,
-                                    fontSize = 14.sp,
-                                    fontFamily = fonts.serif
-                                )
-                            }
+                            NumberBadge(
+                                number = juz.juz,
+                                backgroundColor = colors.folioFrame,
+                                textColor = Tokens.CreamFolioPaper,
+                                fontFamily = fonts.serif
+                            )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Row(

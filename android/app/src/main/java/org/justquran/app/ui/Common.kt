@@ -363,3 +363,37 @@ fun drawWqGlyph(canvas: Canvas, paint: Paint, c: Char, x: Float, y: Float) {
     paint.getTextBounds(str, 0, 1, bounds)
     canvas.drawText(str, x - bounds.exactCenterX(), y - bounds.bottom, paint)
 }
+
+@Composable
+fun NumberBadge(
+    number: Int,
+    backgroundColor: Color,
+    textColor: Color,
+    fontFamily: FontFamily,
+    modifier: Modifier = Modifier,
+    size: Dp = 32.dp,
+    fontWeight: FontWeight = FontWeight.Medium
+) {
+    val text = number.toString()
+    val fontSize = when {
+        text.length >= 3 -> 11.sp
+        else -> 13.5.sp
+    }
+    Box(
+        modifier = modifier
+            .size(size)
+            .background(backgroundColor, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = textColor,
+            fontSize = fontSize,
+            fontFamily = fontFamily,
+            fontWeight = fontWeight,
+            maxLines = 1,
+            softWrap = false
+        )
+    }
+}
+

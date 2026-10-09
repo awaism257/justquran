@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import org.justquran.app.ui.NumberBadge
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -274,19 +275,12 @@ private fun BookmarkRow(
                         .padding(18.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(30.dp)
-                            .background(colors.folioFrame, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = mark.v.toString(),
-                            color = Tokens.CreamFolioPaper,
-                            fontSize = 14.sp,
-                            fontFamily = fonts.serif
-                        )
-                    }
+                    NumberBadge(
+                        number = mark.v,
+                        backgroundColor = colors.folioFrame,
+                        textColor = Tokens.CreamFolioPaper,
+                        fontFamily = fonts.serif
+                    )
                     Spacer(Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(

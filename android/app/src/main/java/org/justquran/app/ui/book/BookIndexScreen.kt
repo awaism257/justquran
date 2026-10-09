@@ -39,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import org.justquran.app.ui.index.IndexFilterField
 import org.justquran.app.ui.index.foldQuery
+import org.justquran.app.ui.NumberBadge
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -276,19 +277,12 @@ fun BookIndexScreen(
                                     .padding(18.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(30.dp)
-                                        .background(colors.folioFrame, CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = surahMeta.n.toString(),
-                                        color = Tokens.CreamFolioPaper,
-                                        fontSize = 14.sp,
-                                        fontFamily = fonts.serif
-                                    )
-                                }
+                                NumberBadge(
+                                    number = surahMeta.n,
+                                    backgroundColor = colors.folioFrame,
+                                    textColor = Tokens.CreamFolioPaper,
+                                    fontFamily = fonts.serif
+                                )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     if (bookLang == "ur") {

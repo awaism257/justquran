@@ -1,0 +1,2 @@
+• Fixed 3-Digit Number Badges: Resolved an issue where 3-digit Surah and verse numbers (e.g. 100 to 114) were clipped or cut off in index cards, verse headers, bookmarks, and downloads.
+• Unified Number Badges: Implemented adaptive font sizing and single-line constraints across all index and reader badges so numbers are always clearly legible.

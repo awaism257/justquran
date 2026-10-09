@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.justquran.app.ui.NumberBadge
 import androidx.navigation.NavHostController
 import org.justquran.app.AppContainer
 import org.justquran.app.data.SurahMeta
@@ -122,19 +123,12 @@ fun SurahIndexScreen(
                                 .padding(18.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(30.dp)
-                                    .background(colors.folioFrame, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = surah.n.toString(),
-                                    color = Tokens.CreamFolioPaper,
-                                    fontSize = 14.sp,
-                                    fontFamily = fonts.serif
-                                )
-                            }
+                            NumberBadge(
+                                number = surah.n,
+                                backgroundColor = colors.folioFrame,
+                                textColor = Tokens.CreamFolioPaper,
+                                fontFamily = fonts.serif
+                            )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(

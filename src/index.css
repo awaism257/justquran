@@ -299,16 +299,19 @@
     margin-bottom: 12px;
   }
   .vnum {
-    width: 30px;
-    height: 30px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 4px;
     border-radius: 9999px;
     background: var(--frame);
     color: var(--paper);
-    font-size: 14px;
+    font-size: 13px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    white-space: nowrap;
+    line-height: 1;
   }
   .spk {
     width: 32px;
