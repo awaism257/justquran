@@ -476,7 +476,7 @@ class AudioController(
                 MediaMetadata.Builder()
                     .setTitle(title)
                     .setDisplayTitle(title)
-                    .setArtist("English narration · Brian")
+                    .setArtist("English narration · Ollie")
                     .setArtworkData(artworkBytes, MediaMetadata.PICTURE_TYPE_FRONT_COVER)
                     .build()
             )

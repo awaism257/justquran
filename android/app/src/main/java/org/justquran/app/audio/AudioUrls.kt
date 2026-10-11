@@ -20,8 +20,8 @@ object AudioUrls {
     }
 
     fun englishNarrationUrl(s: Int, v: Int): String {
-        return if (v == 0) "$NARR_BASE/en/brian-allah/${sss(s)}000.mp3"
-        else "$NARR_BASE/en/brian-allah/${fileName(s, v)}"
+        return if (v == 0) "$NARR_BASE/en/ollie-allah/${sss(s)}000.mp3"
+        else "$NARR_BASE/en/ollie-allah/${fileName(s, v)}"
     }
 
     fun urduNarrationUrl(s: Int, v: Int): String {

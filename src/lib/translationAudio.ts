@@ -2,7 +2,7 @@
 // the project's own Cloudflare R2 bucket and cached on demand for offline.
 //
 // Sets (see public/data/translation-audio.json):
-//   en/brian-allah — ClearQuran text, read by Brian (Microsoft Azure neural voice)
+//   en/ollie-allah — ClearQuran text, read by Ollie (Microsoft Azure neural voice)
 //   en/sonia-allah — ClearQuran text, read by Sonia (Microsoft Azure neural voice)
 //   ur             — Jalandhari translation (public domain), Umbriel (Google Chirp3 HD)
 //
@@ -14,9 +14,9 @@
 import { loadBundle } from '@/lib/data';
 import { registerStopper, stopAllAudio } from '@/lib/audioBus';
 
-export type TranslationSetId = 'en/brian-allah' | 'en/sonia-allah' | 'ur';
+export type TranslationSetId = 'en/ollie-allah' | 'en/sonia-allah' | 'ur';
 export type BookLang = 'en' | 'ur';
-export type EnglishVoice = 'brian' | 'sonia';
+export type EnglishVoice = 'ollie' | 'sonia';
 
 export interface TranslationSetInfo {
   lang: BookLang;
@@ -50,15 +50,17 @@ export function loadTranslationManifest(): Promise<TranslationAudioManifest> {
 }
 
 export function setIdFor(lang: BookLang, voice: EnglishVoice): TranslationSetId {
-  return lang === 'ur' ? 'ur' : voice === 'sonia' ? 'en/sonia-allah' : 'en/brian-allah';
+  return lang === 'ur' ? 'ur' : voice === 'sonia' ? 'en/sonia-allah' : 'en/ollie-allah';
 }
 
-export function setLabel(id: TranslationSetId): string {
+export function setLabel(id: TranslationSetId | string): string {
   switch (id) {
-    case 'en/brian-allah':
-      return 'English · Brian';
+    case 'en/ollie-allah':
+      return 'English · Ollie';
     case 'en/sonia-allah':
       return 'English · Sonia';
+    case 'en/brian-allah':
+      return 'English · Brian';
     default:
       return 'Urdu · Jalandhari';
   }

@@ -317,7 +317,7 @@ export default function Settings() {
           <RowDivider />
           <div style={{ paddingLeft: 14 }}>
             <ToggleRow
-              label="English narration · Brian"
+              label="English narration · Ollie"
               on={settings.followEnglish}
               disabled={!settings.followTranslation}
               onToggle={() => toggle('followEnglish')}

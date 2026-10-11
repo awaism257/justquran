@@ -50,7 +50,7 @@ export default function Reading() {
   autoAdvanceRef.current = settings.audioAutoAdvance;
   // v133 "Follow each verse with translation narration" (Settings →
   // Recitation): after a verse's Arabic, read the enabled narration legs
-  // (English Brian → Urdu Jalandhari). Refs so the running chain reads the
+  // (English Ollie → Urdu Jalandhari). Refs so the running chain reads the
   // live values; the paged mushaf is exempt — its recitation stays
   // Arabic-only.
   const followTransRef = useRef(settings.followTranslation);
@@ -248,7 +248,7 @@ export default function Reading() {
       }
       /** Arabic ended naturally → if "follow with translation" is on (and
           this isn't the paged mushaf), read the enabled narration legs —
-          English Brian → Urdu Jalandhari; v=0 plays the surah's spoken
+          English Ollie → Urdu Jalandhari; v=0 plays the surah's spoken
           Bismillahs — then finish the verse. A failed/unreachable leg is
           skipped: the chain never dies on a missing narration file. */
       function followThenDone(v: number) {

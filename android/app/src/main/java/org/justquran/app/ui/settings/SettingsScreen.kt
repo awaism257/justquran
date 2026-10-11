@@ -252,7 +252,7 @@ fun SettingsScreen(
                     if (settings.followTranslation) {
                         Column(modifier = Modifier.padding(start = 16.dp)) {
                             ToggleRow(
-                                label = "English narration · Brian",
+                                label = "English narration · Ollie",
                                 checked = settings.followEn,
                                 enabled = settings.followTranslation,
                                 onCheckedChange = { appViewModel.setFollowEn(it) }

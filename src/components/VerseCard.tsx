@@ -94,7 +94,7 @@ export default function VerseCard({ verse, showEn, showUr, showTr, onAnyPlay, ac
     };
     const h = playVerse(verse.s, verse.v, (reason) => {
       // Natural end + "follow with translation" on → read the enabled
-      // narration legs (English Brian → Urdu Jalandhari) before finishing.
+      // narration legs (English Ollie → Urdu Jalandhari) before finishing.
       // A failed leg is skipped silently; stop/interrupt aborts quietly.
       if (
         reason === 'ended' &&

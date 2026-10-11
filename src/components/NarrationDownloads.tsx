@@ -164,7 +164,7 @@ export function NarrationSetDownloads({ lang, bundle }: { lang: BookLang; bundle
           </span>
           <span className="block" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
             {lang === 'en'
-              ? 'Brian · Verse-by-verse English narration · ~500 MB'
+              ? 'Ollie · Verse-by-verse English narration · ~500 MB'
               : 'Fateh Muhammad Jalandhari · Verse-by-verse Urdu narration · ~500 MB'}
           </span>
         </span>

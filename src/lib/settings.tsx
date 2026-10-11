@@ -40,9 +40,9 @@ export interface Settings {
    * restores it precisely (beta feedback: leaving used to switch ALL
    * translations back on). Absent until the user first enters mushaf. */
   preMushaf?: { en: boolean; ur: boolean; tr: boolean; verseByVerse: boolean };
-  /** v126: English narration voice for Book mode ('brian' | 'sonia'). Urdu has
+  /** English narration voice for Book mode ('ollie' | 'sonia'). Urdu has
    * a single voice, so this only applies to the English set. */
-  transVoice: 'brian' | 'sonia';
+  transVoice: 'ollie' | 'sonia';
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -59,7 +59,7 @@ export const DEFAULT_SETTINGS: Settings = {
   followEnglish: true,
   followUrdu: true,
   mushafPaged: false,
-  transVoice: 'brian',
+  transVoice: 'ollie',
 };
 
 const LS_KEY = 'jq-settings';
@@ -69,11 +69,15 @@ function loadSettings(): Settings {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw);
-    return {
+    const loaded: Settings = {
       ...DEFAULT_SETTINGS,
       ...parsed,
       fonts: { ...DEFAULT_SETTINGS.fonts, ...(parsed.fonts ?? {}) },
     };
+    if ((loaded.transVoice as string) === 'brian') {
+      loaded.transVoice = 'ollie';
+    }
+    return loaded;
   } catch {
     return DEFAULT_SETTINGS;
   }

@@ -1,5 +1,5 @@
 // "Follow with translation" chain (v133, Settings → Recitation): after the
-// Arabic recitation of a verse, read its meaning aloud — English (Brian)
+// Arabic recitation of a verse, read its meaning aloud — English (Ollie)
 // and/or Urdu (Jalandhari), each an opt-out sub-toggle. Shared by the
 // card-mode surah chain (Reading) and the single-verse speaker button
 // (VerseCard). The paged mushaf never uses this module: its recitation
@@ -47,8 +47,8 @@ export function playFollowLegs(opts: {
       lang: 'en',
       url:
         v === 0
-          ? bismillahUrl('en/brian-allah', s)
-          : translationVerseUrl('en/brian-allah', s, v),
+          ? bismillahUrl('en/ollie-allah', s)
+          : translationVerseUrl('en/ollie-allah', s, v),
     });
   }
   if (legs.urdu) {

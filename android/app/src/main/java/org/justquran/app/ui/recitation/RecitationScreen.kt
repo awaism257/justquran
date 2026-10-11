@@ -78,7 +78,7 @@ private data class AudioTrackInfo(
 
 private val TRACKS = listOf(
     AudioTrackInfo("ar", "Arabic Recitation", "Sheikh Mahmoud Khalil Al-Hussary · Murattal", "~1 GB"),
-    AudioTrackInfo("en", "English Translation", "Brian · Verse-by-verse English narration", "~500 MB"),
+    AudioTrackInfo("en", "English Translation", "Ollie · Verse-by-verse English narration", "~500 MB"),
     AudioTrackInfo("ur", "Urdu Translation", "Fateh Muhammad Jalandhari · Verse-by-verse Urdu narration", "~500 MB")
 )
 

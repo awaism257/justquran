@@ -100,7 +100,7 @@ fun HelpScreen(
                     Step(2, "Tap any verse to open its card, then press play to hear just that verse. Turn AUTO on to continue to the next verse automatically — and into the next surah when one ends.")
                     Step(3, "Recitation (Sheikh Mahmoud Khalil Al-Hussary) keeps playing with the screen off. Control it from the lock screen, the notification, or a Bluetooth headset.")
                     Step(4, "Download surahs for offline listening from the Recitation screen on the home page — downloaded surahs play without internet.")
-                    Step(5, "Translation narration: Turn on Settings → Recitation → 'Follow each verse with translation narration' to hear each verse read aloud in English (Brian) and/or Urdu (Jalandhari) after the Arabic recitation (in card view; the paged mushaf stays Arabic-only).")
+                    Step(5, "Translation narration: Turn on Settings → Recitation → 'Follow each verse with translation narration' to hear each verse read aloud in English (Ollie) and/or Urdu (Jalandhari) after the Arabic recitation (in card view; the paged mushaf stays Arabic-only).")
                 }
 
                 CollapsibleCard(title = "Volume buttons") {
