@@ -164,10 +164,18 @@ class SettingsRepository(private val appContext: Context) {
 
     suspend fun enterArabicOnly() {
         appContext.settingsStore.edit { prefs ->
-            prefs[K.PREV_EN] = prefs[K.SHOW_EN] ?: true
-            prefs[K.PREV_UR] = prefs[K.SHOW_UR] ?: true
-            prefs[K.PREV_TR] = prefs[K.SHOW_TR] ?: true
-            prefs[K.PREV_VBV] = prefs[K.VERSE_BY_VERSE] ?: true
+            val en = prefs[K.SHOW_EN] ?: true
+            val ur = prefs[K.SHOW_UR] ?: true
+            val tr = prefs[K.SHOW_TR] ?: true
+            val alreadyArabicOnly = (prefs[K.SHOW_AR] ?: true) && !en && !ur && !tr
+            // Only remember the previous choices when they are genuine; never
+            // overwrite them with the all-off state of Arabic-only itself.
+            if (!alreadyArabicOnly) {
+                prefs[K.PREV_EN] = en
+                prefs[K.PREV_UR] = ur
+                prefs[K.PREV_TR] = tr
+                prefs[K.PREV_VBV] = prefs[K.VERSE_BY_VERSE] ?: true
+            }
             prefs[K.SHOW_AR] = true
             prefs[K.SHOW_EN] = false
             prefs[K.SHOW_UR] = false
@@ -178,10 +186,15 @@ class SettingsRepository(private val appContext: Context) {
 
     suspend fun leaveArabicOnly() {
         appContext.settingsStore.edit { prefs ->
+            var en = prefs[K.PREV_EN] ?: true
+            var ur = prefs[K.PREV_UR] ?: true
+            var tr = prefs[K.PREV_TR] ?: true
+            // Guard: leaving Arabic-only must always show at least one translation.
+            if (!en && !ur && !tr) { en = true; ur = true; tr = true }
             prefs[K.SHOW_AR] = true
-            prefs[K.SHOW_EN] = prefs[K.PREV_EN] ?: true
-            prefs[K.SHOW_UR] = prefs[K.PREV_UR] ?: true
-            prefs[K.SHOW_TR] = prefs[K.PREV_TR] ?: true
+            prefs[K.SHOW_EN] = en
+            prefs[K.SHOW_UR] = ur
+            prefs[K.SHOW_TR] = tr
             prefs[K.VERSE_BY_VERSE] = prefs[K.PREV_VBV] ?: true
         }
     }
