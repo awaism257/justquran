@@ -417,6 +417,19 @@ export default function Reading() {
   // 3) otherwise (surah list, juz list, pager — no explicit target) → top of the surah.
   const location = useLocation();
 
+  // Seamless language switch: arriving from the English/Urdu reader while its
+  // narration was playing → carry on reciting the Arabic from the same verse
+  // (0 = the Bismillah prelude).
+  useEffect(() => {
+    const st = location.state as { verse?: number; play?: boolean } | null;
+    if (!st?.play || typeof st.verse !== 'number' || !surah) return;
+    const v = st.verse;
+    // Consume the hand-over so Back to this page never restarts the audio.
+    navigate(location.pathname + location.hash, { replace: true });
+    if (v <= 0) startSurahFrom(1);
+    else startSurahFrom(Math.min(v, surah.ayahs), true);
+  }, [location.key, location.state, location.pathname, location.hash, surah, startSurahFrom, navigate]);
+
   // Header juz label must track the verse ACTUALLY at the top of the screen:
   // a surah can span a juz boundary (e.g. Az-Zumar crosses into Juz 24 at
   // v32), so computing it once from the surah's first verse goes stale as
@@ -573,6 +586,18 @@ export default function Reading() {
     },
     [n, navigate, pagedMode, nextPage, prevPage],
   );
+
+  /** Mushaf language chips: hand the reciting verse (0 = Bismillah) to the
+      English/Urdu reader, which carries on narrating from it — or just
+      highlights it when the recitation was paused. */
+  const switchToBook = (lang: 'en' | 'ur') => {
+    const h = surahPlayV !== null ? { verse: surahPlayV, play: surahPlaying } : null;
+    stopAll();
+    navigate(
+      `/book/${lang}/${n}#v${h && h.verse > 0 ? h.verse : metaVerse}`,
+      h ? { state: h } : undefined,
+    );
+  };
 
   const arabicOnly = !settings.showEn && !settings.showUr && !settings.showTr;
   // v113: the exact selection is remembered in the persisted settings
@@ -810,16 +835,7 @@ export default function Reading() {
             type="button"
             className="chip"
             style={{ minWidth: 72 }}
-            onClick={() => {
-              // Arabic reciting a verse → open the translation at THAT verse,
-              // highlighted (BookReader reads `highlight` from the state).
-              const v = surahPlayV !== null && surahPlayV > 0 ? surahPlayV : null;
-              stopAll();
-              navigate(
-                `/book/en/${n}#v${v ?? metaVerse}`,
-                v ? { state: { highlight: v } } : undefined,
-              );
-            }}
+            onClick={() => switchToBook('en')}
           >
             English
           </button>
@@ -827,16 +843,7 @@ export default function Reading() {
             type="button"
             className="chip"
             style={{ minWidth: 72, fontFamily: "'Noto Nastaliq Urdu', serif" }}
-            onClick={() => {
-              // Arabic reciting a verse → open the translation at THAT verse,
-              // highlighted (BookReader reads `highlight` from the state).
-              const v = surahPlayV !== null && surahPlayV > 0 ? surahPlayV : null;
-              stopAll();
-              navigate(
-                `/book/ur/${n}#v${v ?? metaVerse}`,
-                v ? { state: { highlight: v } } : undefined,
-              );
-            }}
+            onClick={() => switchToBook('ur')}
           >
             اردو
           </button>

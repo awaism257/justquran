@@ -121,10 +121,16 @@ export default function BookReader() {
   const handleRef = useRef<PlayHandle | null>(null);
   const playIdxRef = useRef(0);
   const seqRef = useRef<SeqItem[]>([]);
-  /** Verse the Arabic mushaf was reciting when the reader switched here
-      (navigation state `highlight`): shown highlighted until narration
-      starts, and narration's Play starts from it. */
+  /** Verse handed over by a language switch (navigation state `verse`;
+      0 = the Bismillah): highlighted until narration starts, and Play
+      starts from it. */
   const [markV, setMarkV] = useState<number | null>(null);
+  /** The hand-over said audio was running (state `play`): carry on narrating
+      from markV as soon as this chapter's sequence is ready. */
+  const pendingPlayRef = useRef(false);
+  /** setId:n the current `seq` was built for — a language switch must never
+      start the OLD language's sequence before the new one is ready. */
+  const [seqKey, setSeqKey] = useState('');
   const autoRef = useRef(settings.audioAutoAdvance);
   autoRef.current = settings.audioAutoAdvance;
   const pendingAutoRef = useRef(false); // cross-surah auto-continue
@@ -151,6 +157,7 @@ export default function BookReader() {
       if (live) {
         seqRef.current = items;
         setSeq(items);
+        setSeqKey(`${setId}:${n}`);
       }
     };
     void push();
@@ -305,21 +312,49 @@ export default function BookReader() {
     setPlayIdx(0);
   }, [n, lang]);
 
-  // Arriving from the Arabic mushaf mid-recitation: pick up its verse.
+  // Arriving via a language chip (Arabic mushaf or the other translation):
+  // pick up the verse it was on, and whether its audio was running.
   useEffect(() => {
-    const h = (location.state as { highlight?: number } | null)?.highlight;
-    setMarkV(typeof h === 'number' ? h : null);
+    const st = location.state as { verse?: number; play?: boolean } | null;
+    const v = typeof st?.verse === 'number' ? st.verse : null;
+    setMarkV(v);
+    pendingPlayRef.current = v !== null && !!st?.play;
   }, [location.key, location.state]);
 
-  // …and cue narration's Play at that verse once the sequence is built.
+  // …cue narration at that verse once THIS chapter/voice's sequence is built,
+  // and keep the audio going if it was playing (seamless language switch).
   useEffect(() => {
-    if (markV === null || playing || paused) return;
-    const idx = seq.findIndex((it) => it.verseIdx !== null && it.labelVerse.v === markV);
-    if (idx >= 0) {
-      playIdxRef.current = idx;
-      setPlayIdx(idx);
+    if (markV === null || playing || paused || seqKey !== `${setId}:${n}`) return;
+    const idx =
+      markV === 0 ? 0 : seq.findIndex((it) => it.verseIdx !== null && it.labelVerse.v === markV);
+    if (idx < 0) return;
+    playIdxRef.current = idx;
+    setPlayIdx(idx);
+    if (pendingPlayRef.current) {
+      pendingPlayRef.current = false;
+      playItem(idx);
+      // Consume the hand-over so Back to this page never restarts the audio.
+      navigate(location.pathname + location.hash, { replace: true });
     }
-  }, [markV, seq, playing, paused]);
+  }, [markV, seq, seqKey, setId, n, playing, paused, playItem, navigate, location.pathname, location.hash]);
+
+  /** Language chips: hand the current verse (0 = Bismillah) and whether the
+      narration is running to the next view, which carries on from there. */
+  const handOff = (): { verse: number; play: boolean } | null => {
+    if (playing) {
+      const it = seqRef.current[playIdxRef.current];
+      if (it) return { verse: it.labelVerse.v, play: !paused };
+    }
+    return markV !== null ? { verse: markV, play: false } : null;
+  };
+  const switchTo = (path: string) => {
+    const h = handOff();
+    stopPlayback();
+    navigate(
+      `${path}#v${h && h.verse > 0 ? h.verse : currentVisibleVerse}`,
+      h ? { state: h } : undefined,
+    );
+  };
 
   const nextPage = useCallback(
     () => setPageIdx((i) => Math.min(pageCount - 1, i + 1)),
@@ -463,14 +498,13 @@ export default function BookReader() {
             className="chip"
             style={{ minWidth: 72 }}
             onClick={() => {
-              stopPlayback();
               set({
                 showEn: false,
                 showUr: false,
                 showTr: false,
                 verseByVerse: false,
               });
-              navigate(`/surah/${n}#v${currentVisibleVerse}`);
+              switchTo(`/surah/${n}`);
             }}
           >
             Arabic
@@ -480,13 +514,7 @@ export default function BookReader() {
             className={lang === 'en' ? 'chip on' : 'chip'}
             style={{ minWidth: 72 }}
             onClick={() => {
-              if (lang !== 'en') {
-                stopPlayback();
-                navigate(
-                  `/book/en/${n}#v${markV ?? currentVisibleVerse}`,
-                  markV !== null ? { state: { highlight: markV } } : undefined,
-                );
-              }
+              if (lang !== 'en') switchTo(`/book/en/${n}`);
             }}
           >
             English
@@ -496,13 +524,7 @@ export default function BookReader() {
             className={lang === 'ur' ? 'chip on' : 'chip'}
             style={{ minWidth: 72, fontFamily: "'Noto Nastaliq Urdu', serif" }}
             onClick={() => {
-              if (lang !== 'ur') {
-                stopPlayback();
-                navigate(
-                  `/book/ur/${n}#v${markV ?? currentVisibleVerse}`,
-                  markV !== null ? { state: { highlight: markV } } : undefined,
-                );
-              }
+              if (lang !== 'ur') switchTo(`/book/ur/${n}`);
             }}
           >
             اردو
