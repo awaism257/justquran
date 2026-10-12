@@ -1,0 +1,1 @@
+• Fixed Urdu narration verses where the voice garbled or looped (including 69:9), and evened out Urdu volume to match the English narration. Downloaded Urdu audio refreshes automatically.

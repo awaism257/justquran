@@ -68,23 +68,48 @@ export function setLabel(id: TranslationSetId | string): string {
 
 let cachedBase: string | null = null;
 
-/** v137: 103 Urdu narration files were re-recorded on the server (the 30
-    letter-opening verses + 73 honorific-mark verses). Anyone who played them
-    before has the OLD files in the on-device audio cache, which is
-    cache-first — so purge exactly those URLs, once per device, keyed by a
-    flag. Everything else in the cache (incl. offline downloads) is kept. */
-const PURGE_UR_FILENAMES = ["002001.mp3", "003001.mp3", "004001.mp3", "004013.mp3", "004014.mp3", "004042.mp3", "004059.mp3", "004061.mp3", "004064.mp3", "004069.mp3", "004078.mp3", "004079.mp3", "004080.mp3", "004083.mp3", "004084.mp3", "007001.mp3", "007011.mp3", "007059.mp3", "007064.mp3", "007065.mp3", "007069.mp3", "007071.mp3", "007072.mp3", "007073.mp3", "007075.mp3", "007077.mp3", "007079.mp3", "007080.mp3", "007082.mp3", "007085.mp3", "007088.mp3", "007090.mp3", "007092.mp3", "007093.mp3", "007103.mp3", "007142.mp3", "007157.mp3", "007158.mp3", "007184.mp3", "007199.mp3", "009040.mp3", "009054.mp3", "009059.mp3", "010001.mp3", "011001.mp3", "012001.mp3", "013001.mp3", "014001.mp3", "015001.mp3", "019001.mp3", "020001.mp3", "025056.mp3", "026001.mp3", "027001.mp3", "028001.mp3", "029001.mp3", "030001.mp3", "031001.mp3", "032001.mp3", "034010.mp3", "034012.mp3", "034013.mp3", "036001.mp3", "038001.mp3", "038012.mp3", "038013.mp3", "038017.mp3", "038022.mp3", "038024.mp3", "038026.mp3", "038030.mp3", "038034.mp3", "038041.mp3", "038045.mp3", "038048.mp3", "040001.mp3", "040005.mp3", "040031.mp3", "040034.mp3", "040045.mp3", "040066.mp3", "041001.mp3", "041045.mp3", "042001.mp3", "042002.mp3", "042013.mp3", "042015.mp3", "042024.mp3", "043001.mp3", "044001.mp3", "045001.mp3", "046001.mp3", "050001.mp3", "050012.mp3", "050013.mp3", "054027.mp3", "054033.mp3", "054034.mp3", "054036.mp3", "066010.mp3", "068001.mp3", "068002.mp3", "109001.mp3"];
-const PURGE_FLAG = 'jq-audiofix-v137';
+/** Bumped whenever the Urdu files are overwritten on R2. They are served with
+    `Cache-Control: immutable, max-age=1y`, so the query string is what makes
+    browsers fetch the new copies.
+    2 = Oct 2026: 99 garbled verses re-made, whole set loudness-normalised to
+    match the English voice (this also supersedes the v137 per-file purge). */
+const UR_AUDIO_REV = 2;
+const UR_MIGRATE_FLAG = `jq-ur-audio-rev${UR_AUDIO_REV}`;
 
-async function purgeReplacedAudio(base: string): Promise<void> {
+/** The pre-revision cache key for a versioned Urdu URL (query stripped). */
+function legacyKey(url: string): string | null {
+  const i = url.indexOf('?v=');
+  return i > 0 && url.includes('/ur/') ? url.slice(0, i) : null;
+}
+
+/** Re-fetch any Urdu narration the user downloaded before this revision under
+    its new versioned key, then drop the old entry. Runs once per device in
+    the background; offline playback keeps using the old copy until its
+    replacement has arrived (see resolvePlayableUrl). Failures retry on the
+    next app start. */
+async function migrateUrduDownloads(base: string): Promise<void> {
   try {
-    if (localStorage.getItem(PURGE_FLAG)) return;
-    if (typeof caches === 'undefined') return;
+    if (localStorage.getItem(UR_MIGRATE_FLAG)) return;
+    if (typeof caches === 'undefined' || !navigator.onLine) return;
     const cache = await caches.open(TRANS_AUDIO_CACHE);
-    await Promise.all(PURGE_UR_FILENAMES.map((f) => cache.delete(`${base}ur/${f}`)));
-    localStorage.setItem(PURGE_FLAG, '1');
+    const prefix = `${base}ur/`;
+    const stale = (await cache.keys()).filter(
+      (r) => r.url.startsWith(prefix) && !r.url.includes('?v='),
+    );
+    let failed = 0;
+    for (const req of stale) {
+      try {
+        const res = await fetch(`${req.url}?v=${UR_AUDIO_REV}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await cache.put(`${req.url}?v=${UR_AUDIO_REV}`, res);
+        await cache.delete(req);
+      } catch {
+        failed++;
+      }
+    }
+    if (failed === 0) localStorage.setItem(UR_MIGRATE_FLAG, '1');
   } catch {
-    /* purging is best-effort; never block playback on it */
+    /* best-effort; never block playback on it */
   }
 }
 
@@ -97,11 +122,11 @@ async function baseUrl(): Promise<string> {
   } catch {
     cachedBase = 'https://pub-fafe102872f84521ab2a82e3dc2eeab0.r2.dev/';
   }
-  await purgeReplacedAudio(cachedBase);
+  void migrateUrduDownloads(cachedBase);
   return cachedBase;
 }
 
-/** e.g. verseUrl('ur', 2, 255) -> <base>ur/002255.mp3 */
+/** e.g. verseUrl('ur', 2, 255) -> <base>ur/002255.mp3?v=2 */
 export async function translationVerseUrl(
   set: TranslationSetId,
   s: number,
@@ -109,7 +134,8 @@ export async function translationVerseUrl(
 ): Promise<string> {
   const sss = String(s).padStart(3, '0');
   const vvv = String(v).padStart(3, '0');
-  return `${await baseUrl()}${set}/${sss}${vvv}.mp3`;
+  const rev = set === 'ur' ? `?v=${UR_AUDIO_REV}` : '';
+  return `${await baseUrl()}${set}/${sss}${vvv}.mp3${rev}`;
 }
 
 /** Spoken Bismillah that heads a surah (null for surahs 1 and 9). */
@@ -263,7 +289,11 @@ registerStopper(stopTranslation);
 /** Returns an object URL for the cached copy of `url`, or the original URL. */
 async function resolvePlayableUrl(url: string): Promise<string> {
   if (typeof caches === 'undefined') return url;
-  const match = await caches.open(TRANS_AUDIO_CACHE).then((c) => c.match(url));
+  const cache = await caches.open(TRANS_AUDIO_CACHE);
+  let match = await cache.match(url);
+  // Not migrated yet: use the old download while offline rather than fail.
+  const legacy = legacyKey(url);
+  if (!match && legacy && !navigator.onLine) match = await cache.match(legacy);
   if (!match) return url;
   const blob = await match.blob();
   return URL.createObjectURL(blob);

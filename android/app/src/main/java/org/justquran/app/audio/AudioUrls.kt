@@ -24,8 +24,16 @@ object AudioUrls {
         else "$NARR_BASE/en/ollie-allah/${fileName(s, v)}"
     }
 
+    /**
+     * Bumped whenever the Urdu files are overwritten on R2. They are served
+     * with a one-year immutable cache header, so the query string makes sure
+     * no HTTP cache along the way hands back an old copy.
+     * 2 = Oct 2026: 99 garbled verses re-made, whole set loudness-normalised.
+     */
+    const val URDU_AUDIO_REV: Int = 2
+
     fun urduNarrationUrl(s: Int, v: Int): String {
-        return if (v == 0) "$NARR_BASE/ur/001001.mp3"
-        else "$NARR_BASE/ur/${fileName(s, v)}"
+        val name = if (v == 0) "001001.mp3" else fileName(s, v)
+        return "$NARR_BASE/ur/$name?v=$URDU_AUDIO_REV"
     }
 }

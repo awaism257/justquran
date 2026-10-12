@@ -1,6 +1,7 @@
 package org.justquran.app.data
 
 import android.content.Context
+import android.net.ConnectivityManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -50,6 +51,64 @@ class AudioDownloadRepository(private val appContext: Context) {
 
     init {
         refresh()
+        refreshStaleUrduDownloads()
+    }
+
+    /**
+     * Oct 2026: on the server, 99 garbled Urdu verses were re-made and the
+     * whole Urdu set was loudness-normalised to match the English voice.
+     * Urdu files downloaded before that are re-fetched here, in place, so
+     * offline playback keeps working throughout (each file is swapped
+     * atomically via .part). The repaired verses are always refreshed; the
+     * rest (volume only, up to ~250 MB) wait for an unmetered connection.
+     * Anything that fails is retried on the next launch: a refreshed file
+     * has a newer mtime than the cutoff, so it is never fetched twice.
+     */
+    private fun refreshStaleUrduDownloads() {
+        val prefs = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (prefs.getBoolean(KEY_UR_REFRESH_DONE, false)) return
+        scope.launch {
+            val urDir = dirFor("ur")
+            val stale = urDir.listFiles()
+                ?.filter { it.isFile && it.name.endsWith(".mp3") && it.lastModified() < UR_REFRESH_CUTOFF_MS }
+                ?.sortedByDescending { it.name.removeSuffix(".mp3") in UR_REPAIRED }
+                ?: emptyList()
+            val unmetered = runCatching {
+                val cm = appContext.getSystemService(ConnectivityManager::class.java)
+                cm != null && cm.activeNetwork != null && !cm.isActiveNetworkMetered
+            }.getOrDefault(false)
+            var pending = 0
+            for (f in stale) {
+                ensureActive()
+                val stem = f.name.removeSuffix(".mp3")
+                if (stem !in UR_REPAIRED && !unmetered) { pending++; continue }
+                val s = stem.take(3).toIntOrNull()
+                val v = stem.drop(3).toIntOrNull()
+                if (s == null || v == null) continue
+                if (!fetchFile(urDir, f.name, listOf(AudioUrls.urduNarrationUrl(s, v)))) pending++
+            }
+            if (pending == 0) prefs.edit().putBoolean(KEY_UR_REFRESH_DONE, true).apply()
+            if (stale.isNotEmpty()) refresh()
+        }
+    }
+
+    private companion object {
+        const val PREFS = "audio_downloads"
+        const val KEY_UR_REFRESH_DONE = "ur_refresh_rev2_done"
+        /** After the rev-2 Urdu upload to R2 finished (12 Oct 2026 12:00 UTC). */
+        const val UR_REFRESH_CUTOFF_MS = 1_791_806_400_000L
+        val UR_REPAIRED: Set<String> = """
+            002085 002205 002222 002260 002269 002281 003078 004011 004025 004092
+            004111 004115 004125 004154 004162 004163 004164 005033 005057 005061
+            005115 006061 006083 006111 008012 008029 008032 008042 008050 009085
+            009090 009101 009102 009106 009115 009117 009122 009124 009127 010013
+            010016 010019 010022 010023 010024 010041 010068 010104 010109 011008
+            011018 011034 011038 011048 012010 012025 012031 012056 013013 013040
+            014012 014018 014023 014036 017023 017064 017073 017083 017088 017101
+            017105 017111 020081 020127 020132 024031 024055 024061 025007 026139
+            028068 033007 033035 033050 036047 041021 042019 043013 043049 043051
+            045032 046031 048024 048029 057023 066011 069009 072014 073015
+        """.trim().split(Regex("\\s+")).toSet()
     }
 
     fun dirFor(lang: String): File {
