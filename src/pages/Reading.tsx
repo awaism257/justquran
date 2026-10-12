@@ -40,6 +40,8 @@ export default function Reading() {
   const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
   /** Mirrors pagedMode for callbacks whose effect deps don't include it. */
   const pagedRef = useRef(false);
+  /** Mirrors folioMode (Arabic mushaf, vertical or paged) for the playback chain. */
+  const folioRef = useRef(false);
 
   // ---- Whole-surah playback (sequential per-verse, auto-scroll) ----
   const [surahPlayV, setSurahPlayV] = useState<number | null>(null);
@@ -51,8 +53,8 @@ export default function Reading() {
   // v133 "Follow each verse with translation narration" (Settings →
   // Recitation): after a verse's Arabic, read the enabled narration legs
   // (English Ollie → Urdu Jalandhari). Refs so the running chain reads the
-  // live values; the paged mushaf is exempt — its recitation stays
-  // Arabic-only.
+  // live values; the Arabic mushaf (vertical and paged) is exempt — its
+  // recitation stays Arabic-only.
   const followTransRef = useRef(settings.followTranslation);
   followTransRef.current = settings.followTranslation;
   const followLegsRef = useRef({ english: settings.followEnglish, urdu: settings.followUrdu });
@@ -234,7 +236,7 @@ export default function Reading() {
         // If narration/translation is active, insert a 1.0s contemplation pause between verses
         const hasTranslation =
           followTransRef.current &&
-          !pagedRef.current &&
+          !folioRef.current &&
           (followLegsRef.current.english || followLegsRef.current.urdu);
         if (hasTranslation) {
           if (verseTimerRef.current) clearTimeout(verseTimerRef.current);
@@ -247,7 +249,7 @@ export default function Reading() {
         }
       }
       /** Arabic ended naturally → if "follow with translation" is on (and
-          this isn't the paged mushaf), read the enabled narration legs —
+          this isn't the Arabic mushaf), read the enabled narration legs —
           English Ollie → Urdu Jalandhari; v=0 plays the surah's spoken
           Bismillahs — then finish the verse. A failed/unreachable leg is
           skipped: the chain never dies on a missing narration file. */
@@ -255,7 +257,7 @@ export default function Reading() {
         const legs = followLegsRef.current;
         if (
           followTransRef.current &&
-          !pagedRef.current &&
+          !folioRef.current &&
           (legs.english || legs.urdu)
         ) {
           setSurahProgress(0);
@@ -404,6 +406,7 @@ export default function Reading() {
   // chosen font scale) instead of one scrolling page.
   const pagedMode = folioMode && settings.mushafPaged;
   pagedRef.current = pagedMode;
+  folioRef.current = folioMode;
   /** This surah's measured pagination (null until PagedFolio reports). */
   const surahPages = pages && pages.surah === n ? pages : null;
   const surahPageCount = surahPages ? surahPages.count : 1;

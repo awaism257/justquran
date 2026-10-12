@@ -303,7 +303,7 @@ export default function Help() {
             To hear each verse's meaning read aloud after its Arabic, turn on{' '}
             <b>Settings → Recitation → Follow each verse with translation narration</b>. Playback
             then goes Arabic → English → Urdu for every verse; the English and Urdu legs can each
-            be switched off separately just below it. (The paged mushaf always recites Arabic
+            be switched off separately just below it. (The Arabic mushaf, vertical or paged, always recites Arabic
             only.)
           </Step>
         </CollapsibleCard>

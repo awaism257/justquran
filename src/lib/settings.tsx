@@ -28,7 +28,7 @@ export interface Settings {
   alwaysCreamPage: boolean;
   audioAutoAdvance: boolean;
   /** v133: after each verse's Arabic, follow with translation narration
-   * (card mode and the folio chain — the paged mushaf stays Arabic-only). */
+   * (card mode only — the Arabic mushaf, vertical or paged, stays Arabic-only). */
   followTranslation: boolean;
   /** Which narration legs play while followTranslation is on. */
   followEnglish: boolean;
