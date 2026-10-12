@@ -811,8 +811,14 @@ export default function Reading() {
             className="chip"
             style={{ minWidth: 72 }}
             onClick={() => {
+              // Arabic reciting a verse → open the translation at THAT verse,
+              // highlighted (BookReader reads `highlight` from the state).
+              const v = surahPlayV !== null && surahPlayV > 0 ? surahPlayV : null;
               stopAll();
-              navigate(`/book/en/${n}#v${metaVerse}`);
+              navigate(
+                `/book/en/${n}#v${v ?? metaVerse}`,
+                v ? { state: { highlight: v } } : undefined,
+              );
             }}
           >
             English
@@ -822,8 +828,14 @@ export default function Reading() {
             className="chip"
             style={{ minWidth: 72, fontFamily: "'Noto Nastaliq Urdu', serif" }}
             onClick={() => {
+              // Arabic reciting a verse → open the translation at THAT verse,
+              // highlighted (BookReader reads `highlight` from the state).
+              const v = surahPlayV !== null && surahPlayV > 0 ? surahPlayV : null;
               stopAll();
-              navigate(`/book/ur/${n}#v${metaVerse}`);
+              navigate(
+                `/book/ur/${n}#v${v ?? metaVerse}`,
+                v ? { state: { highlight: v } } : undefined,
+              );
             }}
           >
             اردو

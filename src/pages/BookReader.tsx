@@ -121,6 +121,10 @@ export default function BookReader() {
   const handleRef = useRef<PlayHandle | null>(null);
   const playIdxRef = useRef(0);
   const seqRef = useRef<SeqItem[]>([]);
+  /** Verse the Arabic mushaf was reciting when the reader switched here
+      (navigation state `highlight`): shown highlighted until narration
+      starts, and narration's Play starts from it. */
+  const [markV, setMarkV] = useState<number | null>(null);
   const autoRef = useRef(settings.audioAutoAdvance);
   autoRef.current = settings.audioAutoAdvance;
   const pendingAutoRef = useRef(false); // cross-surah auto-continue
@@ -184,6 +188,7 @@ export default function BookReader() {
       if (!item) return;
       playIdxRef.current = idx;
       setPlayIdx(idx);
+      setMarkV(null);
       setPlaying(true);
       setPaused(false);
       setProgress(0);
@@ -299,6 +304,22 @@ export default function BookReader() {
     playIdxRef.current = 0;
     setPlayIdx(0);
   }, [n, lang]);
+
+  // Arriving from the Arabic mushaf mid-recitation: pick up its verse.
+  useEffect(() => {
+    const h = (location.state as { highlight?: number } | null)?.highlight;
+    setMarkV(typeof h === 'number' ? h : null);
+  }, [location.key, location.state]);
+
+  // …and cue narration's Play at that verse once the sequence is built.
+  useEffect(() => {
+    if (markV === null || playing || paused) return;
+    const idx = seq.findIndex((it) => it.verseIdx !== null && it.labelVerse.v === markV);
+    if (idx >= 0) {
+      playIdxRef.current = idx;
+      setPlayIdx(idx);
+    }
+  }, [markV, seq, playing, paused]);
 
   const nextPage = useCallback(
     () => setPageIdx((i) => Math.min(pageCount - 1, i + 1)),
@@ -461,7 +482,10 @@ export default function BookReader() {
             onClick={() => {
               if (lang !== 'en') {
                 stopPlayback();
-                navigate(`/book/en/${n}#v${currentVisibleVerse}`);
+                navigate(
+                  `/book/en/${n}#v${markV ?? currentVisibleVerse}`,
+                  markV !== null ? { state: { highlight: markV } } : undefined,
+                );
               }
             }}
           >
@@ -474,7 +498,10 @@ export default function BookReader() {
             onClick={() => {
               if (lang !== 'ur') {
                 stopPlayback();
-                navigate(`/book/ur/${n}#v${currentVisibleVerse}`);
+                navigate(
+                  `/book/ur/${n}#v${markV ?? currentVisibleVerse}`,
+                  markV !== null ? { state: { highlight: markV } } : undefined,
+                );
               }
             }}
           >
@@ -528,7 +555,9 @@ export default function BookReader() {
                     }
                   }}
                   className={
-                    playing && seqItem?.verseIdx === i ? 'verse-run reciting' : undefined
+                    (playing && seqItem?.verseIdx === i) || (!playing && markV === v.v)
+                      ? 'verse-run reciting'
+                      : undefined
                   }
                 >
                   {lang === 'en' ? v.en : (v.ur ?? '')}{' '}
