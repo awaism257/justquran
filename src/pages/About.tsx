@@ -45,7 +45,7 @@ function CreditRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-const BOOKS = [
+const BOOKS: { cover: string; alt: string; title: string; desc: string; asin: string; sample?: string }[] = [
   {
     cover: 'books/book-odes.jpg',
     alt: 'Odes and Litanies',
@@ -73,6 +73,7 @@ const BOOKS = [
     title: 'My First Seerah Colouring Book',
     desc: 'For children aged 4–9: 25 scenes from Makkah to Madinah, each with a short story. No people are drawn.',
     asin: 'B0HMP8ZHHD',
+    sample: 'https://mantlelibrary.app/downloads/Garden_of_Purity_Free_Colouring_Sample.pdf',
   },
 ];
 
@@ -142,6 +143,16 @@ function BooksCard() {
                 <BookLink href={`https://www.amazon.co.uk/dp/${b.asin}`} label="Amazon UK" filled />
                 <BookLink href={`https://www.amazon.com/dp/${b.asin}`} label="Amazon US" />
               </div>
+              {b.sample && (
+                <a
+                  href={b.sample}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: 'inline-block', marginTop: 8, fontSize: 13, color: GREEN, textDecoration: 'underline' }}
+                >
+                  Free sample pages to print (PDF, 4 MB)
+                </a>
+              )}
             </div>
           </div>
         ))}
