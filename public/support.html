@@ -271,6 +271,20 @@
     padding: 8px 18px;
     font-size: 0.88rem;
   }
+  /* Books from Munajaat Press */
+  @font-face { font-family: 'NotoNaskh'; src: url('fonts/noto-naskh.ttf') format('truetype'); font-display: swap; }
+  .hon { font-family: 'NotoNaskh', serif; font-weight: normal; line-height: 1; }
+  .book-item { display: flex; gap: 14px; align-items: flex-start; }
+  .book-item-cover { flex: 0 0 72px; height: auto; border-radius: 4px; box-shadow: var(--card-shadow); }
+  .book-item-info { flex: 1; min-width: 0; }
+  .book-item .app-item-name { font-size: 1rem; line-height: 1.35; }
+  .book-item .app-item-desc { margin: 6px 0 10px !important; }
+  .book-item-links { display: flex; gap: 8px; flex-wrap: wrap; }
+  .book-item-links .btn { margin: 0; padding: 6px 14px; font-size: 0.85rem; }
+  @media (max-width: 480px) {
+    .book-item { gap: 12px; padding: 14px; }
+    .book-item-cover { flex-basis: 60px; width: 60px; }
+  }
 </style>
 </head>
 <body>
@@ -390,6 +404,59 @@
       <div class="app-item-actions">
         <a class="btn btn-primary" href="https://mantlelibrary.app" target="_blank" rel="noopener noreferrer">Open Mantle Library</a>
         <a class="btn btn-outline" href="https://github.com/awaism257/the-mantle-library" target="_blank" rel="noopener noreferrer">Source code</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Books from Munajaat Press</h2>
+    <p class="family-intro">Printed and Kindle editions made by the same team. They are paid books sold on Amazon; the app itself stays free, with no ads.</p>
+
+    <div class="app-item book-item">
+      <img class="book-item-cover" src="books/book-odes.jpg" width="72" height="107" loading="lazy" alt="Cover of Odes and Litanies">
+      <div class="book-item-info">
+        <h3 class="app-item-name">Odes and Litanies in Praise of the Prophet <span class="hon">ﷺ</span></h3>
+        <p class="app-item-desc">The Burdah, Bānat Suʿād and Dalāʾil al-Khayrāt in Arabic and English, in one volume.</p>
+        <div class="book-item-links">
+          <a class="btn btn-primary" href="https://www.amazon.co.uk/dp/B0HMLDCM2N" target="_blank" rel="noopener noreferrer">Amazon UK</a>
+          <a class="btn btn-outline" href="https://www.amazon.com/dp/B0HMLDCM2N" target="_blank" rel="noopener noreferrer">Amazon US</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-item book-item">
+      <img class="book-item-cover" src="books/book-garden-vol1.jpg" width="72" height="107" loading="lazy" alt="Cover of The Garden of Purity, Volume 1">
+      <div class="book-item-info">
+        <h3 class="app-item-name">The Garden of Purity, Volume 1: The Dawn of Prophethood</h3>
+        <p class="app-item-desc">Mīrkhwānd's life of the Prophet <span class="hon">ﷺ</span> in modern English, from his ancestry to Badr and Uḥud, with editorial footnotes.</p>
+        <div class="book-item-links">
+          <a class="btn btn-primary" href="https://www.amazon.co.uk/dp/B0HMLBZP9S" target="_blank" rel="noopener noreferrer">Amazon UK</a>
+          <a class="btn btn-outline" href="https://www.amazon.com/dp/B0HMLBZP9S" target="_blank" rel="noopener noreferrer">Amazon US</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-item book-item">
+      <img class="book-item-cover" src="books/book-garden-vol2.jpg" width="72" height="107" loading="lazy" alt="Cover of The Garden of Purity, Volume 2">
+      <div class="book-item-info">
+        <h3 class="app-item-name">The Garden of Purity, Volume 2: The Madinan Years</h3>
+        <p class="app-item-desc">From the Trench and Ḥudaybiyyah to the Farewell Pilgrimage and the passing of the Prophet <span class="hon">ﷺ</span>.</p>
+        <div class="book-item-links">
+          <a class="btn btn-primary" href="https://www.amazon.co.uk/dp/B0HMP9ZH3Q" target="_blank" rel="noopener noreferrer">Amazon UK</a>
+          <a class="btn btn-outline" href="https://www.amazon.com/dp/B0HMP9ZH3Q" target="_blank" rel="noopener noreferrer">Amazon US</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-item book-item">
+      <img class="book-item-cover" src="books/book-seerah-colouring.jpg" width="72" height="72" loading="lazy" alt="Cover of My First Seerah Colouring Book">
+      <div class="book-item-info">
+        <h3 class="app-item-name">My First Seerah Colouring Book</h3>
+        <p class="app-item-desc">For children aged 4–9: 25 scenes from Makkah to Madinah, each with a short story. No people are drawn.</p>
+        <div class="book-item-links">
+          <a class="btn btn-primary" href="https://www.amazon.co.uk/dp/B0HMP8ZHHD" target="_blank" rel="noopener noreferrer">Amazon UK</a>
+          <a class="btn btn-outline" href="https://www.amazon.com/dp/B0HMP8ZHHD" target="_blank" rel="noopener noreferrer">Amazon US</a>
+        </div>
       </div>
     </div>
   </div>

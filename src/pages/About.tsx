@@ -45,6 +45,111 @@ function CreditRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+const BOOKS = [
+  {
+    cover: 'books/book-odes.jpg',
+    alt: 'Odes and Litanies',
+    title: 'Odes and Litanies in Praise of the Prophet ﷺ',
+    desc: 'The Burdah, Bānat Suʿād and Dalāʾil al-Khayrāt in Arabic and English, in one volume.',
+    asin: 'B0HMLDCM2N',
+  },
+  {
+    cover: 'books/book-garden-vol1.jpg',
+    alt: 'The Garden of Purity, Volume 1',
+    title: 'The Garden of Purity, Volume 1: The Dawn of Prophethood',
+    desc: "Mīrkhwānd's life of the Prophet ﷺ in modern English, from his ancestry to Badr and Uḥud, with editorial footnotes.",
+    asin: 'B0HMLBZP9S',
+  },
+  {
+    cover: 'books/book-garden-vol2.jpg',
+    alt: 'The Garden of Purity, Volume 2',
+    title: 'The Garden of Purity, Volume 2: The Madinan Years',
+    desc: 'From the Trench and Ḥudaybiyyah to the Farewell Pilgrimage and the passing of the Prophet ﷺ.',
+    asin: 'B0HMP9ZH3Q',
+  },
+  {
+    cover: 'books/book-seerah-colouring.jpg',
+    alt: 'My First Seerah Colouring Book',
+    title: 'My First Seerah Colouring Book',
+    desc: 'For children aged 4–9: 25 scenes from Makkah to Madinah, each with a short story. No people are drawn.',
+    asin: 'B0HMP8ZHHD',
+  },
+];
+
+// Renders ﷺ in Noto Naskh so it isn't drawn oversized by a fallback font.
+function WithHonorific({ text }: { text: string }) {
+  const parts = text.split('ﷺ');
+  return (
+    <>
+      {parts.map((part, i) => (
+        <span key={i}>
+          {part}
+          {i < parts.length - 1 && <span style={{ fontFamily: 'NotoNaskh, serif' }}>ﷺ</span>}
+        </span>
+      ))}
+    </>
+  );
+}
+
+function BookLink({ href, label, filled }: { href: string; label: string; filled?: boolean }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: 'inline-block',
+        borderRadius: 9999,
+        padding: '6px 14px',
+        fontSize: 13,
+        textDecoration: 'none',
+        border: `1.5px solid ${GREEN}`,
+        background: filled ? GREEN : 'transparent',
+        color: filled ? 'rgb(16, 22, 19)' : GREEN,
+      }}
+    >
+      {label}
+    </a>
+  );
+}
+
+function BooksCard() {
+  return (
+    <Card>
+      <CardTitle>Books from Munajaat Press</CardTitle>
+      <p style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--muted)' }}>
+        Printed and Kindle editions made by the same team. They are paid books sold on Amazon; the
+        app itself stays free, with no ads.
+      </p>
+      <div className="flex flex-col gap-4" style={{ marginTop: 14 }}>
+        {BOOKS.map((b) => (
+          <div key={b.asin} className="flex items-start gap-3">
+            <img
+              src={`${import.meta.env.BASE_URL}${b.cover}`}
+              alt={`Cover of ${b.alt}`}
+              width={64}
+              loading="lazy"
+              style={{ flexShrink: 0, height: 'auto', borderRadius: 4, boxShadow: 'var(--card-shadow)' }}
+            />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 15, lineHeight: 1.4 }}>
+                <WithHonorific text={b.title} />
+              </div>
+              <p style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--muted)', margin: '4px 0 8px' }}>
+                <WithHonorific text={b.desc} />
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <BookLink href={`https://www.amazon.co.uk/dp/${b.asin}`} label="Amazon UK" filled />
+                <BookLink href={`https://www.amazon.com/dp/${b.asin}`} label="Amazon US" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 function AppInfo() {
   // The "Repair offline files & reload" button lives in Settings → Diagnostics.
   return (
@@ -99,6 +204,9 @@ export default function About() {
             DigitalKhatt IndoPak (Amine Anane / Tarteel Inc) · Amiri Quran · Noto Nastaliq Urdu — SIL Open Font License
           </p>
         </Card>
+
+        {/* Books from Munajaat Press (web app only; Google Play could treat it as advertising) */}
+        {!isAndroidApp && <BooksCard />}
 
         {/* Card 4 — Support this app (web app only; never in the Android app —
             Google Play policy forbids external donation links in the app) */}
