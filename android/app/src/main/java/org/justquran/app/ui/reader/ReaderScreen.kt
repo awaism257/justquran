@@ -1070,16 +1070,24 @@ fun ReaderScreen(
                         currentMode = PagedMode.ARABIC,
                         onSelectArabic = { /* Already in Arabic */ },
                         onSelectEnglish = {
-                            if (audioActive || chainActive) {
+                            // Seamless switch: the English narration carries on
+                            // from the verse being recited (highlighted there).
+                            val handed = audioController.switchLanguage("en")
+                            if (handed == null && (audioActive || chainActive)) {
                                 audioController.stopAll()
                             }
-                            nav.navigate(Routes.book("en", activeSurah, topVerse))
+                            val v = handed?.takeIf { it.s == activeSurah && it.v >= 1 }?.v ?: topVerse
+                            nav.navigate(Routes.book("en", handed?.s ?: activeSurah, v))
                         },
                         onSelectUrdu = {
-                            if (audioActive || chainActive) {
+                            // Seamless switch: the Urdu narration carries on
+                            // from the verse being recited (highlighted there).
+                            val handed = audioController.switchLanguage("ur")
+                            if (handed == null && (audioActive || chainActive)) {
                                 audioController.stopAll()
                             }
-                            nav.navigate(Routes.book("ur", activeSurah, topVerse))
+                            val v = handed?.takeIf { it.s == activeSurah && it.v >= 1 }?.v ?: topVerse
+                            nav.navigate(Routes.book("ur", handed?.s ?: activeSurah, v))
                         }
                     )
                 }

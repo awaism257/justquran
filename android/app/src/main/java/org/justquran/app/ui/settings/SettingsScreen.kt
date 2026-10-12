@@ -243,7 +243,7 @@ fun SettingsScreen(
                         onCheckedChange = { appViewModel.setFollowTranslation(it) }
                     )
                     Text(
-                        text = "After the Arabic, each verse is read aloud in English and/or Urdu (card view; the paged mushaf stays Arabic-only).",
+                        text = "After the Arabic, each verse is read aloud in English and/or Urdu (card view; the Arabic mushaf, vertical or paged, stays Arabic-only).",
                         color = colors.muted,
                         fontSize = 12.sp,
                         fontFamily = fonts.serif,

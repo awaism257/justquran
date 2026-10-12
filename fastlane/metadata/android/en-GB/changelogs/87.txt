@@ -1,0 +1,2 @@
+• The Arabic mushaf (vertical and paged) now recites Arabic only; translation narration follows in card view only.
+• Switching between Arabic, English and Urdu while audio plays carries on in the new language from the same verse, highlighted.

@@ -320,18 +320,27 @@ fun BookReaderScreen(
     }
 
     val onSelectArabic: () -> Unit = {
-        if (isPlayingThisSurah || activeAudio || chainActive) {
-            audio.stopAll()
-        }
         scope.launch {
             container.settingsRepository.enterArabicOnly()
-            nav.navigate(Routes.reader(surahNumber, currentAnchorVerse))
+            // Seamless switch: the Arabic recitation carries on from the
+            // verse being narrated (after arabicOnly is saved, so the chain
+            // builds Arabic-only items).
+            val handed = audio.switchLanguage(null)
+            if (handed == null && (isPlayingThisSurah || activeAudio || chainActive)) {
+                audio.stopAll()
+            }
+            val v = handed?.takeIf { it.v >= 1 }?.v ?: currentAnchorVerse
+            nav.navigate(Routes.reader(handed?.s ?: surahNumber, v))
         }
     }
 
     val onSelectEnglish: () -> Unit = {
         if (currentLang != "en") {
-            targetVerseToJump = currentAnchorVerse
+            // Seamless switch: narration carries on in the new language from
+            // the verse on air, and the page opens at that verse.
+            val handed = audio.switchLanguage("en")
+            targetVerseToJump =
+                handed?.takeIf { it.s == surahNumber && it.v >= 1 }?.v ?: currentAnchorVerse
             initialJumpDone = false
             currentLang = "en"
             scope.launch {
@@ -342,7 +351,11 @@ fun BookReaderScreen(
 
     val onSelectUrdu: () -> Unit = {
         if (currentLang != "ur") {
-            targetVerseToJump = currentAnchorVerse
+            // Seamless switch: narration carries on in the new language from
+            // the verse on air, and the page opens at that verse.
+            val handed = audio.switchLanguage("ur")
+            targetVerseToJump =
+                handed?.takeIf { it.s == surahNumber && it.v >= 1 }?.v ?: currentAnchorVerse
             initialJumpDone = false
             currentLang = "ur"
             scope.launch {

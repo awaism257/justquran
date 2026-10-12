@@ -248,7 +248,12 @@ class AudioController(
         }
     }
 
-    fun startChain(surah: Int, from: Int = 1) {
+    fun startChain(
+        surah: Int,
+        from: Int = 1,
+        withPrelude: Boolean = true,
+        playWhenReady: Boolean = true
+    ) {
         _error.value = null
         chainMode = null
         _translationLang.value = null
@@ -259,7 +264,7 @@ class AudioController(
             val startVerse = from.coerceIn(1, meta.ayahs)
             val items = withContext(Dispatchers.IO) {
                 buildList {
-                    if (ChainLogic.needsPrelude(surah, startVerse)) {
+                    if (withPrelude && ChainLogic.needsPrelude(surah, startVerse)) {
                         addAll(buildItemsForPrelude(surah, meta.nameEn, currentSettings))
                     }
                     for (v in startVerse..meta.ayahs) {
@@ -273,12 +278,19 @@ class AudioController(
                 triedFallback = false
                 mc.setMediaItems(items)
                 mc.prepare()
-                mc.play()
+                if (playWhenReady) mc.play() else mc.pause()
             }
         }
     }
 
-    fun startTranslationChain(surah: Int, lang: String) {
+    /** from = 0 starts at the top (spoken Bismillah, where the surah has one);
+     *  from >= 1 starts at that verse. */
+    fun startTranslationChain(
+        surah: Int,
+        lang: String,
+        from: Int = 0,
+        playWhenReady: Boolean = true
+    ) {
         _error.value = null
         chainMode = lang
         _translationLang.value = lang
@@ -286,9 +298,11 @@ class AudioController(
             bundleRepository.load()
             val meta = bundleRepository.surah(surah) ?: return@launch
             val isUr = lang == "ur"
+            val withPrelude = from <= 0 && surah != 1 && surah != 9
+            val startVerse = from.coerceIn(1, meta.ayahs)
             val items = withContext(Dispatchers.IO) {
                 buildList {
-                    if (surah != 1 && surah != 9) {
+                    if (withPrelude) {
                         val bisTitle = if (isUr) "شروع اللہ کا نام لے کر" else "Bismillah — In the name of Allah"
                         if (isUr) {
                             add(urduNarrationItemFor(surah, 0, "prelude:ur:$surah", bisTitle))
@@ -296,7 +310,7 @@ class AudioController(
                             add(englishNarrationItemFor(surah, 0, "prelude:en:$surah", bisTitle))
                         }
                     }
-                    for (v in 1..meta.ayahs) {
+                    for (v in startVerse..meta.ayahs) {
                         val title = "$surah. ${if (isUr) "آیت" else "Verse"} $v"
                         if (isUr) {
                             add(urduNarrationItemFor(surah, v, "narr:ur:$surah:$v", title))
@@ -309,14 +323,34 @@ class AudioController(
             if (items.isEmpty()) return@launch
             _chainActive.value = true
             _chainSurah.value = surah
-            _prelude.value = (surah != 1 && surah != 9)
+            _prelude.value = withPrelude
             withController { mc ->
                 triedFallback = false
                 mc.setMediaItems(items)
                 mc.prepare()
-                mc.play()
+                if (playWhenReady) mc.play() else mc.pause()
             }
         }
+    }
+
+    /**
+     * Seamless language switch (Arabic mushaf / English / Urdu pills): carry
+     * the verse on air over to the other language's audio. lang = null → the
+     * Arabic recitation chain; "en" / "ur" → translation narration. A paused
+     * player stays paused, cued at that verse (so it stays highlighted).
+     * Returns the verse handed over (0 = the Bismillah), or null when nothing
+     * is loaded.
+     */
+    fun switchLanguage(lang: String?): VerseRef? {
+        val cur = _currentVerse.value ?: return null
+        if (!_active.value) return null
+        val keepPlaying = controller?.playWhenReady ?: _isPlaying.value
+        if (lang == null) {
+            startChain(cur.s, cur.v.coerceAtLeast(1), withPrelude = cur.v == 0, playWhenReady = keepPlaying)
+        } else {
+            startTranslationChain(cur.s, lang, from = cur.v, playWhenReady = keepPlaying)
+        }
+        return cur
     }
 
     fun togglePlayPause() {
@@ -511,11 +545,12 @@ class AudioController(
         if (playArabic) {
             add(itemFor(s, v, "verse:$s:$v"))
         }
-        val playEn = if (settings.arabicOnly) (settings.followTranslation && settings.followEn) else settings.showEn
+        // The Arabic mushaf (vertical and paged) recites Arabic only.
+        val playEn = !settings.arabicOnly && settings.showEn
         if (playEn) {
             add(englishNarrationItemFor(s, v, "narr:en:$s:$v"))
         }
-        val playUr = if (settings.arabicOnly) (settings.followTranslation && settings.followUr) else settings.showUr
+        val playUr = !settings.arabicOnly && settings.showUr
         if (playUr) {
             add(urduNarrationItemFor(s, v, "narr:ur:$s:$v"))
         }
@@ -526,11 +561,12 @@ class AudioController(
         if (playArabic) {
             add(itemFor(1, 1, "prelude:$surah", "Bismillah — $surahName"))
         }
-        val playEn = if (settings.arabicOnly) (settings.followTranslation && settings.followEn) else settings.showEn
+        // The Arabic mushaf (vertical and paged) recites Arabic only.
+        val playEn = !settings.arabicOnly && settings.showEn
         if (playEn) {
             add(englishNarrationItemFor(surah, 0, "prelude:en:$surah", "Bismillah — $surahName"))
         }
-        val playUr = if (settings.arabicOnly) (settings.followTranslation && settings.followUr) else settings.showUr
+        val playUr = !settings.arabicOnly && settings.showUr
         if (playUr) {
             add(urduNarrationItemFor(surah, 0, "prelude:ur:$surah", "Bismillah — $surahName"))
         }
