@@ -82,7 +82,7 @@ const BOOKS: {
     title: 'My First Seerah Colouring Book',
     desc: 'For children aged 4–9: 25 scenes from Makkah to Madinah, each with a short story. No people are drawn.',
     asin: 'B0HMP8ZHHD',
-    sample: 'https://mantlelibrary.app/downloads/Garden_of_Purity_Free_Colouring_Sample.pdf',
+    sample: 'https://munajaatpress.com/downloads/Garden_of_Purity_Free_Colouring_Sample.pdf',
   },
 ];
 
@@ -129,7 +129,11 @@ function BooksCard() {
       <CardTitle>Books from Munajaat Press</CardTitle>
       <p style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--muted)' }}>
         Printed and Kindle editions made by the same team. They are paid books sold on Amazon; the
-        app itself stays free, with no ads.
+        app itself stays free, with no ads. See all our books at{' '}
+        <a href="https://munajaatpress.com" target="_blank" rel="noopener noreferrer" style={{ color: GREEN }}>
+          munajaatpress.com
+        </a>
+        .
       </p>
       <div className="flex flex-col gap-4" style={{ marginTop: 14 }}>
         {BOOKS.map((b) => (
