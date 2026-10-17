@@ -45,7 +45,15 @@ function CreditRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-const BOOKS: { cover: string; alt: string; title: string; desc: string; asin: string; sample?: string }[] = [
+const BOOKS: {
+  cover: string;
+  alt: string;
+  title: string;
+  desc: string;
+  asin: string;
+  sample?: string;
+  review?: string;
+}[] = [
   {
     cover: 'books/book-odes.jpg',
     alt: 'Odes and Litanies',
@@ -59,6 +67,7 @@ const BOOKS: { cover: string; alt: string; title: string; desc: string; asin: st
     title: 'The Garden of Purity, Volume 1: The Dawn of Prophethood',
     desc: "Mīrkhwānd's life of the Prophet ﷺ in modern English, from his ancestry to Badr and Uḥud, with editorial footnotes.",
     asin: 'B0HMLBZP9S',
+    review: '“An exquisite work of Islamic historical writing… Very highly recommended.”',
   },
   {
     cover: 'books/book-garden-vol2.jpg',
@@ -139,6 +148,24 @@ function BooksCard() {
               <p style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--muted)', margin: '4px 0 8px' }}>
                 <WithHonorific text={b.desc} />
               </p>
+              {b.review && (
+                <div className="flex items-center gap-2" style={{ margin: '0 0 10px' }}>
+                  <img
+                    src={`${import.meta.env.BASE_URL}books/rf-5-star-seal.png`}
+                    alt="Readers’ Favorite five-star seal"
+                    width={44}
+                    height={44}
+                    loading="lazy"
+                    style={{ flexShrink: 0 }}
+                  />
+                  <p style={{ fontSize: 13, lineHeight: 1.45, fontStyle: 'italic', margin: 0 }}>
+                    {b.review}{' '}
+                    <span style={{ fontStyle: 'normal', color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                      — Readers’ Favorite, 5 stars
+                    </span>
+                  </p>
+                </div>
+              )}
               <div className="flex flex-wrap gap-2">
                 <BookLink href={`https://www.amazon.co.uk/dp/${b.asin}`} label="Amazon UK" filled />
                 <BookLink href={`https://www.amazon.com/dp/${b.asin}`} label="Amazon US" />
