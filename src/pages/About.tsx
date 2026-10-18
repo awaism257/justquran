@@ -77,6 +77,13 @@ const BOOKS: {
     asin: 'B0HMP9ZH3Q',
   },
   {
+    cover: 'books/book-shield-vol1.jpg',
+    alt: 'The Shield of Al-Aqsa, Volume 1',
+    title: 'The Shield of Al-Aqsa, Volume 1: Born in Exile',
+    desc: 'A historical manga about Salahuddin Ayyubi, from his birth on the road into exile to Damascus and Egypt, drawn from the medieval chronicles. No Prophet or Companion is depicted.',
+    asin: 'B0HNH8ZWJN',
+  },
+  {
     cover: 'books/book-seerah-colouring.jpg',
     alt: 'My First Seerah Colouring Book',
     title: 'My First Seerah Colouring Book',
