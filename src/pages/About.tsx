@@ -167,7 +167,7 @@ function BooksCard() {
                 <WithHonorific text={b.desc} />
               </p>
               {b.review && (
-                <div className="flex items-center gap-2" style={{ margin: '0 0 10px' }}>
+                <div className="flex items-start gap-2" style={{ margin: '0 0 10px' }}>
                   <img
                     src={`${import.meta.env.BASE_URL}books/rf-5-star-seal.png`}
                     alt="Readers’ Favorite five-star seal"
