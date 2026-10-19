@@ -176,9 +176,9 @@ function BooksCard() {
                     loading="lazy"
                     style={{ flexShrink: 0 }}
                   />
-                  <p style={{ fontSize: 13, lineHeight: 1.45, fontStyle: 'italic', margin: 0 }}>
+                  <p style={{ fontSize: 13, lineHeight: 1.45, fontStyle: 'italic', margin: 0, flex: 1, minWidth: 0 }}>
                     {b.review}{' '}
-                    <span style={{ fontStyle: 'normal', color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontStyle: 'normal', color: 'var(--muted)' }}>
                       — Readers’ Favorite, 5 stars
                     </span>
                   </p>
