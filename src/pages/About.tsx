@@ -91,6 +91,13 @@ const BOOKS: {
     asin: 'B0HMP8ZHHD',
     sample: 'https://munajaatpress.com/downloads/Garden_of_Purity_Free_Colouring_Sample.pdf',
   },
+  {
+    cover: 'books/book-prophets-colouring.jpg',
+    alt: 'My First Stories of the Prophets Colouring Book',
+    title: 'My First Stories of the Prophets Colouring Book',
+    desc: 'For children aged 4–9: 25 scenes from Adam to Muhammad ﷺ, each with a short Quran story. No Prophet or person is drawn.',
+    asin: 'B0HNHS7S6W',
+  },
 ];
 
 // Renders ﷺ in Noto Naskh so it isn't drawn oversized by a fallback font.
