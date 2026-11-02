@@ -1,0 +1,2 @@
+• Fixed verse numbers showing only their first digit on some tablets.
+• Fixed Quran words displaying with their letters out of order on Android 12 and older.

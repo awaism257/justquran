@@ -42,6 +42,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
@@ -50,6 +51,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -115,7 +117,9 @@ fun VerseNumberChip(
                 .padding(horizontal = 2.dp),
             contentAlignment = Alignment.Center
         ) {
-            val fontSize = if (number > 99) 9.sp else 10.5.sp
+            // Sized in dp, like the badge: the number must fit whatever the
+            // system font size is, or its later digits wrap out of sight.
+            val fontSize = with(LocalDensity.current) { (if (number > 99) 9.dp else 10.5.dp).toSp() }
             Text(
                 text = number.toString(),
                 color = fc.folioFrame,
@@ -123,6 +127,8 @@ fun VerseNumberChip(
                 lineHeight = fontSize,
                 fontFamily = fonts.serif,
                 textAlign = TextAlign.Center,
+                softWrap = false,
+                overflow = TextOverflow.Visible,
                 maxLines = 1
             )
         }
@@ -158,7 +164,8 @@ fun buildFolioText(
     verses: List<Verse>,
     fc: AppColors,
     playingVerse: Int?,
-    arSize: Float
+    arSize: Float,
+    fontScale: Float
 ): FolioBuild {
     val builder = AnnotatedString.Builder()
     val inlineContent = mutableMapOf<String, InlineTextContent>()
@@ -202,8 +209,9 @@ fun buildFolioText(
                 )
             }
 
-            val chipW = (chipWidthDp(verse.v) + 8.0f) / arSize
-            val chipH = 19.0f / arSize
+            // em scales with the system font size; the badge is in dp, so undo it.
+            val chipW = (chipWidthDp(verse.v) + 8.0f) / (arSize * fontScale)
+            val chipH = 19.0f / (arSize * fontScale)
             val placeholder = Placeholder(
                 width = chipW.em,
                 height = chipH.em,
@@ -322,8 +330,9 @@ fun FolioView(
 
     val fontArScale = if (settings.fontAr > 0) settings.fontAr else 100
     val arSize = (FOLIO_BASE_AR * fontArScale) / 100f
-    val folioBuild = remember(verses, fc, playingVerse, arSize) {
-        buildFolioText(verses, fc, playingVerse, arSize)
+    val fontScale = LocalDensity.current.fontScale
+    val folioBuild = remember(verses, fc, playingVerse, arSize, fontScale) {
+        buildFolioText(verses, fc, playingVerse, arSize, fontScale)
     }
 
     val scrollState = rememberScrollState()

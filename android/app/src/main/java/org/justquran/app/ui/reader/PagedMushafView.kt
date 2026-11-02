@@ -194,6 +194,7 @@ fun paginateSurah(
     verses: List<Verse>,
     surah: Int,
     arSize: Float,
+    fontScale: Float,
     maxW: Int,
     maxH: Int,
     band: BandMetrics,
@@ -202,7 +203,7 @@ fun paginateSurah(
     if (verses.isEmpty() || maxW <= 0 || maxH <= 0) {
         return SurahPages(emptyList(), AnnotatedString(""))
     }
-    val build = buildFolioText(verses, LightAppColors, null, arSize)
+    val build = buildFolioText(verses, LightAppColors, null, arSize, fontScale)
     val text = build.text
     if (text.isEmpty()) {
         return SurahPages(emptyList(), text)
@@ -456,7 +457,7 @@ fun PagedMushafView(
                             contentReady = true
                         }
 
-                        val key = "${curSurah.intValue}|$textW|$maxH|$fontAr"
+                        val key = "${curSurah.intValue}|$textW|$maxH|$fontAr|${density.fontScale}"
                         val pages = remember(verses, curSurah.intValue, textW, maxH, fontAr, bandMetrics, contentReady) {
                             val cached = mushafPaginationCache[key]
                             if (cached != null) {
@@ -464,7 +465,7 @@ fun PagedMushafView(
                             } else if (!contentReady) {
                                 SurahPages(emptyList(), AnnotatedString(""))
                             } else {
-                                val computed = paginateSurah(textMeasurer, appFonts, verses, curSurah.intValue, fontAr, textW, maxH, bandMetrics, safetyPx)
+                                val computed = paginateSurah(textMeasurer, appFonts, verses, curSurah.intValue, fontAr, density.fontScale, textW, maxH, bandMetrics, safetyPx)
                                 mushafPaginationCache[key] = computed
                                 computed
                             }
@@ -515,7 +516,7 @@ fun PagedMushafView(
                             }
                         }
 
-                        val countKey = "$textW|$maxH|$fontAr"
+                        val countKey = "$textW|$maxH|$fontAr|${density.fontScale}"
                         val pageCounts = remember(textW, maxH, fontAr, bandMetrics) {
                             val map = mutableStateMapOf<Int, Int>()
                             mushafPageCountCache[countKey]?.let { map.putAll(it) }
@@ -537,7 +538,7 @@ fun PagedMushafView(
                             }
                             for (s in 1..114) {
                                 if (pageCounts[s] == null) {
-                                    val count = paginateSurah(textMeasurer, appFonts, versesOf(s), s, fontAr, textW, maxH, bandMetrics, safetyPx).ranges.size
+                                    val count = paginateSurah(textMeasurer, appFonts, versesOf(s), s, fontAr, density.fontScale, textW, maxH, bandMetrics, safetyPx).ranges.size
                                     pageCounts[s] = count
                                     withFrameNanos { }
                                 }
@@ -584,8 +585,8 @@ fun PagedMushafView(
                         }
 
                         val activeVerse = if (playingVerse != null && playingVerse >= 1 && audioSurah == curSurah.intValue) playingVerse else null
-                        val folioBuild = remember(verses, colors, activeVerse, fontAr) {
-                            buildFolioText(verses, colors, activeVerse, fontAr)
+                        val folioBuild = remember(verses, colors, activeVerse, fontAr, density.fontScale) {
+                            buildFolioText(verses, colors, activeVerse, fontAr, density.fontScale)
                         }
 
                         val pageRange = pages.ranges[page]

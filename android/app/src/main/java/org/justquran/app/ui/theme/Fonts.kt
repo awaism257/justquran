@@ -40,7 +40,7 @@ private fun assetFile(context: Context, name: String): File {
 fun loadAppFonts(context: Context): AppFonts {
     cached?.let { return it }
     val appContext = context.applicationContext
-    val indoPak = Font(assetFile(appContext, "digitalkhatt-indopak-v2.otf"))
+    val indoPak = Font(assetFile(appContext, "digitalkhatt-indopak-v3.otf"))
     val amiri = Font(assetFile(appContext, "amiri-quran.ttf"))
     val nastaliq = Font(assetFile(appContext, "nastaliq.ttf"))
     val notoNaskh = Font(assetFile(appContext, "noto-naskh.ttf"))

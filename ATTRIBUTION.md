@@ -71,7 +71,7 @@ All fonts ship under the **SIL Open Font License, Version 1.1** (full text in
 
 | Font file | Font | Copyright |
 | --- | --- | --- |
-| `digitalkhatt-indopak-v2.otf` | DigitalKhatt IndoPak | Amine Anane / Tarteel Inc |
+| `digitalkhatt-indopak-v2.otf` (web); `digitalkhatt-indopak-v3.otf` (Android: same font with U+06E4 also mapped to the madda waajib glyph, for Android 12L and older; still SIL OFL 1.1) | DigitalKhatt IndoPak | Amine Anane / Tarteel Inc |
 | `amiri-quran.ttf` | Amiri Quran | The Amiri Project (Khaled Hosny) |
 | `nastaliq.ttf` | Noto Nastaliq Urdu | Google Inc. |
 | `noto-naskh.ttf` | Noto Naskh Arabic | Google Inc. |

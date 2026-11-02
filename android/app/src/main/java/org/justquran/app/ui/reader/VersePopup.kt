@@ -47,12 +47,13 @@ import androidx.compose.ui.unit.sp
 import java.util.Locale
 import org.justquran.app.data.Verse
 import org.justquran.app.data.displayArabic
+import org.justquran.app.data.shareArabic
 import org.justquran.app.ui.theme.appColors
 import org.justquran.app.ui.theme.rememberAppFonts
 
 fun verseShareText(v: Verse): String {
     val sb = StringBuilder()
-    sb.append(v.displayArabic())
+    sb.append(v.shareArabic())
     sb.append("\n\n")
     sb.append(v.en)
     if (v.ur != null) {

@@ -33,4 +33,13 @@ data class QuranBundle(
     val verses: List<Verse> = emptyList(),
 )
 
-fun Verse.displayArabic(): String = ar.replace('\u08db', '\u06e9')
+/** The verse text with verbatim characters, apart from the U+08DB mark; for sharing. */
+fun Verse.shareArabic(): String = ar.replace('\u08db', '\u06e9')
+
+/**
+ * The verse text for drawing on screen. Android 12L and older don't know U+089C
+ * (madda waajib, Unicode 14) and draw the word's two halves in swapped order, so
+ * it is drawn via U+06E4, which the app's copy of the font maps to the same glyph.
+ * Same length as [ar], so character offsets still line up.
+ */
+fun Verse.displayArabic(): String = shareArabic().replace('\u089c', '\u06e4')

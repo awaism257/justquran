@@ -351,7 +351,7 @@ fun wqMarkPaint(color: Color): Paint {
 fun wqMarkTypeface(context: Context): Typeface {
     wqTypefaceCache?.let { return it }
     val tf = runCatching {
-        Typeface.createFromAsset(context.assets, "fonts/digitalkhatt-indopak-v2.otf")
+        Typeface.createFromAsset(context.assets, "fonts/digitalkhatt-indopak-v3.otf")
     }.getOrNull() ?: Typeface.DEFAULT
     wqTypefaceCache = tf
     return tf
