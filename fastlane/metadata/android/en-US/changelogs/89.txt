@@ -1,0 +1,1 @@
+• Verse numbers now sit fully inside their circles on all devices.

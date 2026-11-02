@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -122,10 +123,12 @@ fun VerseNumberChip(
             val fontSize = with(LocalDensity.current) { (if (number > 99) 9.dp else 10.5.dp).toSp() }
             Text(
                 text = number.toString(),
+                modifier = Modifier.wrapContentWidth(unbounded = true),
                 color = fc.folioFrame,
                 fontSize = fontSize,
                 lineHeight = fontSize,
-                fontFamily = fonts.serif,
+                // Bundled, so the digits' width doesn't depend on the device's serif font.
+                fontFamily = fonts.arabicAmiri,
                 textAlign = TextAlign.Center,
                 softWrap = false,
                 overflow = TextOverflow.Visible,
