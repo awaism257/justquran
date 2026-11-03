@@ -1,0 +1,1 @@
+• Verse numbers are now centred in their circles.

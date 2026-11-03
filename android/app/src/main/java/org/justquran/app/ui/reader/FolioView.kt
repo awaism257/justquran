@@ -71,6 +71,9 @@ import org.justquran.app.ui.theme.rememberAppFonts
 import org.justquran.app.ui.wqDisplay
 import org.justquran.app.ui.wqMarkTypeface
 import org.justquran.app.ui.wqSortDisplay
+import android.graphics.Rect
+import android.graphics.Typeface
+import androidx.compose.foundation.layout.width
 
 const val VERSE_TAG = "verse"
 const val FOLIO_BASE_AR = 23.0f
@@ -80,25 +83,55 @@ fun chipWidthDp(v: Int): Float {
     return ((v.toString().length - 2).coerceAtLeast(0) * 7.5f) + 19.0f
 }
 
+private var numberTypefaceCache: Typeface? = null
+
+/** Amiri (bundled), so the digits look and measure the same on every device. */
+private fun verseNumberTypeface(context: Context): Typeface {
+    numberTypefaceCache?.let { return it }
+    val tf = runCatching {
+        Typeface.createFromAsset(context.assets, "fonts/amiri-quran.ttf")
+    }.getOrNull() ?: Typeface.SERIF
+    numberTypefaceCache = tf
+    return tf
+}
+
 @Composable
 fun VerseNumberChip(
     number: Int,
     wq: String?,
     fc: AppColors
 ) {
-    val fonts = rememberAppFonts()
     val context = LocalContext.current
-    val paint = remember(fc.folioFrame) {
+    val density = LocalDensity.current
+    val frameArgb = android.graphics.Color.argb(
+        (fc.folioFrame.alpha * 255).toInt(),
+        (fc.folioFrame.red * 255).toInt(),
+        (fc.folioFrame.green * 255).toInt(),
+        (fc.folioFrame.blue * 255).toInt()
+    )
+    val paint = remember(frameArgb) {
         Paint().apply {
             isAntiAlias = true
-            color = android.graphics.Color.argb(
-                (fc.folioFrame.alpha * 255).toInt(),
-                (fc.folioFrame.red * 255).toInt(),
-                (fc.folioFrame.green * 255).toInt(),
-                (fc.folioFrame.blue * 255).toInt()
-            )
+            color = frameArgb
         }
     }
+    // The number is drawn, not laid out as text: it is centred on its own ink
+    // (the digits' measured bounds), so no font's line metrics can push it up
+    // or down. Sized in dp like the badge, whatever the system font size.
+    val label = number.toString()
+    val numberPaint = remember(frameArgb, number > 99, density) {
+        Paint().apply {
+            isAntiAlias = true
+            color = frameArgb
+            typeface = verseNumberTypeface(context)
+            textAlign = Paint.Align.CENTER
+            textSize = with(density) { (if (number > 99) 10.dp else 11.5.dp).toPx() }
+        }
+    }
+    val inkBounds = remember(numberPaint, label) {
+        Rect().also { numberPaint.getTextBounds(label, 0, label.length, it) }
+    }
+    val badgeW = maxOf(19.dp, with(density) { numberPaint.measureText(label).toDp() } + 6.dp)
 
     Box(
         modifier = Modifier
@@ -110,31 +143,17 @@ fun VerseNumberChip(
             modifier = Modifier
                 .drawBehind {
                     drawVerseMark(this, wq, paint, context)
+                    drawContext.canvas.nativeCanvas.drawText(
+                        label,
+                        size.width / 2f,
+                        size.height / 2f - inkBounds.exactCenterY(),
+                        numberPaint
+                    )
                 }
                 .height(19.dp)
-                .defaultMinSize(minWidth = 19.dp)
+                .width(badgeW)
                 .border(BorderStroke(1.dp, fc.folioFrame), CircleShape)
-                .background(Color.Transparent)
-                .padding(horizontal = 2.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            // Sized in dp, like the badge: the number must fit whatever the
-            // system font size is, or its later digits wrap out of sight.
-            val fontSize = with(LocalDensity.current) { (if (number > 99) 9.dp else 10.5.dp).toSp() }
-            Text(
-                text = number.toString(),
-                modifier = Modifier.wrapContentWidth(unbounded = true),
-                color = fc.folioFrame,
-                fontSize = fontSize,
-                lineHeight = fontSize,
-                // Bundled, so the digits' width doesn't depend on the device's serif font.
-                fontFamily = fonts.arabicAmiri,
-                textAlign = TextAlign.Center,
-                softWrap = false,
-                overflow = TextOverflow.Visible,
-                maxLines = 1
-            )
-        }
+        )
     }
 }
 
