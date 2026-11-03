@@ -37,3 +37,4 @@ android/**/build/
 android/keystore/
 *.apk
 *.aab
+desktop/out/

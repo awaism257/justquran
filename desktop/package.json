@@ -1,0 +1,9 @@
+{
+  "name": "justquran",
+  "productName": "JustQuran",
+  "version": "1.0.0",
+  "description": "Free, ad-free Quran reader with IndoPak Arabic, English and Urdu translations.",
+  "license": "MIT",
+  "main": "main.js",
+  "desktopName": "app.justquran.JustQuran.desktop"
+}

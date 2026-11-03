@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=JustQuran
+GenericName=Quran Reader
+Comment=Read and listen to the Quran in Arabic, English and Urdu
+Exec=justquran
+Icon=app.justquran.JustQuran
+Terminal=false
+Categories=Education;Literature;
+Keywords=Quran;Koran;Islam;Muslim;Arabic;Urdu;Recitation;Mushaf;
+SingleMainWindow=true

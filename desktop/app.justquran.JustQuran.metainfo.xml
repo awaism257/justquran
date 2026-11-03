@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>app.justquran.JustQuran</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>JustQuran</name>
+  <summary>Read and listen to the Quran in Arabic, English and Urdu</summary>
+  <developer id="app.justquran">
+    <name>JustQuran</name>
+  </developer>
+  <description>
+    <p>
+      JustQuran is a clean, modern reader for the Holy Quran, presented in Arabic together with Urdu and English translations. It is free and open source, with no adverts, no subscriptions, no tracking and no account.
+    </p>
+    <p>Texts and scripts:</p>
+    <ul>
+      <li>Arabic in the Digital Khatt IndoPak script, in a paged mushaf layout</li>
+      <li>Urdu translation by Fateh Muhammad Jalandhari</li>
+      <li>English: The ClearQuran translation by Dr Talal Itani</li>
+      <li>English transliteration for every verse</li>
+    </ul>
+    <p>Features:</p>
+    <ul>
+      <li>Paged mushaf view with waqf symbols, surah headers and bismillah markers</li>
+      <li>Verse-by-verse cards showing Arabic, translation and transliteration side by side</li>
+      <li>Arabic recitation by Sheikh Mahmoud Khalil Al-Hussary, with English and Urdu narration, verse by verse or continuously like an audiobook</li>
+      <li>Book view for the English and Urdu translations, highlighting the verse being read</li>
+      <li>Fast offline search across Arabic, English and Urdu</li>
+      <li>Surah and juz indexes, bookmarks and the Khatm al-Quran supplication</li>
+      <li>Light, dark and sepia themes with separate text sizes for each language</li>
+    </ul>
+    <p>
+      All texts, translations and fonts are included, so reading needs no internet connection. The network is used only to stream or download audio.
+    </p>
+  </description>
+  <launchable type="desktop-id">app.justquran.JustQuran.desktop</launchable>
+  <url type="homepage">https://justquran.app</url>
+  <url type="bugtracker">https://github.com/awaism257/justquran/issues</url>
+  <url type="vcs-browser">https://github.com/awaism257/justquran</url>
+  <url type="donation">https://ko-fi.com/awaismahmood257</url>
+  <categories>
+    <category>Education</category>
+    <category>Literature</category>
+  </categories>
+  <keywords>
+    <keyword>Quran</keyword>
+    <keyword>Koran</keyword>
+    <keyword>Islam</keyword>
+    <keyword>Mushaf</keyword>
+    <keyword>Recitation</keyword>
+  </keywords>
+  <branding>
+    <color type="primary" scheme_preference="light">#eee5cb</color>
+    <color type="primary" scheme_preference="dark">#101613</color>
+  </branding>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Paged IndoPak mushaf</caption>
+      <image>https://raw.githubusercontent.com/awaism257/justquran/desktop-v1.0.0/desktop/screenshots/mushaf.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Verse-by-verse cards with translation</caption>
+      <image>https://raw.githubusercontent.com/awaism257/justquran/desktop-v1.0.0/desktop/screenshots/cards.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>English translation as flowing pages</caption>
+      <image>https://raw.githubusercontent.com/awaism257/justquran/desktop-v1.0.0/desktop/screenshots/book.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <releases>
+    <release version="1.0.0" date="2026-11-03">
+      <description>
+        <p>First desktop release.</p>
+      </description>
+    </release>
+  </releases>
+</component>
