@@ -77,6 +77,20 @@ const BOOKS: {
     asin: 'B0HMP9ZH3Q',
   },
   {
+    cover: 'books/book-garden-vol3.jpg',
+    alt: 'The Garden of Purity, Volume 3',
+    title: 'The Garden of Purity, Volume 3: The Rightly Guided Caliphs',
+    desc: 'The thirty years after the Prophet ﷺ: Abū Bakr, ʿUmar, ʿUthmān and ʿAlī, from the wars of apostasy and the great conquests to the peace of al-Ḥasan.',
+    asin: 'B0HQVBS37B',
+  },
+  {
+    cover: 'books/book-garden-vol4.jpg',
+    alt: 'The Garden of Purity, Volume 4',
+    title: 'The Garden of Purity, Volume 4: Stories of the Prophets',
+    desc: 'From the creation of Ādam to ʿĪsā, peace be upon them, with notes on the Qurʾānic verses and hadith behind each story.',
+    asin: 'B0HQY3BWZN',
+  },
+  {
     cover: 'books/book-shield-vol1.jpg',
     alt: 'The Shield of Al-Aqsa, Volume 1',
     title: 'The Shield of Al-Aqsa, Volume 1: Born in Exile',
