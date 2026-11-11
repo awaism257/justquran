@@ -91,6 +91,13 @@ const BOOKS: {
     asin: 'B0HQY3BWZN',
   },
   {
+    cover: 'books/book-signs-of-the-hour.jpg',
+    alt: 'Signs of the Hour',
+    title: 'Signs of the Hour: and the Life to Come',
+    desc: '510 hadith from the Mishkāt al-Maṣābīḥ on the trials before the Last Hour, its signs, and the grave, the Gathering, Paradise and the Fire, in Arabic and modern English with the classical commentary.',
+    asin: 'B0HR9814KS',
+  },
+  {
     cover: 'books/book-shield-vol1.jpg',
     alt: 'The Shield of Al-Aqsa, Volume 1',
     title: 'The Shield of Al-Aqsa, Volume 1: Born in Exile',
