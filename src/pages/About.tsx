@@ -119,6 +119,13 @@ const BOOKS: {
     desc: 'For children aged 4–9: 25 scenes from Adam to Muhammad ﷺ, each with a short Quran story. No Prophet or person is drawn.',
     asin: 'B0HNHS7S6W',
   },
+  {
+    cover: 'books/book-sahabah-colouring.jpg',
+    alt: 'My First Sahabah Colouring Book',
+    title: 'My First Sahabah Colouring Book',
+    desc: 'For children aged 4–9: 25 true stories of the Companions of the Prophet ﷺ, from Khadījah to Abū Hurayrah. No people are drawn.',
+    asin: 'B0HRX5NDPD',
+  },
 ];
 
 // Renders ﷺ in Noto Naskh so it isn't drawn oversized by a fallback font.
